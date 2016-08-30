@@ -13,8 +13,8 @@ type MaximumValidator struct {
 }
 
 func (m MaximumValidator) Error(val int) string {
-	return fmt.Sprintf("expected less than %d but actual %d with option exlusive %b", m.Maximum, val, m.Exclusive)
-
+	return fmt.Sprintf("expected less than %d but actual %d with option exlusive %b",
+		m.Maximum, val, m.Exclusive)
 }
 
 func NewMaximumValidator(maximum int, exclusive bool) (*MaximumValidator, error) {
@@ -26,8 +26,11 @@ func NewMaximumValidator(maximum int, exclusive bool) (*MaximumValidator, error)
 	return v, nil
 }
 
-//if "exclusiveMinimum" is not present, or has boolean value false, then the instance is valid if it is greater than, or equal to, the value of "minimum";
-//if "exlusiveMinimum" is present and has boolean value true, the instance is valid if it is strictly greater than the value of "minimum".
+//If "exclusiveMaximum" is not present, or has boolean value false,
+//then the instance is valid if it is less than,
+//or equal to, the value of "minimum".
+//If "exlusiveMaximum" is present and has boolean value true,
+//the instance is valid if it is strictly less than the value of "maximum".
 func (m MaximumValidator) Validate(val int) bool {
 	if !m.Exclusive {
 		if val <= m.Maximum {
@@ -48,7 +51,8 @@ type MinimumValidator struct {
 }
 
 func (m MinimumValidator) Error(val int) string {
-	return fmt.Sprintf("expected greater than %d but actual %d with option exlusive %b", m.Minimum, val, m.Exclusive)
+	return fmt.Sprintf("expected greater than %d but actual %d with option exlusive %b",
+		m.Minimum, val, m.Exclusive)
 }
 
 func NewMinimumValidator(minimum int, exclusive bool) (*MinimumValidator, error) {
@@ -60,8 +64,11 @@ func NewMinimumValidator(minimum int, exclusive bool) (*MinimumValidator, error)
 	return v, nil
 }
 
-//if "exclusiveMinimum" is not present, or has boolean value false, then the instance is valid if it is greater than, or equal to, the value of "minimum";
-//if "exclusiveMinimum" is present and has boolean value true, the instance is valid if it is strictly greater than the value of "minimum".
+//If "exclusiveMinimum" is not present, or has boolean value false,
+//then the instance is valid if it is greater than,
+//or equal to, the value of "minimum"
+//if "exclusiveMinimum" is present and has boolean value true,
+//the instance is valid if it is strictly greater than the value of "minimum".
 func (m MinimumValidator) Validate(val int) bool {
 	if !m.Exclusive {
 		if val >= m.Minimum {
@@ -81,7 +88,8 @@ type MaxLengthValidator struct {
 }
 
 func (m MaxLengthValidator) Error(val string) string {
-	return fmt.Sprintf("expected less than, or equal to, %d charactors but actual %d", m.MaxLength, utf8.RuneCountInString(val))
+	return fmt.Sprintf("expected less than, or equal to, %d charactors but actual %d",
+		m.MaxLength, utf8.RuneCountInString(val))
 }
 
 func NewMaxLengthValidator(maxLength int) (*MaxLengthValidator, error) {
@@ -108,7 +116,8 @@ type MinLengthValidator struct {
 }
 
 func (m MinLengthValidator) Error(val string) string {
-	return fmt.Sprintf("expected greater than, or equal to, %d charactors but actual %d charactors", m.MinLength, utf8.RuneCountInString(val))
+	return fmt.Sprintf("expected greater than, or equal to, %d charactors but actual %d charactors",
+		m.MinLength, utf8.RuneCountInString(val))
 }
 
 func NewMinLengthValidator(minLength int) (*MinLengthValidator, error) {
@@ -151,7 +160,6 @@ func NewPatternValidator(pattern string) (*PatternValidator, error) {
 }
 
 func (m PatternValidator) Validate(val string) bool {
-	// need fix return value type is wrong
 	ok, err := regexp.MatchString(m.Pattern, val)
 	if err != nil {
 		return false
@@ -173,15 +181,13 @@ func (m IntEnumValidator) Error(val string) string {
 }
 
 func NewIntEnumValidator(enumerate []int) (*IntEnumValidator, error) {
-	l := enumerate
-
-	if len(l) == 0 {
+	if len(enumerate) == 0 {
 		return nil, errors.New("enumerate element should not be empty")
 	}
 
 	// unique test
-	for idx, e := range l {
-		for _, es := range l[idx+1:] {
+	for idx, e := range enumerate {
+		for _, es := range enumerate[idx+1:] {
 			if e == es {
 				return nil, errors.New("enumerate element should be unique")
 			}
@@ -214,15 +220,13 @@ func (m StringEnumValidator) Error(val string) string {
 }
 
 func NewStringEnumValidator(enumerate []string) (*StringEnumValidator, error) {
-	l := enumerate
-
-	if len(l) == 0 {
+	if len(enumerate) == 0 {
 		return nil, errors.New("enumerate element should not be empty")
 	}
 
 	// unique test
-	for idx, e := range l {
-		for _, es := range l[idx+1:] {
+	for idx, e := range enumerate {
+		for _, es := range enumerate[idx+1:] {
 			if e == es {
 				return nil, errors.New("enumerate element should be unique")
 			}

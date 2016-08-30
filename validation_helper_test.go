@@ -4,33 +4,14 @@ import (
 	"testing"
 )
 
-//Structs for make constructer test case
-type MaximumTestCase struct {
-	Case    MaximumValidator
-	Message string
-	Pass    bool
+//There structs for make constructer test case
+type TestInterface interface {
+	Validate(string) bool
+	Error(string) string
 }
 
-type MinimumTestCase struct {
-	Case    MinimumValidator
-	Message string
-	Pass    bool
-}
-
-type MaxLengthTestCase struct {
-	Case    MaxLengthValidator
-	Message string
-	Pass    bool
-}
-
-type MinLengthTestCase struct {
-	Case    MinLengthValidator
-	Message string
-	Pass    bool
-}
-
-type PatternTestCase struct {
-	Case    PatternValidator
+type TestCase struct {
+	Case    TestInterface
 	Message string
 	Pass    bool
 }
@@ -47,45 +28,9 @@ type StringEnumTestCase struct {
 	Pass    bool
 }
 
-//Structs for make validator test case
-type MaximumValidatorTestCase struct {
-	Case    int
-	Message string
-	Pass    bool
-}
-
-type MinimumValidatorTestCase struct {
-	Case    int
-	Message string
-	Pass    bool
-}
-
-type MaxLengthValidatorTestCase struct {
-	Case    string
-	Message string
-	Pass    bool
-}
-
-type MinLengthValidatorTestCase struct {
-	Case    string
-	Message string
-	Pass    bool
-}
-
-type PatternValidatorTestCase struct {
-	Case    string
-	Message string
-	Pass    bool
-}
-
-type IntEnumValidatorTestCase struct {
-	Case    int
-	Message string
-	Pass    bool
-}
-
-type StringEnumValidatorTestCase struct {
-	Case    string
+//This struct for make validator test case
+type ValidatorTestCase struct {
+	Case    interface{}
 	Message string
 	Pass    bool
 }
@@ -99,7 +44,7 @@ func TestMaximumValidator(t *testing.T) {
 	if err != nil {
 		t.Error(err.Error())
 	}
-	tests := []MaximumValidatorTestCase{{
+	tests := []ValidatorTestCase{{
 		Case:    99,
 		Message: "'99' is less than Maximum therefore should be pass",
 		Pass:    true,
@@ -114,7 +59,7 @@ func TestMaximumValidator(t *testing.T) {
 	}}
 
 	for _, test := range tests {
-		ok := validator.Validate(test.Case)
+		ok := validator.Validate(test.Case.(int))
 		//if Pass flag true, ok should be true
 		if test.Pass == true && ok != true {
 			t.Error(test.Message)
@@ -132,7 +77,7 @@ func TestMaximumValidator(t *testing.T) {
 		t.Error(err.Error())
 	}
 
-	tests = []MaximumValidatorTestCase{{
+	tests = []ValidatorTestCase{{
 		Case:    99,
 		Message: "'99' is less than Maximum therefore should be pass",
 		Pass:    true,
@@ -147,7 +92,7 @@ func TestMaximumValidator(t *testing.T) {
 	}}
 
 	for _, test := range tests {
-		ok := validator.Validate(test.Case)
+		ok := validator.Validate(test.Case.(int))
 		//if Pass flag true, ok should be true
 		if test.Pass == true && ok != true {
 			t.Error(test.Message)
@@ -167,7 +112,7 @@ func TestMinimumValidator(t *testing.T) {
 		t.Error(err.Error())
 	}
 
-	tests := []MinimumValidatorTestCase{{
+	tests := []ValidatorTestCase{{
 		Case:    101,
 		Message: "'101' is greater than Minimum therefore should be pass",
 		Pass:    true,
@@ -182,7 +127,7 @@ func TestMinimumValidator(t *testing.T) {
 	}}
 
 	for _, test := range tests {
-		ok := validator.Validate(test.Case)
+		ok := validator.Validate(test.Case.(int))
 		//if Pass flag true, ok should be true
 		if test.Pass == true && ok != true {
 			t.Error(test.Message)
@@ -200,7 +145,7 @@ func TestMinimumValidator(t *testing.T) {
 		t.Error(err.Error())
 	}
 
-	tests = []MinimumValidatorTestCase{{
+	tests = []ValidatorTestCase{{
 		Case:    101,
 		Message: "'101' is greater than Minimum therefore should be pass",
 		Pass:    true,
@@ -215,7 +160,7 @@ func TestMinimumValidator(t *testing.T) {
 	}}
 
 	for _, test := range tests {
-		ok := validator.Validate(test.Case)
+		ok := validator.Validate(test.Case.(int))
 		//if Pass flag true, ok should be true
 		if test.Pass == true && ok != true {
 			t.Error(test.Message)
@@ -227,9 +172,8 @@ func TestMinimumValidator(t *testing.T) {
 		}
 	}
 }
-
 func TestMaxLength(t *testing.T) {
-	tests := []MaxLengthTestCase{{
+	tests := []TestCase{{
 		Case:    MaxLengthValidator{MaxLength: -1},
 		Message: "MaxLength should be greater than 0",
 		Pass:    false,
@@ -244,7 +188,7 @@ func TestMaxLength(t *testing.T) {
 	}}
 
 	for _, test := range tests {
-		_, err := NewMaxLengthValidator(test.Case.MaxLength)
+		_, err := NewMaxLengthValidator(test.Case.(MaxLengthValidator).MaxLength)
 		//if Pass flag true, err should be empty
 		if test.Pass == true && err != nil {
 			t.Error(test.Message)
@@ -264,7 +208,7 @@ func TestMaxLengthValidator(t *testing.T) {
 		t.Error(err.Error())
 	}
 
-	tests := []MaxLengthValidatorTestCase{{
+	tests := []ValidatorTestCase{{
 		Case:    "あいうえ",
 		Message: "4 charactors is less than maxLength therefore should be pass",
 		Pass:    true,
@@ -287,7 +231,7 @@ func TestMaxLengthValidator(t *testing.T) {
 	}}
 
 	for _, test := range tests {
-		ok := validator.Validate(test.Case)
+		ok := validator.Validate(test.Case.(string))
 		//if Pass flag true, ok should be true
 		if test.Pass == true && ok != true {
 			t.Error(test.Message)
@@ -301,7 +245,7 @@ func TestMaxLengthValidator(t *testing.T) {
 }
 
 func TestMinLength(t *testing.T) {
-	tests := []MinLengthTestCase{{
+	tests := []TestCase{{
 		Case:    MinLengthValidator{MinLength: -1},
 		Message: "MinLength should be greater than 0",
 		Pass:    false,
@@ -316,7 +260,7 @@ func TestMinLength(t *testing.T) {
 	}}
 
 	for _, test := range tests {
-		_, err := NewMinLengthValidator(test.Case.MinLength)
+		_, err := NewMinLengthValidator(test.Case.(MinLengthValidator).MinLength)
 		//if Pass flag true, err should be empty
 		if test.Pass == true && err != nil {
 			t.Error(test.Message)
@@ -334,8 +278,7 @@ func TestMinLengthValidator(t *testing.T) {
 	if err != nil {
 		t.Error(err.Error())
 	}
-
-	tests := []MinLengthValidatorTestCase{{
+	tests := []ValidatorTestCase{{
 		Case:    "あいうえおか",
 		Message: "6 charactors is greater than minLength therefore should be pass",
 		Pass:    true,
@@ -349,8 +292,12 @@ func TestMinLengthValidator(t *testing.T) {
 		Message: "4` charactors less than minLength therefore should not be pass",
 		Pass:    false,
 	}, {
-		Case:    "100 characters 100 characters 100 characters 100 characters 100 characters 100 characters 100 charac",
-		Message: "case 100 characters in en should be pass",
+		Case:    "abcde",
+		Message: "case 5 characters in en should be pass",
+		Pass:    true,
+	}, {
+		Case:    "あiうeお",
+		Message: "case that includes japanese and english should be pass",
 		Pass:    true,
 	}, {
 		Case:    "",
@@ -359,7 +306,7 @@ func TestMinLengthValidator(t *testing.T) {
 	}}
 
 	for _, test := range tests {
-		ok := validator.Validate(test.Case)
+		ok := validator.Validate(test.Case.(string))
 		//if Pass flag true, ok should be true
 		if test.Pass == true && ok != true {
 			t.Error(test.Message)
@@ -373,7 +320,7 @@ func TestMinLengthValidator(t *testing.T) {
 }
 
 func TestPattern(t *testing.T) {
-	tests := []PatternTestCase{{
+	tests := []TestCase{{
 		Case:    PatternValidator{Pattern: ""},
 		Message: "pattern should be empty",
 		Pass:    true,
@@ -388,7 +335,7 @@ func TestPattern(t *testing.T) {
 	}}
 
 	for _, test := range tests {
-		_, err := NewPatternValidator(test.Case.Pattern)
+		_, err := NewPatternValidator(test.Case.(PatternValidator).Pattern)
 		//if Pass flag true, err should be empty
 		if test.Pass == true && err != nil {
 			t.Error(test.Message)
@@ -406,7 +353,7 @@ func TestPatternValidator(t *testing.T) {
 		t.Error(err.Error())
 	}
 
-	tests := []PatternValidatorTestCase{{
+	tests := []ValidatorTestCase{{
 		Case:    "555-1212",
 		Message: "should be pass",
 		Pass:    true,
@@ -424,7 +371,7 @@ func TestPatternValidator(t *testing.T) {
 		Pass:    false,
 	}}
 	for _, test := range tests {
-		ok := validator.Validate(test.Case)
+		ok := validator.Validate(test.Case.(string))
 		//if Pass flag true, ok should be true
 		if test.Pass == true && ok != true {
 			t.Error(test.Message)
@@ -472,7 +419,7 @@ func TestIntEnumvalidator(t *testing.T) {
 		t.Error(err.Error())
 	}
 
-	tests := []IntEnumValidatorTestCase{{
+	tests := []ValidatorTestCase{{
 		Case:    13,
 		Message: "There is '13' in enumerates therefore should be pass",
 		Pass:    true,
@@ -483,7 +430,7 @@ func TestIntEnumvalidator(t *testing.T) {
 	}}
 
 	for _, test := range tests {
-		ok := validator.Validate(test.Case)
+		ok := validator.Validate(test.Case.(int))
 		//if Pass flag true, ok should be true
 		if test.Pass == true && ok != true {
 			t.Error(test.Message)
@@ -525,13 +472,13 @@ func TestStringEnum(t *testing.T) {
 	}
 }
 
-func TestStringEnumvalidator(t *testing.T) {
+func TestStringEnumValidator(t *testing.T) {
 	validator, err := NewStringEnumValidator([]string{"red", "amgber", "blue"})
 	if err != nil {
 		t.Error(err.Error())
 	}
 
-	tests := []StringEnumValidatorTestCase{{
+	tests := []ValidatorTestCase{{
 		Case:    "red",
 		Message: "There is `red` in enumerates therefore should be pass",
 		Pass:    true,
@@ -546,7 +493,7 @@ func TestStringEnumvalidator(t *testing.T) {
 	}}
 
 	for _, test := range tests {
-		ok := validator.Validate(test.Case)
+		ok := validator.Validate(test.Case.(string))
 		//if Pass flag true, ok should be true
 		if test.Pass == true && ok != true {
 			t.Error(test.Message)
