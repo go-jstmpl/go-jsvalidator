@@ -83,6 +83,45 @@ func (m MinimumValidator) Validate(val int) bool {
 	return false
 }
 
+type FloatMaximumValidator struct {
+	Maximum   float64 `json:"maximum"`
+	Exclusive bool    `json:"exclusive"`
+}
+
+func (m FloatMaximumValidator) Error(val float64) string {
+	return fmt.Sprintf("expected less than %d but actual %d with option exlusive %b",
+		m.Maximum, val, m.Exclusive)
+
+}
+
+func NewFloatMaximumValidator(maximum float64, exclusive bool) (*FloatMaximumValidator, error) {
+	v := &FloatMaximumValidator{
+		Maximum:   maximum,
+		Exclusive: exclusive,
+	}
+
+	return v, nil
+}
+
+//If "exclusiveMinimum" is not present, or has boolean value false,
+//then the instance is valid if it is less than,
+//or equal to, the value of "minimum".
+//If "exlusiveMinimum" is present and has boolean value true,
+//the instance is valid if it is strictly less than the value of "minimum".
+func (m FloatMaximumValidator) Validate(val float64) bool {
+	if !m.Exclusive {
+		if val <= m.Maximum {
+			return true
+		}
+		return false
+	}
+
+	if val < m.Maximum {
+		return true
+	}
+	return false
+}
+
 type MaxLengthValidator struct {
 	MaxLength int `json:"maxlength"`
 }
