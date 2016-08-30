@@ -252,6 +252,74 @@ func TestFloatMaximumValidator(t *testing.T) {
 	}
 }
 
+func TestFloatMinimumValidator(t *testing.T) {
+	//Case exclusive is false
+	validator, err := NewFloatMinimumValidator(1.5, false)
+	if err != nil {
+		t.Error(err.Error())
+	}
+
+	tests := []ValidatorTestCase{{
+		Case:    1.6,
+		Message: "'1.6' is greater than Minimum therefore should be pass",
+		Pass:    true,
+	}, {
+		Case:    1.5,
+		Message: "'1.5' equal to Minimum and exclusive is false in this case should be pass",
+		Pass:    true,
+	}, {
+		Case:    1.4,
+		Message: "'1.4' is less than Minimum therefore should not be pass",
+		Pass:    false,
+	}}
+
+	for _, test := range tests {
+		ok := validator.Validate(test.Case.(float64))
+		//if Pass flag true, ok should be true
+		if test.Pass == true && ok != true {
+			t.Error(test.Message)
+		}
+
+		//if Pass flag false, ok should not be true
+		if test.Pass == false && ok == true {
+			t.Error(test.Message)
+		}
+	}
+
+	//Case exclusive is true
+	validator, err = NewFloatMinimumValidator(1.5, true)
+	if err != nil {
+		t.Error(err.Error())
+	}
+
+	tests = []ValidatorTestCase{{
+		Case:    1.6,
+		Message: "'1.6' is greater than Minimum therefore should be pass",
+		Pass:    true,
+	}, {
+		Case:    1.5,
+		Message: "'1.5' equal to Minimum and exclusive is false in this case should not be pass",
+		Pass:    false,
+	}, {
+		Case:    1.4,
+		Message: "'1.4' is less than Minimum therefore should not be pass",
+		Pass:    false,
+	}}
+
+	for _, test := range tests {
+		ok := validator.Validate(test.Case.(float64))
+		//if Pass flag true, ok should be true
+		if test.Pass == true && ok != true {
+			t.Error(test.Message)
+		}
+
+		//if Pass flag false, ok should not be true
+		if test.Pass == false && ok == true {
+			t.Error(test.Message)
+		}
+	}
+}
+
 func TestMaxLength(t *testing.T) {
 	tests := []TestCase{{
 		Case:    MaxLengthValidator{MaxLength: -1},
