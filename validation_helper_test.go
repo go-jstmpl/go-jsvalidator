@@ -28,6 +28,12 @@ type StringEnumTestCase struct {
 	Pass    bool
 }
 
+type FloatEnumTestCase struct {
+	Case    FloatEnumValidator
+	Message string
+	Pass    bool
+}
+
 //This struct for make validator test case
 type ValidatorTestCase struct {
 	Case    interface{}
@@ -642,6 +648,73 @@ func TestStringEnumValidator(t *testing.T) {
 
 	for _, test := range tests {
 		ok := validator.Validate(test.Case.(string))
+		//if Pass flag true, ok should be true
+		if test.Pass == true && ok != true {
+			t.Error(test.Message)
+		}
+
+		//if Pass flag false, ok should not be true
+		if test.Pass == false && ok == true {
+			t.Error(test.Message)
+		}
+	}
+}
+
+func TestFloatEnum(t *testing.T) {
+	tests := []FloatEnumTestCase{{
+		Case:    FloatEnumValidator{Enumerate: []float64{}},
+		Message: "enum accepts list shoudl not be empty",
+		Pass:    false,
+	}, {
+		Case:    FloatEnumValidator{Enumerate: []float64{1.0, 1.1, 1.0}},
+		Message: "enum accepts element should be unique",
+		Pass:    false,
+	}, {
+		Case:    FloatEnumValidator{Enumerate: []float64{1.0, 1.1, 1.2}},
+		Message: "enum accepts list [test1, test2, test3] should be pass",
+		Pass:    true,
+	}, {
+		Case:    FloatEnumValidator{Enumerate: []float64{1.0}},
+		Message: "should be pass",
+		Pass:    true,
+	}}
+
+	for _, test := range tests {
+		_, err := NewFloatEnumValidator(test.Case.Enumerate)
+		// if Pass flag true, err should be empty
+		if test.Pass == true && err != nil {
+			t.Error(test.Message)
+		}
+
+		// if Pass flag false, err should not be empty
+		if test.Pass != true && err == nil {
+			t.Error(test.Message)
+		}
+	}
+}
+
+func TestFloatEnumValidator(t *testing.T) {
+	validator, err := NewFloatEnumValidator([]float64{1.0, 1.1, 1.2})
+	if err != nil {
+		t.Error(err.Error())
+	}
+
+	tests := []ValidatorTestCase{{
+		Case:    1.1,
+		Message: "There is `1.1` in enumerates therefore should be pass",
+		Pass:    true,
+	}, {
+		Case:    0.9,
+		Message: "There is not '0.9' in enumerates therefore should not be pass",
+		Pass:    false,
+	}, {
+		Case:    0.0,
+		Message: "0.0 should not be pass",
+		Pass:    false,
+	}}
+
+	for _, test := range tests {
+		ok := validator.Validate(test.Case.(float64))
 		//if Pass flag true, ok should be true
 		if test.Pass == true && ok != true {
 			t.Error(test.Message)

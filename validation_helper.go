@@ -80,6 +80,7 @@ func (m MinimumValidator) Validate(val int) bool {
 	if val > m.Minimum {
 		return true
 	}
+
 	return false
 }
 
@@ -319,6 +320,45 @@ func NewStringEnumValidator(enumerate []string) (*StringEnumValidator, error) {
 
 func (m StringEnumValidator) Validate(val string) bool {
 	for _, e := range m.Enumerate {
+		if val == e {
+			return true
+		}
+	}
+
+	return false
+}
+
+type FloatEnumValidator struct {
+	Enumerate []float64
+}
+
+func (f FloatEnumValidator) Error(val float64) string {
+	return fmt.Sprintf("%s expected include enumerate list: %v", val, f.Enumerate)
+}
+
+func NewFloatEnumValidator(enumerate []float64) (*FloatEnumValidator, error) {
+	if len(enumerate) == 0 {
+		return nil, errors.New("enumerate element should not be empty")
+	}
+
+	// unique test
+	for idx, e := range enumerate {
+		for _, es := range enumerate[idx+1:] {
+			if e == es {
+				return nil, errors.New("enumerate element should be unique")
+			}
+		}
+	}
+
+	v := &FloatEnumValidator{
+		Enumerate: enumerate,
+	}
+
+	return v, nil
+}
+
+func (f FloatEnumValidator) Validate(val float64) bool {
+	for _, e := range f.Enumerate {
 		if val == e {
 			return true
 		}
