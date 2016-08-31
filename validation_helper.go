@@ -1,8 +1,10 @@
 package validator
 
 import (
+	"database/sql/driver"
 	"errors"
 	"fmt"
+	"reflect"
 	"regexp"
 	"unicode/utf8"
 )
@@ -365,4 +367,56 @@ func (f FloatEnumValidator) Validate(val float64) bool {
 	}
 
 	return false
+}
+
+type RequiredValidator struct {
+	Required []string
+}
+
+func (r RequiredValidator) Error(val string) string {
+	return fmt.Sprint("%s", val)
+}
+
+func NewRequiredValidator(s []string) (*RequiredValidator, error) {
+	if len(s) == 0 {
+		return nil, errors.New("the required value should have at least one element")
+	}
+
+	// unique test
+	for idx, e := range s {
+		for _, es := range s[idx+1:] {
+			if e == es {
+				return nil, errors.New("the required value should not be duplicated")
+			}
+		}
+	}
+
+	return &RequiredValidator{Required: s}, nil
+}
+
+func (r RequiredValidator) Validate(i interface{}) bool {
+	// convert reflect data to interfaced struct
+	elem := reflect.ValueOf(i).Elem()
+	size := elem.NumField()
+
+	for s := 0; s < size; s++ {
+		for _, require := range r.Required {
+			// getting required field
+			if require == elem.Type().Field(s).Name {
+				// change into a type that have null check function
+				n, ok := elem.Field(s).Interface().(interface {
+					Value() (driver.Value, error)
+				})
+				if ok != true {
+					return false
+				}
+
+				v, _ := n.Value()
+				if v == nil {
+					return false
+				}
+			}
+		}
+	}
+	return true
 }

@@ -1,6 +1,7 @@
 package validator
 
 import (
+	"github.com/gocraft/dbr"
 	"testing"
 )
 
@@ -34,6 +35,12 @@ type FloatEnumTestCase struct {
 	Pass    bool
 }
 
+type RequiredTestCase struct {
+	Case    RequiredValidator
+	Message string
+	Pass    bool
+}
+
 //This struct for make validator test case
 type ValidatorTestCase struct {
 	Case    interface{}
@@ -43,7 +50,6 @@ type ValidatorTestCase struct {
 
 // The purpose of method with a name like 'Test"Validation Keyword"' is testing constructor
 // The purpose of method with a name like 'Test"Validation Keyword"Validator' is testing validator
-
 func TestMaximumValidator(t *testing.T) {
 	//Case exclusive is false
 	validator, err := NewMaximumValidator(100, false)
@@ -715,6 +721,96 @@ func TestFloatEnumValidator(t *testing.T) {
 
 	for _, test := range tests {
 		ok := validator.Validate(test.Case.(float64))
+		//if Pass flag true, ok should be true
+		if test.Pass == true && ok != true {
+			t.Error(test.Message)
+		}
+
+		//if Pass flag false, ok should not be true
+		if test.Pass == false && ok == true {
+			t.Error(test.Message)
+		}
+	}
+}
+
+type Sample struct {
+	Id   dbr.NullInt64
+	Name dbr.NullString
+	Addr dbr.NullString
+}
+
+type Sample1 struct {
+	Message dbr.NullString
+	Auther  dbr.NullString
+	Date    dbr.NullString
+}
+
+func TestRequired(t *testing.T) {
+	tests := []RequiredTestCase{{
+		Case:    RequiredValidator{Required: []string{}},
+		Message: "Required value array must have at least one element",
+		Pass:    false,
+	}, {
+		Case:    RequiredValidator{Required: []string{"Id", "Name", "Id"}},
+		Message: "Required value array must have at least one element",
+		Pass:    false,
+	}, {
+		Case:    RequiredValidator{Required: []string{"Id", "Name", "Addr"}},
+		Message: "Required value array must have at least one element",
+		Pass:    true,
+	}}
+
+	for _, test := range tests {
+		_, err := NewRequiredValidator(test.Case.Required)
+		// if Pass flag true, err should be empty
+		if test.Pass == true && err != nil {
+			t.Error(test.Message)
+		}
+
+		// if Pass flag false, err should not be empty
+		if test.Pass != true && err == nil {
+			t.Error(test.Message)
+		}
+	}
+}
+
+func TestRequiredValidator(t *testing.T) {
+	validator, err := NewRequiredValidator([]string{"Id", "Name"})
+	if err != nil {
+		t.Error(err.Error())
+	}
+
+	tests := []ValidatorTestCase{{
+		Case: &Sample{
+			Id:   dbr.NewNullInt64(1),
+			Name: dbr.NewNullString("hi")},
+		Message: "should be pass",
+		Pass:    true,
+	}, {
+		Case: &Sample{
+			Id: dbr.NewNullInt64(1)},
+		Message: "should not be pass",
+		Pass:    false,
+	}, {
+		Case: &Sample{
+			Id:   dbr.NewNullInt64(1),
+			Name: dbr.NewNullString("MyName"),
+			Addr: dbr.NewNullString("myaddr@hoge.com"),
+		},
+		Message: "struct has `Id` `Name` and `Addr` therefore should be pass",
+		Pass:    true,
+	}, {
+		Case: &Sample1{
+			Message: dbr.NewNullString("hogeho"),
+			Auther:  dbr.NewNullString("MyName"),
+			Date:    dbr.NewNullString("myaddr@hoge.com"),
+		},
+		Message: "struct has `Id` `Name` and `Addr` therefore should be pass",
+		Pass:    true,
+	}}
+
+	for _, test := range tests {
+		ok := validator.Validate(test.Case)
 		//if Pass flag true, ok should be true
 		if test.Pass == true && ok != true {
 			t.Error(test.Message)
