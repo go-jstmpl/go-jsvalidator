@@ -1,824 +1,967 @@
 package validator
 
 import (
-	"github.com/gocraft/dbr"
+	"reflect"
 	"testing"
+
+	"github.com/gocraft/dbr"
 )
 
-//There structs for make constructer test case
-type TestInterface interface {
-	Validate(string) bool
-	Error(string) string
+type IntMaximumValidatorTestCase struct {
+	Input    int
+	Expected *IntMaximumValidationError
 }
 
-type TestCase struct {
-	Case    TestInterface
-	Message string
-	Pass    bool
-}
+func TestIntMaximumValidator(t *testing.T) {
+	// Case exclusive is false
+	definition := IntMaximumValidatorDefinition{
+		Maximum:   100,
+		Exclusive: false,
+	}
 
-type IntEnumTestCase struct {
-	Case    IntEnumValidator
-	Message string
-	Pass    bool
-}
-
-type StringEnumTestCase struct {
-	Case    StringEnumValidator
-	Message string
-	Pass    bool
-}
-
-type FloatEnumTestCase struct {
-	Case    FloatEnumValidator
-	Message string
-	Pass    bool
-}
-
-type RequiredTestCase struct {
-	Case    RequiredValidator
-	Message string
-	Pass    bool
-}
-
-//This struct for make validator test case
-type ValidatorTestCase struct {
-	Case    interface{}
-	Message string
-	Pass    bool
-}
-
-// The purpose of method with a name like 'Test"Validation Keyword"' is testing constructor
-// The purpose of method with a name like 'Test"Validation Keyword"Validator' is testing validator
-func TestMaximumValidator(t *testing.T) {
-	//Case exclusive is false
-	validator, err := NewMaximumValidator(100, false)
+	validator, err := NewIntMaximumValidator(definition)
 	if err != nil {
 		t.Error(err.Error())
 	}
-	tests := []ValidatorTestCase{{
-		Case:    99,
-		Message: "'99' is less than Maximum therefore should be pass",
-		Pass:    true,
+	tests := []IntMaximumValidatorTestCase{{
+		Input:    99,
+		Expected: nil,
 	}, {
-		Case:    100,
-		Message: "'100' equal to Maximum and exclusive is false in this case should be pass",
-		Pass:    true,
+		Input:    100,
+		Expected: nil,
 	}, {
-		Case:    101,
-		Message: "'101' is greater than Maximum therefore should not be pass",
-		Pass:    false,
+		Input: 101,
+		Expected: &IntMaximumValidationError{
+			Input:      101,
+			Definition: definition,
+		},
 	}}
 
 	for _, test := range tests {
-		ok := validator.Validate(test.Case.(int))
-		//if Pass flag true, ok should be true
-		if test.Pass == true && ok != true {
-			t.Error(test.Message)
-		}
-
-		//if Pass flag false, ok should not be true
-		if test.Pass == false && ok == true {
-			t.Error(test.Message)
+		err := validator.Validate(test.Input)
+		if !reflect.DeepEqual(err, test.Expected) {
+			t.Errorf("expected:%v ,actual:%v", test.Expected, err)
 		}
 	}
 
-	//Case exclusive is true
-	validator, err = NewMaximumValidator(100, true)
+	// Case exclusive is true
+	definition = IntMaximumValidatorDefinition{
+		Maximum:   100,
+		Exclusive: true,
+	}
+
+	validator, err = NewIntMaximumValidator(definition)
 	if err != nil {
 		t.Error(err.Error())
 	}
-
-	tests = []ValidatorTestCase{{
-		Case:    99,
-		Message: "'99' is less than Maximum therefore should be pass",
-		Pass:    true,
+	tests = []IntMaximumValidatorTestCase{{
+		Input:    99,
+		Expected: nil,
 	}, {
-		Case:    100,
-		Message: "'100' equal to Maximum and exclusive is false in this case should not be pass",
-		Pass:    false,
+		Input: 100,
+		Expected: &IntMaximumValidationError{
+			Input:      100,
+			Definition: definition,
+		},
 	}, {
-		Case:    101,
-		Message: "'101' is greater than Maximum therefore should not be pass",
-		Pass:    false,
+		Input: 101,
+		Expected: &IntMaximumValidationError{
+			Input:      101,
+			Definition: definition,
+		},
 	}}
 
 	for _, test := range tests {
-		ok := validator.Validate(test.Case.(int))
-		//if Pass flag true, ok should be true
-		if test.Pass == true && ok != true {
-			t.Error(test.Message)
-		}
-
-		//if Pass flag false, ok should not be true
-		if test.Pass == false && ok == true {
-			t.Error(test.Message)
+		err := validator.Validate(test.Input)
+		if !reflect.DeepEqual(err, test.Expected) {
+			t.Errorf("expected:%v ,actual:%v", test.Expected, err)
 		}
 	}
 }
 
-func TestMinimumValidator(t *testing.T) {
-	//Case exclusive is false
-	validator, err := NewMinimumValidator(100, false)
+type IntMinimumValidatorTestCase struct {
+	Input    int
+	Expected *IntMinimumValidationError
+}
+
+func TestIntMinimumValidator(t *testing.T) {
+	// Case exclusive is false
+	definition := IntMinimumValidatorDefinition{
+		Minimum:   100,
+		Exclusive: false,
+	}
+
+	validator, err := NewIntMinimumValidator(definition)
 	if err != nil {
 		t.Error(err.Error())
 	}
-
-	tests := []ValidatorTestCase{{
-		Case:    101,
-		Message: "'101' is greater than Minimum therefore should be pass",
-		Pass:    true,
+	tests := []IntMinimumValidatorTestCase{{
+		Input:    101,
+		Expected: nil,
 	}, {
-		Case:    100,
-		Message: "'100' equal to Minimum and exclusive is false in this case should be pass",
-		Pass:    true,
+		Input:    100,
+		Expected: nil,
 	}, {
-		Case:    99,
-		Message: "'99' is less than Minimum therefore should not be pass",
-		Pass:    false,
+		Input: 99,
+		Expected: &IntMinimumValidationError{
+			Input:      99,
+			Definition: definition,
+		},
 	}}
 
 	for _, test := range tests {
-		ok := validator.Validate(test.Case.(int))
-		//if Pass flag true, ok should be true
-		if test.Pass == true && ok != true {
-			t.Error(test.Message)
-		}
-
-		//if Pass flag false, ok should not be true
-		if test.Pass == false && ok == true {
-			t.Error(test.Message)
+		err := validator.Validate(test.Input)
+		if !reflect.DeepEqual(err, test.Expected) {
+			t.Errorf("expected:%v ,actual:%v", test.Expected, err)
 		}
 	}
 
-	//Case exclusive is true
-	validator, err = NewMinimumValidator(100, true)
+	// Case exclusive is true
+	definition = IntMinimumValidatorDefinition{
+		Minimum:   100,
+		Exclusive: true,
+	}
+
+	validator, err = NewIntMinimumValidator(definition)
 	if err != nil {
 		t.Error(err.Error())
 	}
-
-	tests = []ValidatorTestCase{{
-		Case:    101,
-		Message: "'101' is greater than Minimum therefore should be pass",
-		Pass:    true,
+	tests = []IntMinimumValidatorTestCase{{
+		Input:    101,
+		Expected: nil,
 	}, {
-		Case:    100,
-		Message: "'100' equal to Minimum and exclusive is false in this case should not be pass",
-		Pass:    false,
+		Input: 100,
+		Expected: &IntMinimumValidationError{
+			Input:      100,
+			Definition: definition,
+		},
 	}, {
-		Case:    99,
-		Message: "'99' is less than Minimum therefore should not be pass",
-		Pass:    false,
+		Input: 99,
+		Expected: &IntMinimumValidationError{
+			Input:      99,
+			Definition: definition,
+		},
 	}}
 
 	for _, test := range tests {
-		ok := validator.Validate(test.Case.(int))
-		//if Pass flag true, ok should be true
-		if test.Pass == true && ok != true {
-			t.Error(test.Message)
-		}
-
-		//if Pass flag false, ok should not be true
-		if test.Pass == false && ok == true {
-			t.Error(test.Message)
+		err := validator.Validate(test.Input)
+		if !reflect.DeepEqual(err, test.Expected) {
+			t.Errorf("expected:%v ,actual:%v", test.Expected, err)
 		}
 	}
+}
+
+type FloatMaximumValidatorTestCase struct {
+	Input    float64
+	Expected *FloatMaximumValidationError
 }
 
 func TestFloatMaximumValidator(t *testing.T) {
-	//Case exclusive is false
-	validator, err := NewFloatMaximumValidator(1.5, false)
+	// Case exclusive is false
+	definition := FloatMaximumValidatorDefinition{
+		Maximum:   1.0,
+		Exclusive: false,
+	}
+
+	validator, err := NewFloatMaximumValidator(definition)
 	if err != nil {
 		t.Error(err.Error())
 	}
-	tests := []ValidatorTestCase{{
-		Case:    1.4,
-		Message: "'1.3' is less than Maximum therefore should be pass",
-		Pass:    true,
+	tests := []FloatMaximumValidatorTestCase{{
+		Input:    0.9,
+		Expected: nil,
 	}, {
-		Case:    1.5,
-		Message: "'1.5' equal to Maximum and exclusive is false in this case should be pass",
-		Pass:    true,
+		Input:    1.0,
+		Expected: nil,
 	}, {
-		Case:    1.6,
-		Message: "'1.6' is greater than Maximum therefore should not be pass",
-		Pass:    false,
-	}, {
-		Case:    1.500000000000001,
-		Message: "'1.5000000000001' is greater than Maximum therefore should not be pass",
-		Pass:    false,
+		Input: 1.1,
+		Expected: &FloatMaximumValidationError{
+			Input:      1.1,
+			Definition: definition,
+		},
 	}}
 
 	for _, test := range tests {
-		ok := validator.Validate(test.Case.(float64))
-		//if Pass flag true, ok should be true
-		if test.Pass == true && ok != true {
-			t.Error(test.Message)
-		}
-
-		//if Pass flag false, ok should not be true
-		if test.Pass == false && ok == true {
-			t.Error(test.Message)
+		err := validator.Validate(test.Input)
+		if !reflect.DeepEqual(err, test.Expected) {
+			t.Errorf("expected:%v ,actual:%v", test.Expected, err)
 		}
 	}
 
-	//Case exclusive is true
-	validator, err = NewFloatMaximumValidator(1.5, true)
+	// Case exclusive is true
+	definition = FloatMaximumValidatorDefinition{
+		Maximum:   1.0,
+		Exclusive: true,
+	}
+
+	validator, err = NewFloatMaximumValidator(definition)
 	if err != nil {
 		t.Error(err.Error())
 	}
-
-	tests = []ValidatorTestCase{{
-		Case:    1.4,
-		Message: "'1.4' is less than Maximum therefore should be pass",
-		Pass:    true,
+	tests = []FloatMaximumValidatorTestCase{{
+		Input:    0.9,
+		Expected: nil,
 	}, {
-		Case:    1.5,
-		Message: "'1.5' equal to Maximum and exclusive is false in this case should not be pass",
-		Pass:    false,
+		Input: 1.0,
+		Expected: &FloatMaximumValidationError{
+			Input:      1.0,
+			Definition: definition,
+		},
 	}, {
-		Case:    1.6,
-		Message: "'1.6' is greater than Maximum therefore should not be pass",
-		Pass:    false,
-	}, {
-		Case:    1.0,
-		Message: "'1.0' is less than Maximum therefore should not be pass",
-		Pass:    true,
-	}, {
-		Case:    1.5000000000001,
-		Message: "'1.5000000000001' is greater than Maximum therefore should not be pass",
-		Pass:    false,
+		Input: 1.1,
+		Expected: &FloatMaximumValidationError{
+			Input:      1.1,
+			Definition: definition,
+		},
 	}}
 
 	for _, test := range tests {
-		ok := validator.Validate(test.Case.(float64))
-		//if Pass flag true, ok should be true
-		if test.Pass == true && ok != true {
-			t.Error(test.Message)
-		}
-
-		//if Pass flag false, ok should not be true
-		if test.Pass == false && ok == true {
-			t.Error(test.Message)
+		err := validator.Validate(test.Input)
+		if !reflect.DeepEqual(err, test.Expected) {
+			t.Errorf("expected:%v ,actual:%v", test.Expected, err)
 		}
 	}
+}
+
+type FloatMinimumValidatorTestCase struct {
+	Input    float64
+	Expected *FloatMinimumValidationError
 }
 
 func TestFloatMinimumValidator(t *testing.T) {
-	//Case exclusive is false
-	validator, err := NewFloatMinimumValidator(1.5, false)
+	// Case exclusive is false
+	definition := FloatMinimumValidatorDefinition{
+		Minimum:   1.0,
+		Exclusive: false,
+	}
+
+	validator, err := NewFloatMinimumValidator(definition)
 	if err != nil {
 		t.Error(err.Error())
 	}
-
-	tests := []ValidatorTestCase{{
-		Case:    1.6,
-		Message: "'1.6' is greater than Minimum therefore should be pass",
-		Pass:    true,
+	tests := []FloatMinimumValidatorTestCase{{
+		Input:    1.1,
+		Expected: nil,
 	}, {
-		Case:    1.5,
-		Message: "'1.5' equal to Minimum and exclusive is false in this case should be pass",
-		Pass:    true,
+		Input:    1.0,
+		Expected: nil,
 	}, {
-		Case:    1.4,
-		Message: "'1.4' is less than Minimum therefore should not be pass",
-		Pass:    false,
+		Input: 0.9,
+		Expected: &FloatMinimumValidationError{
+			Input:      0.9,
+			Definition: definition,
+		},
 	}}
 
 	for _, test := range tests {
-		ok := validator.Validate(test.Case.(float64))
-		//if Pass flag true, ok should be true
-		if test.Pass == true && ok != true {
-			t.Error(test.Message)
-		}
-
-		//if Pass flag false, ok should not be true
-		if test.Pass == false && ok == true {
-			t.Error(test.Message)
+		err := validator.Validate(test.Input)
+		if !reflect.DeepEqual(err, test.Expected) {
+			t.Errorf("expected:%v ,actual:%v", test.Expected, err)
 		}
 	}
 
-	//Case exclusive is true
-	validator, err = NewFloatMinimumValidator(1.5, true)
+	// Case exclusive is true
+	definition = FloatMinimumValidatorDefinition{
+		Minimum:   1.0,
+		Exclusive: true,
+	}
+
+	validator, err = NewFloatMinimumValidator(definition)
 	if err != nil {
 		t.Error(err.Error())
 	}
-
-	tests = []ValidatorTestCase{{
-		Case:    1.6,
-		Message: "'1.6' is greater than Minimum therefore should be pass",
-		Pass:    true,
+	tests = []FloatMinimumValidatorTestCase{{
+		Input:    1.1,
+		Expected: nil,
 	}, {
-		Case:    1.5,
-		Message: "'1.5' equal to Minimum and exclusive is false in this case should not be pass",
-		Pass:    false,
+		Input: 1.0,
+		Expected: &FloatMinimumValidationError{
+			Input:      1.0,
+			Definition: definition,
+		},
 	}, {
-		Case:    1.4,
-		Message: "'1.4' is less than Minimum therefore should not be pass",
-		Pass:    false,
+		Input: 0.9,
+		Expected: &FloatMinimumValidationError{
+			Input:      0.9,
+			Definition: definition,
+		},
 	}}
 
 	for _, test := range tests {
-		ok := validator.Validate(test.Case.(float64))
-		//if Pass flag true, ok should be true
-		if test.Pass == true && ok != true {
-			t.Error(test.Message)
-		}
-
-		//if Pass flag false, ok should not be true
-		if test.Pass == false && ok == true {
-			t.Error(test.Message)
+		err := validator.Validate(test.Input)
+		if !reflect.DeepEqual(err, test.Expected) {
+			t.Errorf("expected:%v ,actual:%v", test.Expected, err)
 		}
 	}
+}
+
+type MaxLengthTestCase struct {
+	Definition MaxLengthValidatorDefinition
+	Expected   error
 }
 
 func TestMaxLength(t *testing.T) {
-	tests := []TestCase{{
-		Case:    MaxLengthValidator{MaxLength: -1},
-		Message: "MaxLength should be greater than 0",
-		Pass:    false,
-	}, {
-		Case:    MaxLengthValidator{MaxLength: 0},
-		Message: "MaxLength 0 should not be pass",
-		Pass:    false,
-	}, {
-		Case:    MaxLengthValidator{MaxLength: 1},
-		Message: "MaxLength 1 should be pass",
-		Pass:    true,
+	tests := []MaxLengthTestCase{{
+		Definition: MaxLengthValidatorDefinition{MaxLength: -1},
+		Expected:   NoLengthError{},
 	}}
 
 	for _, test := range tests {
-		_, err := NewMaxLengthValidator(test.Case.(MaxLengthValidator).MaxLength)
-		//if Pass flag true, err should be empty
-		if test.Pass == true && err != nil {
-			t.Error(test.Message)
-		}
-
-		//if Pass flag false, err should not be empty
-		if test.Pass == false && err == nil {
-			t.Error(test.Message)
+		_, err := NewMaxLengthValidator(test.Definition)
+		if reflect.TypeOf(err) != reflect.TypeOf(test.Expected) {
+			t.Errorf("expected:%v, actual:%v", reflect.TypeOf(test.Expected), reflect.TypeOf(err))
 		}
 	}
+}
 
+type MaxLengthValidatorTestCase struct {
+	Input    string
+	Expected *MaxLengthValidationError
 }
 
 func TestMaxLengthValidator(t *testing.T) {
-	validator, err := NewMaxLengthValidator(5)
+	definition := MaxLengthValidatorDefinition{
+		MaxLength: 5,
+	}
+	validator, err := NewMaxLengthValidator(definition)
 	if err != nil {
 		t.Error(err.Error())
 	}
 
-	tests := []ValidatorTestCase{{
-		Case:    "あいうえ",
-		Message: "4 charactors is less than maxLength therefore should be pass",
-		Pass:    true,
+	tests := []MaxLengthValidatorTestCase{{
+		Input:    "あいうえ",
+		Expected: nil,
 	}, {
-		Case:    "あいうえお",
-		Message: "case value equal to maxLength should be pass",
-		Pass:    true,
+		Input:    "あいうえお",
+		Expected: nil,
 	}, {
-		Case:    "あいうえおか",
-		Message: "6 charactors is greater than maxLength therefore should not be pass",
-		Pass:    false,
+		Input: "あいうえおか",
+		Expected: &MaxLengthValidationError{
+			Input:      "あいうえおか",
+			Definition: definition,
+		},
 	}, {
-		Case:    "abcde",
-		Message: "case 5 characters in en should be pass",
-		Pass:    true,
-	}, {
-		Case:    "",
-		Message: "empty string should be pass",
-		Pass:    true,
+		Input:    "abcde",
+		Expected: nil,
 	}}
 
 	for _, test := range tests {
-		ok := validator.Validate(test.Case.(string))
-		//if Pass flag true, ok should be true
-		if test.Pass == true && ok != true {
-			t.Error(test.Message)
-		}
-
-		//if Pass flag false, ok should not be true
-		if test.Pass == false && ok == true {
-			t.Error(test.Message)
+		err := validator.Validate(test.Input)
+		if !reflect.DeepEqual(err, test.Expected) {
+			t.Errorf("expected:%v ,actual:%v", test.Expected, err)
 		}
 	}
 }
 
-func TestMinLength(t *testing.T) {
-	tests := []TestCase{{
-		Case:    MinLengthValidator{MinLength: -1},
-		Message: "MinLength should be greater than 0",
-		Pass:    false,
-	}, {
-		Case:    MinLengthValidator{MinLength: 0},
-		Message: "MinLength 0 should not be pass",
-		Pass:    false,
-	}, {
-		Case:    MinLengthValidator{MinLength: 1},
-		Message: "MinLength 1 should be pass",
-		Pass:    true,
-	}}
-
-	for _, test := range tests {
-		_, err := NewMinLengthValidator(test.Case.(MinLengthValidator).MinLength)
-		//if Pass flag true, err should be empty
-		if test.Pass == true && err != nil {
-			t.Error(test.Message)
-		}
-
-		//if Pass flag false, err should not be empty
-		if test.Pass == false && err == nil {
-			t.Error(test.Message)
-		}
-	}
-}
-
-func TestMinLengthValidator(t *testing.T) {
-	validator, err := NewMinLengthValidator(5)
-	if err != nil {
-		t.Error(err.Error())
-	}
-	tests := []ValidatorTestCase{{
-		Case:    "あいうえおか",
-		Message: "6 charactors is greater than minLength therefore should be pass",
-		Pass:    true,
-	}, {
-		Case:    "あいうえお",
-		Message: "case value equal to minLength should be pass",
-		Pass:    true,
-	}, {
-
-		Case:    "あいうえ",
-		Message: "4` charactors less than minLength therefore should not be pass",
-		Pass:    false,
-	}, {
-		Case:    "abcde",
-		Message: "case 5 characters in en should be pass",
-		Pass:    true,
-	}, {
-		Case:    "あiうeお",
-		Message: "case that includes japanese and english should be pass",
-		Pass:    true,
-	}, {
-		Case:    "",
-		Message: "empty string should not be pass",
-		Pass:    false,
-	}}
-
-	for _, test := range tests {
-		ok := validator.Validate(test.Case.(string))
-		//if Pass flag true, ok should be true
-		if test.Pass == true && ok != true {
-			t.Error(test.Message)
-		}
-
-		//if Pass flag false, ok should not be true
-		if test.Pass == false && ok == true {
-			t.Error(test.Message)
-		}
-	}
+type PatternTestCase struct {
+	Definition PatternValidatorDefinition
+	Expected   error
 }
 
 func TestPattern(t *testing.T) {
-	tests := []TestCase{{
-		Case:    PatternValidator{Pattern: ""},
-		Message: "pattern should be empty",
-		Pass:    true,
+	tests := []PatternTestCase{{
+		Definition: PatternValidatorDefinition{Pattern: ""},
+		Expected:   EmptyError{},
 	}, {
-		Case:    PatternValidator{Pattern: "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$"},
-		Message: "pattern `^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$` should be pass regex compile",
-		Pass:    true,
-	}, {
-		Case:    PatternValidator{Pattern: "[a-z"},
-		Message: "pattern `[a-z` should not be pass",
-		Pass:    false,
+		Definition: PatternValidatorDefinition{Pattern: "[a-z"},
+		Expected:   InvalidPatternError{},
 	}}
-
 	for _, test := range tests {
-		_, err := NewPatternValidator(test.Case.(PatternValidator).Pattern)
-		//if Pass flag true, err should be empty
-		if test.Pass == true && err != nil {
-			t.Error(test.Message)
-		}
-		//if Pass flag false, err should not be empty
-		if test.Pass == false && err == nil {
-			t.Error(test.Message)
+		_, err := NewPatternValidator(test.Definition)
+		if reflect.TypeOf(err) != reflect.TypeOf(test.Expected) {
+			t.Errorf("expected:%v, actual:%v", reflect.TypeOf(test.Expected), reflect.TypeOf(err))
 		}
 	}
 }
 
+type PatternValidatorTestCase struct {
+	Input    string
+	Expected *PatternValidationError
+}
+
 func TestPatternValidator(t *testing.T) {
-	validator, err := NewPatternValidator("^(\\([0-9]{3}\\))?[0-9]{3}-[0-9]{4}$")
+	definition := PatternValidatorDefinition{
+		Pattern: "^\\d{7}$",
+	}
+	validator, err := NewPatternValidator(definition)
 	if err != nil {
 		t.Error(err.Error())
 	}
 
-	tests := []ValidatorTestCase{{
-		Case:    "555-1212",
-		Message: "should be pass",
-		Pass:    true,
+	tests := []PatternValidatorTestCase{{
+		Input:    "1234567",
+		Expected: nil,
 	}, {
-		Case:    "(888)555-1212",
-		Message: "should be pass",
-		Pass:    true,
-	}, {
-		Case:    "(888)555-1212 ext. 532",
-		Message: "should not be pass",
-		Pass:    false,
-	}, {
-		Case:    "(800)FLOWERS",
-		Message: "should not be pass",
-		Pass:    false,
+		Input: "abcdefg",
+		Expected: &PatternValidationError{
+			Input:      "abcdefg",
+			Definition: definition,
+		},
 	}}
-	for _, test := range tests {
-		ok := validator.Validate(test.Case.(string))
-		//if Pass flag true, ok should be true
-		if test.Pass == true && ok != true {
-			t.Error(test.Message)
-		}
 
-		//if Pass flag false, ok should not be true
-		if test.Pass == false && ok == true {
-			t.Error(test.Message)
+	for _, test := range tests {
+		err := validator.Validate(test.Input)
+		if !reflect.DeepEqual(err, test.Expected) {
+			t.Errorf("expected:%v ,actual:%v", test.Expected, err)
 		}
 	}
+}
+
+type IntEnumTestCase struct {
+	Definition IntEnumValidatorDefinition
+	Expected   error
 }
 
 func TestIntEnum(t *testing.T) {
 	tests := []IntEnumTestCase{{
-		Case:    IntEnumValidator{Enumerate: []int{}},
-		Message: "enum accepts list shoud not be empty",
-		Pass:    false,
+		Definition: IntEnumValidatorDefinition{Enumerate: []int{}},
+		Expected:   EmptyError{},
 	}, {
-		Case:    IntEnumValidator{Enumerate: []int{10, 20, 10}},
-		Message: "enum accepts element should be unique",
-		Pass:    false,
-	}, {
-		Case:    IntEnumValidator{Enumerate: []int{10, 20, 30}},
-		Message: "enum accepts list [10, 20, 30] should be pass",
-		Pass:    true,
+		Definition: IntEnumValidatorDefinition{Enumerate: []int{0, 1, 0}},
+		Expected:   DuplicationError{},
 	}}
-
 	for _, test := range tests {
-		_, err := NewIntEnumValidator(test.Case.Enumerate)
-		//if Pass flag true, err should be empty
-		if test.Pass == true && err != nil {
-			t.Error(test.Message)
-		}
-
-		//if Pass flag false, err should not be empty
-		if test.Pass == false && err == nil {
-			t.Error(test.Message)
+		_, err := NewIntEnumValidator(test.Definition)
+		if reflect.TypeOf(err) != reflect.TypeOf(test.Expected) {
+			t.Errorf("expected:%v, actual:%v", reflect.TypeOf(test.Expected), reflect.TypeOf(err))
 		}
 	}
+}
+
+type IntEnumValidatorTestCase struct {
+	Input    int
+	Expected *IntEnumValidationError
 }
 
 func TestIntEnumvalidator(t *testing.T) {
-	validator, err := NewIntEnumValidator([]int{11, 13, 17, 19})
+	definition := IntEnumValidatorDefinition{
+		Enumerate: []int{401, 402, 403},
+	}
+	validator, err := NewIntEnumValidator(definition)
 	if err != nil {
 		t.Error(err.Error())
 	}
-
-	tests := []ValidatorTestCase{{
-		Case:    13,
-		Message: "There is '13' in enumerates therefore should be pass",
-		Pass:    true,
+	tests := []IntEnumValidatorTestCase{{
+		Input:    401,
+		Expected: nil,
 	}, {
-		Case:    14,
-		Message: "There is not '14' in enumerates therefore should not be pass",
-		Pass:    false,
+		Input:    402,
+		Expected: nil,
+	}, {
+		Input:    403,
+		Expected: nil,
+	}, {
+		Input: 501,
+		Expected: &IntEnumValidationError{
+			Input:      501,
+			Definition: definition,
+		},
 	}}
-
 	for _, test := range tests {
-		ok := validator.Validate(test.Case.(int))
-		//if Pass flag true, ok should be true
-		if test.Pass == true && ok != true {
-			t.Error(test.Message)
-		}
-
-		//if Pass flag false, ok should not be true
-		if test.Pass == false && ok == true {
-			t.Error(test.Message)
+		err := validator.Validate(test.Input)
+		if !reflect.DeepEqual(err, test.Expected) {
+			t.Errorf("expected:%v ,actual:%v", test.Expected, err)
 		}
 	}
 }
 
-func TestStringEnum(t *testing.T) {
-	tests := []StringEnumTestCase{{
-		Case:    StringEnumValidator{Enumerate: []string{}},
-		Message: "enum accepts list shoudl not be empty",
-		Pass:    false,
-	}, {
-		Case:    StringEnumValidator{Enumerate: []string{"test", "test"}},
-		Message: "enum accepts element should be unique",
-		Pass:    false,
-	}, {
-		Case:    StringEnumValidator{Enumerate: []string{"test1", "test2", "test3"}},
-		Message: "enum accepts list [test1, test2, test3] should be pass",
-		Pass:    true,
-	}}
-
-	for _, test := range tests {
-		_, err := NewStringEnumValidator(test.Case.Enumerate)
-		// if Pass flag true, err should be empty
-		if test.Pass == true && err != nil {
-			t.Error(test.Message)
-		}
-
-		// if Pass flag false, err should not be empty
-		if test.Pass != true && err == nil {
-			t.Error(test.Message)
-		}
-	}
-}
-
-func TestStringEnumValidator(t *testing.T) {
-	validator, err := NewStringEnumValidator([]string{"red", "amgber", "blue"})
-	if err != nil {
-		t.Error(err.Error())
-	}
-
-	tests := []ValidatorTestCase{{
-		Case:    "red",
-		Message: "There is `red` in enumerates therefore should be pass",
-		Pass:    true,
-	}, {
-		Case:    "green",
-		Message: "There is not 'green' in enumerates therefore should not be pass",
-		Pass:    false,
-	}, {
-		Case:    "",
-		Message: "empty string case should not be pass",
-		Pass:    false,
-	}}
-
-	for _, test := range tests {
-		ok := validator.Validate(test.Case.(string))
-		//if Pass flag true, ok should be true
-		if test.Pass == true && ok != true {
-			t.Error(test.Message)
-		}
-
-		//if Pass flag false, ok should not be true
-		if test.Pass == false && ok == true {
-			t.Error(test.Message)
-		}
-	}
+type FloatEnumTestCase struct {
+	Definition FloatEnumValidatorDefinition
+	Expected   error
 }
 
 func TestFloatEnum(t *testing.T) {
 	tests := []FloatEnumTestCase{{
-		Case:    FloatEnumValidator{Enumerate: []float64{}},
-		Message: "enum accepts list shoudl not be empty",
-		Pass:    false,
+		Definition: FloatEnumValidatorDefinition{Enumerate: []float64{}},
+		Expected:   EmptyError{},
 	}, {
-		Case:    FloatEnumValidator{Enumerate: []float64{1.0, 1.1, 1.0}},
-		Message: "enum accepts element should be unique",
-		Pass:    false,
-	}, {
-		Case:    FloatEnumValidator{Enumerate: []float64{1.0, 1.1, 1.2}},
-		Message: "enum accepts list [test1, test2, test3] should be pass",
-		Pass:    true,
-	}, {
-		Case:    FloatEnumValidator{Enumerate: []float64{1.0}},
-		Message: "should be pass",
-		Pass:    true,
+		Definition: FloatEnumValidatorDefinition{Enumerate: []float64{0.9, 1.0, 1.0}},
+		Expected:   DuplicationError{},
 	}}
-
 	for _, test := range tests {
-		_, err := NewFloatEnumValidator(test.Case.Enumerate)
-		// if Pass flag true, err should be empty
-		if test.Pass == true && err != nil {
-			t.Error(test.Message)
-		}
-
-		// if Pass flag false, err should not be empty
-		if test.Pass != true && err == nil {
-			t.Error(test.Message)
+		_, err := NewFloatEnumValidator(test.Definition)
+		if reflect.TypeOf(err) != reflect.TypeOf(test.Expected) {
+			t.Errorf("expected:%v, actual:%v", reflect.TypeOf(test.Expected), reflect.TypeOf(err))
 		}
 	}
 }
 
-func TestFloatEnumValidator(t *testing.T) {
-	validator, err := NewFloatEnumValidator([]float64{1.0, 1.1, 1.2})
+type FloatEnumValidatorTestCase struct {
+	Input    float64
+	Expected *FloatEnumValidationError
+}
+
+func TestFloatEnumvalidator(t *testing.T) {
+	definition := FloatEnumValidatorDefinition{
+		Enumerate: []float64{0.9, 1.0, 1.1},
+	}
+	validator, err := NewFloatEnumValidator(definition)
 	if err != nil {
 		t.Error(err.Error())
 	}
-
-	tests := []ValidatorTestCase{{
-		Case:    1.1,
-		Message: "There is `1.1` in enumerates therefore should be pass",
-		Pass:    true,
+	tests := []FloatEnumValidatorTestCase{{
+		Input:    0.9,
+		Expected: nil,
 	}, {
-		Case:    0.9,
-		Message: "There is not '0.9' in enumerates therefore should not be pass",
-		Pass:    false,
+		Input:    1.0,
+		Expected: nil,
 	}, {
-		Case:    0.0,
-		Message: "0.0 should not be pass",
-		Pass:    false,
+		Input:    1.1,
+		Expected: nil,
+	}, {
+		Input: 1.5,
+		Expected: &FloatEnumValidationError{
+			Input:      1.5,
+			Definition: definition,
+		},
 	}}
-
 	for _, test := range tests {
-		ok := validator.Validate(test.Case.(float64))
-		//if Pass flag true, ok should be true
-		if test.Pass == true && ok != true {
-			t.Error(test.Message)
+		err := validator.Validate(test.Input)
+		if !reflect.DeepEqual(err, test.Expected) {
+			t.Errorf("expected:%v ,actual:%v", test.Expected, err)
 		}
+	}
+}
 
-		//if Pass flag false, ok should not be true
-		if test.Pass == false && ok == true {
-			t.Error(test.Message)
+type StringEnumTestCase struct {
+	Definition StringEnumValidatorDefinition
+	Expected   error
+}
+
+func TestStringEnum(t *testing.T) {
+	tests := []StringEnumTestCase{{
+		Definition: StringEnumValidatorDefinition{Enumerate: []string{}},
+		Expected:   EmptyError{},
+	}, {
+		Definition: StringEnumValidatorDefinition{Enumerate: []string{"foo", "bar", "foo"}},
+		Expected:   DuplicationError{},
+	}}
+	for _, test := range tests {
+		_, err := NewStringEnumValidator(test.Definition)
+		if reflect.TypeOf(err) != reflect.TypeOf(test.Expected) {
+			t.Errorf("expected:%v, actual:%v", reflect.TypeOf(test.Expected), reflect.TypeOf(err))
+		}
+	}
+}
+
+type StringEnumValidatorTestCase struct {
+	Input    string
+	Expected *StringEnumValidationError
+}
+
+func TestStringEnumvalidator(t *testing.T) {
+	definition := StringEnumValidatorDefinition{
+		Enumerate: []string{"foo", "bar", "baz"},
+	}
+	validator, err := NewStringEnumValidator(definition)
+	if err != nil {
+		t.Error(err.Error())
+	}
+	tests := []StringEnumValidatorTestCase{{
+		Input:    "foo",
+		Expected: nil,
+	}, {
+		Input:    "bar",
+		Expected: nil,
+	}, {
+		Input:    "baz",
+		Expected: nil,
+	}, {
+		Input: "qux",
+		Expected: &StringEnumValidationError{
+			Input:      "qux",
+			Definition: definition,
+		},
+	}}
+	for _, test := range tests {
+		err := validator.Validate(test.Input)
+		if !reflect.DeepEqual(err, test.Expected) {
+			t.Errorf("expected:%v ,actual:%v", test.Expected, err)
+		}
+	}
+}
+
+type RequiredTestCase struct {
+	Definition RequiredValidatorDefinition
+	Expected   error
+}
+
+func TestRequired(t *testing.T) {
+	tests := []RequiredTestCase{{
+		Definition: RequiredValidatorDefinition{Required: []string{}},
+		Expected:   EmptyError{},
+	}, {
+		Definition: RequiredValidatorDefinition{Required: []string{"foo", "foo", "bar"}},
+		Expected:   DuplicationError{},
+	}, {
+		Definition: RequiredValidatorDefinition{Required: []string{"foo", "bar", "foo"}},
+		Expected:   DuplicationError{},
+	}, {
+		Definition: RequiredValidatorDefinition{Required: []string{"bar", "foo", "foo"}},
+		Expected:   DuplicationError{},
+	}, {
+		Definition: RequiredValidatorDefinition{Required: []string{"foo", "foo", "foo"}},
+		Expected:   DuplicationError{},
+	}}
+	for _, test := range tests {
+		_, err := NewRequiredValidator(test.Definition)
+		if reflect.TypeOf(err) != reflect.TypeOf(test.Expected) {
+			t.Errorf("expected:%v, actual:%v", reflect.TypeOf(test.Expected), reflect.TypeOf(err))
 		}
 	}
 }
 
 type Sample struct {
-	Id   dbr.NullInt64
+	ID   dbr.NullInt64
 	Name dbr.NullString
 	Addr dbr.NullString
 }
 
-type Sample1 struct {
-	Message dbr.NullString
-	Auther  dbr.NullString
-	Date    dbr.NullString
-}
-
-func TestRequired(t *testing.T) {
-	tests := []RequiredTestCase{{
-		Case:    RequiredValidator{Required: []string{}},
-		Message: "Required value array must have at least one element",
-		Pass:    false,
-	}, {
-		Case:    RequiredValidator{Required: []string{"Id", "Name", "Id"}},
-		Message: "Required value array must have at least one element",
-		Pass:    false,
-	}, {
-		Case:    RequiredValidator{Required: []string{"Id", "Name", "Addr"}},
-		Message: "Required value array must have at least one element",
-		Pass:    true,
-	}}
-
-	for _, test := range tests {
-		_, err := NewRequiredValidator(test.Case.Required)
-		// if Pass flag true, err should be empty
-		if test.Pass == true && err != nil {
-			t.Error(test.Message)
-		}
-
-		// if Pass flag false, err should not be empty
-		if test.Pass != true && err == nil {
-			t.Error(test.Message)
-		}
-	}
+type RequiredValidatorTestCase struct {
+	Input    *Sample
+	Expected *RequiredValidationError
 }
 
 func TestRequiredValidator(t *testing.T) {
-	validator, err := NewRequiredValidator([]string{"Id", "Name"})
+	definition := RequiredValidatorDefinition{
+		Required: []string{"Id", "Addr"},
+	}
+	validator, err := NewRequiredValidator(definition)
 	if err != nil {
 		t.Error(err.Error())
 	}
 
-	tests := []ValidatorTestCase{{
-		Case: &Sample{
-			Id:   dbr.NewNullInt64(1),
-			Name: dbr.NewNullString("hi")},
-		Message: "should be pass",
-		Pass:    true,
+	sample1 := &Sample{
+		ID:   dbr.NewNullInt64(1),
+		Name: dbr.NewNullString("hi"),
+		Addr: dbr.NewNullString("foo@bar.com"),
+	}
+	sample2 := &Sample{
+		ID:   dbr.NewNullInt64(1),
+		Name: dbr.NewNullString("hi"),
+	}
+
+	tests := []RequiredValidatorTestCase{{
+		Input:    sample1,
+		Expected: nil,
 	}, {
-		Case: &Sample{
-			Id: dbr.NewNullInt64(1)},
-		Message: "should not be pass",
-		Pass:    false,
-	}, {
-		Case: &Sample{
-			Id:   dbr.NewNullInt64(1),
-			Name: dbr.NewNullString("MyName"),
-			Addr: dbr.NewNullString("myaddr@hoge.com"),
+		Input: sample2,
+		Expected: &RequiredValidationError{
+			Input:      sample2,
+			Definition: definition,
 		},
-		Message: "struct has `Id` `Name` and `Addr` therefore should be pass",
-		Pass:    true,
-	}, {
-		Case: &Sample1{
-			Message: dbr.NewNullString("hogeho"),
-			Auther:  dbr.NewNullString("MyName"),
-			Date:    dbr.NewNullString("myaddr@hoge.com"),
-		},
-		Message: "struct has `Id` `Name` and `Addr` therefore should be pass",
-		Pass:    true,
 	}}
 
 	for _, test := range tests {
-		ok := validator.Validate(test.Case)
-		//if Pass flag true, ok should be true
-		if test.Pass == true && ok != true {
-			t.Error(test.Message)
+		err := validator.Validate(test.Input)
+		if !reflect.DeepEqual(err, test.Expected) {
+			t.Errorf("expected:%v ,actual:%v", test.Expected, err)
 		}
+	}
+}
 
-		//if Pass flag false, ok should not be true
-		if test.Pass == false && ok == true {
-			t.Error(test.Message)
+type IntMaxItemsTestCase struct {
+	Definition IntMaxItemsValidatorDefinition
+	Expected   error
+}
+
+func TestIntMaxItems(t *testing.T) {
+	tests := []IntMaxItemsTestCase{{
+		Definition: IntMaxItemsValidatorDefinition{MaxItems: -1},
+		Expected:   NoLengthError{},
+	}}
+	for _, test := range tests {
+		_, err := NewIntMaxItemsValidator(test.Definition)
+		if reflect.TypeOf(err) != reflect.TypeOf(test.Expected) {
+			t.Errorf("expected:%v, actual:%v", reflect.TypeOf(test.Expected), reflect.TypeOf(err))
+		}
+	}
+}
+
+type IntMaxItemsValidatorTestCase struct {
+	Input    []int
+	Expected *IntMaxItemsValidationError
+}
+
+func TestIntMaxItemsValidator(t *testing.T) {
+	definition := IntMaxItemsValidatorDefinition{
+		MaxItems: 3,
+	}
+	validator, err := NewIntMaxItemsValidator(definition)
+	if err != nil {
+		t.Error(err.Error())
+	}
+
+	tests := []IntMaxItemsValidatorTestCase{{
+		Input:    []int{1},
+		Expected: nil,
+	}, {
+		Input:    []int{1, 2},
+		Expected: nil,
+	}, {
+		Input:    []int{1, 2, 3},
+		Expected: nil,
+	}, {
+		Input: []int{1, 2, 3, 4},
+		Expected: &IntMaxItemsValidationError{
+			Input:      []int{1, 2, 3, 4},
+			Definition: definition,
+		},
+	}}
+
+	for _, test := range tests {
+		err := validator.Validate(test.Input)
+		if !reflect.DeepEqual(err, test.Expected) {
+			t.Errorf("expected:%v ,actual:%v", test.Expected, err)
+		}
+	}
+}
+
+type StringMaxItemsTestCase struct {
+	Definition StringMaxItemsValidatorDefinition
+	Expected   error
+}
+
+func TestStringMaxItems(t *testing.T) {
+	tests := []StringMaxItemsTestCase{{
+		Definition: StringMaxItemsValidatorDefinition{MaxItems: -1},
+		Expected:   NoLengthError{},
+	}}
+	for _, test := range tests {
+		_, err := NewStringMaxItemsValidator(test.Definition)
+		if reflect.TypeOf(err) != reflect.TypeOf(test.Expected) {
+			t.Errorf("expected:%v, actual:%v", reflect.TypeOf(test.Expected), reflect.TypeOf(err))
+		}
+	}
+}
+
+type StringMaxItemsValidatorTestCase struct {
+	Input    []string
+	Expected *StringMaxItemsValidationError
+}
+
+func TestStringMaxItemsValidator(t *testing.T) {
+	definition := StringMaxItemsValidatorDefinition{
+		MaxItems: 3,
+	}
+	validator, err := NewStringMaxItemsValidator(definition)
+	if err != nil {
+		t.Error(err.Error())
+	}
+
+	tests := []StringMaxItemsValidatorTestCase{{
+		Input:    []string{"foo"},
+		Expected: nil,
+	}, {
+		Input:    []string{"foo", "bar"},
+		Expected: nil,
+	}, {
+		Input:    []string{"foo", "bar", "baz"},
+		Expected: nil,
+	}, {
+		Input: []string{"foo", "bar", "bas", "qux"},
+		Expected: &StringMaxItemsValidationError{
+			Input: []string{"foo", "bar", "bas", "qux"},
+
+			Definition: definition,
+		},
+	}}
+
+	for _, test := range tests {
+		err := validator.Validate(test.Input)
+		if !reflect.DeepEqual(err, test.Expected) {
+			t.Errorf("expected:%v ,actual:%v", test.Expected, err)
+		}
+	}
+}
+
+type FloatMaxItemsTestCase struct {
+	Definition FloatMaxItemsValidatorDefinition
+	Expected   error
+}
+
+func TestFloatMaxItems(t *testing.T) {
+	tests := []FloatMaxItemsTestCase{{
+		Definition: FloatMaxItemsValidatorDefinition{MaxItems: -1},
+		Expected:   NoLengthError{},
+	}}
+	for _, test := range tests {
+		_, err := NewFloatMaxItemsValidator(test.Definition)
+		if reflect.TypeOf(err) != reflect.TypeOf(test.Expected) {
+			t.Errorf("expected:%v, actual:%v", reflect.TypeOf(test.Expected), reflect.TypeOf(err))
+		}
+	}
+}
+
+type FloatMaxItemsValidatorTestCase struct {
+	Input    []float64
+	Expected *FloatMaxItemsValidationError
+}
+
+func TestFloatMaxItemsValidator(t *testing.T) {
+	definition := FloatMaxItemsValidatorDefinition{
+		MaxItems: 3,
+	}
+	validator, err := NewFloatMaxItemsValidator(definition)
+	if err != nil {
+		t.Error(err.Error())
+	}
+
+	tests := []FloatMaxItemsValidatorTestCase{{
+		Input:    []float64{1},
+		Expected: nil,
+	}, {
+		Input:    []float64{1, 2},
+		Expected: nil,
+	}, {
+		Input:    []float64{1, 2, 3},
+		Expected: nil,
+	}, {
+		Input: []float64{1, 2, 3, 4},
+		Expected: &FloatMaxItemsValidationError{
+			Input:      []float64{1, 2, 3, 4},
+			Definition: definition,
+		},
+	}}
+
+	for _, test := range tests {
+		err := validator.Validate(test.Input)
+		if !reflect.DeepEqual(err, test.Expected) {
+			t.Errorf("expected:%v ,actual:%v", test.Expected, err)
+		}
+	}
+}
+
+type FormatTestCase struct {
+	Definition FormatValidatorDefinition
+	Expected   error
+}
+
+func TestFormat(t *testing.T) {
+	tests := []FormatTestCase{{
+		Definition: FormatValidatorDefinition{Format: "password"},
+		Expected:   InvalidFormatError{},
+	}}
+
+	for _, test := range tests {
+		_, err := NewFormatValidator(test.Definition)
+		if reflect.TypeOf(err) != reflect.TypeOf(test.Expected) {
+			t.Errorf("expected:%v, actual:%v", reflect.TypeOf(test.Expected), reflect.TypeOf(err))
+		}
+	}
+}
+
+type FormatValidationTestCase struct {
+	Input    string
+	Expected *FormatValidationError
+}
+
+func TestFormatValidator(t *testing.T) {
+	definition := FormatValidatorDefinition{
+		Format: "date-time",
+	}
+	validator, err := NewFormatValidator(definition)
+	if err != nil {
+		t.Error(err.Error())
+	}
+
+	tests := []FormatValidationTestCase{{
+		Input:    "2016-05-09T19:45:32Z",
+		Expected: nil,
+	}, {
+		Input: "209385790284750",
+		Expected: &FormatValidationError{
+			Input:      "209385790284750",
+			Definition: definition,
+		},
+	}}
+
+	for _, test := range tests {
+		err := validator.Validate(test.Input)
+		if !reflect.DeepEqual(err, test.Expected) {
+			t.Errorf("expected:%v ,actual:%v", test.Expected, err)
+		}
+	}
+
+	definition = FormatValidatorDefinition{
+		Format: "email",
+	}
+	validator, err = NewFormatValidator(definition)
+	if err != nil {
+		t.Error(err.Error())
+	}
+
+	tests = []FormatValidationTestCase{{
+		Input:    "foo@bar.com",
+		Expected: nil,
+	}, {
+		Input: "foobar.com",
+		Expected: &FormatValidationError{
+			Input:      "foobar.com",
+			Definition: definition,
+		},
+	}, {
+		Input: "foo@bar",
+		Expected: &FormatValidationError{
+			Input:      "foo@bar",
+			Definition: definition,
+		},
+	}, {
+		Input: "foo@bar.",
+		Expected: &FormatValidationError{
+			Input:      "foo@bar.",
+			Definition: definition,
+		},
+	}}
+
+	for _, test := range tests {
+		err := validator.Validate(test.Input)
+		if !reflect.DeepEqual(err, test.Expected) {
+			t.Errorf("expected:%v ,actual:%v", test.Expected, err)
+		}
+	}
+
+	definition = FormatValidatorDefinition{
+		Format: "uri",
+	}
+	validator, err = NewFormatValidator(definition)
+	if err != nil {
+		t.Error(err.Error())
+	}
+
+	tests = []FormatValidationTestCase{{
+		Input:    "https://example.com",
+		Expected: nil,
+	}, {
+		Input:    "http://example.com",
+		Expected: nil,
+	}, {
+		Input:    "https://example.com/foo/bar",
+		Expected: nil,
+	}, {
+		Input: "foobar.com",
+		Expected: &FormatValidationError{
+			Input:      "foobar.com",
+			Definition: definition,
+		},
+	}, {
+		Input: "ttp://example.com",
+		Expected: &FormatValidationError{
+			Input:      "ttp://example.com",
+			Definition: definition,
+		},
+	}, {
+		Input: "ftp://example.com",
+		Expected: &FormatValidationError{
+			Input:      "ftp://example.com",
+			Definition: definition,
+		},
+	}}
+
+	for _, test := range tests {
+		err := validator.Validate(test.Input)
+		if !reflect.DeepEqual(err, test.Expected) {
+			t.Errorf("expected:%v ,actual:%v", test.Expected, err)
 		}
 	}
 }

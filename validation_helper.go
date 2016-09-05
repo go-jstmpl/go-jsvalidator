@@ -2,405 +2,458 @@ package validator
 
 import (
 	"database/sql/driver"
-	"errors"
 	"fmt"
 	"reflect"
 	"regexp"
 	"unicode/utf8"
 )
 
-type MaximumValidator struct {
+type EmptyError struct {
+	message string
+}
+
+func (e EmptyError) Error() string {
+	return e.message
+}
+
+type DuplicationError struct {
+	message string
+}
+
+func (e DuplicationError) Error() string {
+	return e.message
+}
+
+type NoLengthError struct {
+	message string
+}
+
+func (e NoLengthError) Error() string {
+	return e.message
+}
+
+type InvalidPatternError struct {
+	message string
+}
+
+func (e InvalidPatternError) Error() string {
+	return e.message
+}
+
+type InvalidFormatError struct {
+	message string
+}
+
+func (e InvalidFormatError) Error() string {
+	return e.message
+}
+
+type IntMaximumValidator struct {
+	definition IntMaximumValidatorDefinition
+}
+
+type IntMaximumValidatorDefinition struct {
 	Maximum   int  `json:"maximum"`
 	Exclusive bool `json:"exclusive"`
 }
 
-func (m MaximumValidator) Error(val int) string {
-	return fmt.Sprintf("expected less than %d but actual %d with option exlusive %b",
-		m.Maximum, val, m.Exclusive)
+type IntMaximumValidationError struct {
+	Definition IntMaximumValidatorDefinition `json:"definition"`
+	Input      int                           `json:"input"`
 }
 
-func NewMaximumValidator(maximum int, exclusive bool) (*MaximumValidator, error) {
-	v := &MaximumValidator{
-		Maximum:   maximum,
-		Exclusive: exclusive,
-	}
-
-	return v, nil
+func NewIntMaximumValidator(definition IntMaximumValidatorDefinition) (IntMaximumValidator, error) {
+	return IntMaximumValidator{definition}, nil
 }
 
-//If "exclusiveMaximum" is not present, or has boolean value false,
-//then the instance is valid if it is less than,
-//or equal to, the value of "minimum".
-//If "exlusiveMaximum" is present and has boolean value true,
-//the instance is valid if it is strictly less than the value of "maximum".
-func (m MaximumValidator) Validate(val int) bool {
-	if !m.Exclusive {
-		if val <= m.Maximum {
-			return true
+func (m IntMaximumValidator) Validate(input int) *IntMaximumValidationError {
+	if !m.definition.Exclusive {
+		if input <= m.definition.Maximum {
+			return nil
 		}
-		return false
+		return &IntMaximumValidationError{
+			m.definition,
+			input,
+		}
 	}
 
-	if val < m.Maximum {
-		return true
+	if input < m.definition.Maximum {
+		return nil
 	}
-	return false
+	return &IntMaximumValidationError{
+		m.definition,
+		input,
+	}
 }
 
-type MinimumValidator struct {
+type IntMinimumValidator struct {
+	definition IntMinimumValidatorDefinition
+}
+
+type IntMinimumValidatorDefinition struct {
 	Minimum   int  `json:"minimum"`
 	Exclusive bool `json:"exclusive"`
 }
 
-func (m MinimumValidator) Error(val int) string {
-	return fmt.Sprintf("expected greater than %d but actual %d with option exlusive %b",
-		m.Minimum, val, m.Exclusive)
+type IntMinimumValidationError struct {
+	Definition IntMinimumValidatorDefinition `json:"definition"`
+	Input      int                           `json:"input"`
 }
 
-func NewMinimumValidator(minimum int, exclusive bool) (*MinimumValidator, error) {
-	v := &MinimumValidator{
-		Minimum:   minimum,
-		Exclusive: exclusive,
-	}
-
-	return v, nil
+func NewIntMinimumValidator(definition IntMinimumValidatorDefinition) (IntMinimumValidator, error) {
+	return IntMinimumValidator{definition}, nil
 }
 
-//If "exclusiveMinimum" is not present, or has boolean value false,
-//then the instance is valid if it is greater than,
-//or equal to, the value of "minimum"
-//if "exclusiveMinimum" is present and has boolean value true,
-//the instance is valid if it is strictly greater than the value of "minimum".
-func (m MinimumValidator) Validate(val int) bool {
-	if !m.Exclusive {
-		if val >= m.Minimum {
-			return true
+func (m IntMinimumValidator) Validate(input int) *IntMinimumValidationError {
+	if !m.definition.Exclusive {
+		if input >= m.definition.Minimum {
+			return nil
 		}
-		return false
+		return &IntMinimumValidationError{
+			m.definition,
+			input,
+		}
 	}
-
-	if val > m.Minimum {
-		return true
+	if input > m.definition.Minimum {
+		return nil
 	}
-
-	return false
+	return &IntMinimumValidationError{
+		m.definition,
+		input,
+	}
 }
 
 type FloatMaximumValidator struct {
+	definition FloatMaximumValidatorDefinition
+}
+
+type FloatMaximumValidatorDefinition struct {
 	Maximum   float64 `json:"maximum"`
 	Exclusive bool    `json:"exclusive"`
 }
 
-func (m FloatMaximumValidator) Error(val float64) string {
-	return fmt.Sprintf("expected less than %d but actual %d with option exlusive %b",
-		m.Maximum, val, m.Exclusive)
-
+type FloatMaximumValidationError struct {
+	Definition FloatMaximumValidatorDefinition `json:"definition"`
+	Input      float64                         `json:"input"`
 }
 
-func NewFloatMaximumValidator(maximum float64, exclusive bool) (*FloatMaximumValidator, error) {
-	v := &FloatMaximumValidator{
-		Maximum:   maximum,
-		Exclusive: exclusive,
-	}
-
-	return v, nil
+func NewFloatMaximumValidator(definition FloatMaximumValidatorDefinition) (FloatMaximumValidator, error) {
+	return FloatMaximumValidator{definition}, nil
 }
 
-//If "exclusiveMinimum" is not present, or has boolean value false,
-//then the instance is valid if it is less than,
-//or equal to, the value of "minimum".
-//If "exlusiveMinimum" is present and has boolean value true,
-//the instance is valid if it is strictly less than the value of "minimum".
-func (m FloatMaximumValidator) Validate(val float64) bool {
-	if !m.Exclusive {
-		if val <= m.Maximum {
-			return true
+func (m FloatMaximumValidator) Validate(input float64) *FloatMaximumValidationError {
+	if !m.definition.Exclusive {
+		if input <= m.definition.Maximum {
+			return nil
 		}
-		return false
+		return &FloatMaximumValidationError{
+			m.definition,
+			input,
+		}
 	}
-
-	if val < m.Maximum {
-		return true
+	if input < m.definition.Maximum {
+		return nil
 	}
-	return false
+	return &FloatMaximumValidationError{
+		m.definition,
+		input,
+	}
 }
 
 type FloatMinimumValidator struct {
+	definition FloatMinimumValidatorDefinition
+}
+
+type FloatMinimumValidatorDefinition struct {
 	Minimum   float64 `json:"minimum"`
 	Exclusive bool    `json:"exclusive"`
 }
 
-func (m FloatMinimumValidator) Error(val float64) string {
-	return fmt.Sprintf("expected greater than %d but actual %d with option exlusive %b",
-		m.Minimum, val, m.Exclusive)
+type FloatMinimumValidationError struct {
+	Definition FloatMinimumValidatorDefinition `json:"definition"`
+	Input      float64                         `json:"input"`
 }
 
-func NewFloatMinimumValidator(minimum float64, exclusive bool) (*FloatMinimumValidator, error) {
-	v := &FloatMinimumValidator{
-		Minimum:   minimum,
-		Exclusive: exclusive,
-	}
-
-	return v, nil
+func NewFloatMinimumValidator(definition FloatMinimumValidatorDefinition) (FloatMinimumValidator, error) {
+	return FloatMinimumValidator{definition}, nil
 }
 
-//If "exclusiveMinimum" is not present, or has boolean value false,
-//then the instance is valid if it is greater than,
-//or equal to, the value of "minimum"
-//if "exclusiveMinimum" is present and has boolean value true,
-//the instance is valid if it is strictly greater than the value of "minimum".
-func (m FloatMinimumValidator) Validate(val float64) bool {
-	if !m.Exclusive {
-		if val >= m.Minimum {
-			return true
+func (m FloatMinimumValidator) Validate(input float64) *FloatMinimumValidationError {
+	if !m.definition.Exclusive {
+		if input >= m.definition.Minimum {
+			return nil
 		}
-		return false
+		return &FloatMinimumValidationError{
+			m.definition,
+			input,
+		}
 	}
 
-	if val > m.Minimum {
-		return true
+	if input > m.definition.Minimum {
+		return nil
 	}
-	return false
+	return &FloatMinimumValidationError{
+		m.definition,
+		input,
+	}
 }
 
 type MaxLengthValidator struct {
-	MaxLength int `json:"maxlength"`
+	definition MaxLengthValidatorDefinition
 }
 
-func (m MaxLengthValidator) Error(val string) string {
-	return fmt.Sprintf("expected less than, or equal to, %d charactors but actual %d",
-		m.MaxLength, utf8.RuneCountInString(val))
+type MaxLengthValidatorDefinition struct {
+	MaxLength int `json:"max_length"`
 }
 
-func NewMaxLengthValidator(maxLength int) (*MaxLengthValidator, error) {
-	if maxLength <= 0 {
-		return nil, fmt.Errorf("maxLength must be greater than 0. maxLength: %d", maxLength)
-	}
-	v := &MaxLengthValidator{
-		MaxLength: maxLength,
-	}
-
-	return v, nil
+type MaxLengthValidationError struct {
+	Definition MaxLengthValidatorDefinition `json:"definition"`
+	Input      string                       `json:"input"`
 }
 
-func (m MaxLengthValidator) Validate(val string) bool {
-	if utf8.RuneCountInString(val) <= m.MaxLength {
-		return true
+func NewMaxLengthValidator(definition MaxLengthValidatorDefinition) (MaxLengthValidator, error) {
+	if definition.MaxLength < 0 {
+		return MaxLengthValidator{}, NoLengthError{"the max length should be greater than, or equal to, 0"}
 	}
+	return MaxLengthValidator{definition}, nil
+}
 
-	return false
+func (m MaxLengthValidator) Validate(input string) *MaxLengthValidationError {
+	if utf8.RuneCountInString(input) <= m.definition.MaxLength {
+		return nil
+	}
+	return &MaxLengthValidationError{
+		m.definition,
+		input,
+	}
 }
 
 type MinLengthValidator struct {
-	MinLength int `json:"minLength"`
+	definition MinLengthValidatorDefinition
 }
 
-func (m MinLengthValidator) Error(val string) string {
-	return fmt.Sprintf("expected greater than, or equal to, %d charactors but actual %d charactors",
-		m.MinLength, utf8.RuneCountInString(val))
+type MinLengthValidatorDefinition struct {
+	MinLength int `json:"min_length"`
 }
 
-func NewMinLengthValidator(minLength int) (*MinLengthValidator, error) {
-	if minLength <= 0 {
-		return nil, fmt.Errorf("minLength must be less than 0. minLength: %d", minLength)
-	}
-	v := &MinLengthValidator{
-		MinLength: minLength,
-	}
-
-	return v, nil
+type MinLengthValidationError struct {
+	Definition MinLengthValidatorDefinition `json:"definition"`
+	Input      string                       `json:"input"`
 }
 
-func (m MinLengthValidator) Validate(val string) bool {
-	if utf8.RuneCountInString(val) >= m.MinLength {
-		return true
+func NewMinLengthValidator(definition MinLengthValidatorDefinition) (MinLengthValidator, error) {
+	if definition.MinLength < 0 {
+		return MinLengthValidator{}, fmt.Errorf("the minimum length should be greater than, or equal to, 0")
 	}
 
-	return false
+	return MinLengthValidator{definition}, nil
+}
+
+func (m MinLengthValidator) Validate(input string) *MinLengthValidationError {
+	if utf8.RuneCountInString(input) >= m.definition.MinLength {
+		return nil
+	}
+	return &MinLengthValidationError{
+		m.definition,
+		input,
+	}
 }
 
 type PatternValidator struct {
-	Pattern string
+	definition PatternValidatorDefinition
 }
 
-func (m PatternValidator) Error(val string) string {
-	return fmt.Sprintf("%s expected matching pattern: %s", val, m.Pattern)
+type PatternValidatorDefinition struct {
+	Pattern string `json:"pattern"`
 }
 
-func NewPatternValidator(pattern string) (*PatternValidator, error) {
-	_, err := regexp.Compile(pattern)
+type PatternValidationError struct {
+	Definition PatternValidatorDefinition `json:"definition"`
+	Input      string                     `json:"input"`
+}
+
+func NewPatternValidator(definition PatternValidatorDefinition) (PatternValidator, error) {
+	if definition.Pattern == "" {
+		return PatternValidator{}, EmptyError{"the pattern should not be empty"}
+	}
+	_, err := regexp.Compile(definition.Pattern)
 	if err != nil {
-		return nil, err
+		return PatternValidator{}, InvalidPatternError{fmt.Sprintf("invalid pattern: %s", definition.Pattern)}
 	}
-	v := &PatternValidator{
-		Pattern: pattern,
-	}
-
-	return v, nil
+	return PatternValidator{definition}, nil
 }
 
-func (m PatternValidator) Validate(val string) bool {
-	ok, err := regexp.MatchString(m.Pattern, val)
-	if err != nil {
-		return false
+func (p PatternValidator) Validate(input string) *PatternValidationError {
+	ok, err := regexp.MatchString(p.definition.Pattern, input)
+	if ok == true && err == nil {
+		return nil
 	}
-
-	if ok == false {
-		return false
+	return &PatternValidationError{
+		p.definition,
+		input,
 	}
-
-	return true
 }
 
 type IntEnumValidator struct {
-	Enumerate []int
+	definition IntEnumValidatorDefinition
 }
 
-func (m IntEnumValidator) Error(val string) string {
-	return fmt.Sprintf("%s expected include emunerate list: %v", val, m.Enumerate)
+type IntEnumValidatorDefinition struct {
+	Enumerate []int `json:"enum"`
 }
 
-func NewIntEnumValidator(enumerate []int) (*IntEnumValidator, error) {
+type IntEnumValidationError struct {
+	Definition IntEnumValidatorDefinition `json:"definition"`
+	Input      int                        `json:"input"`
+}
+
+func NewIntEnumValidator(definition IntEnumValidatorDefinition) (IntEnumValidator, error) {
+	enumerate := definition.Enumerate
 	if len(enumerate) == 0 {
-		return nil, errors.New("enumerate element should not be empty")
+		return IntEnumValidator{}, EmptyError{"the enumurate should have at least one element"}
 	}
 
-	// unique test
-	for idx, e := range enumerate {
-		for _, es := range enumerate[idx+1:] {
+	for i, e := range enumerate {
+		for _, es := range enumerate[i+1:] {
 			if e == es {
-				return nil, errors.New("enumerate element should be unique")
+				return IntEnumValidator{}, DuplicationError{"the elements of enumurate should not be duplicated"}
 			}
 		}
 	}
+	return IntEnumValidator{definition}, nil
 
-	v := &IntEnumValidator{
-		Enumerate: enumerate,
-	}
-
-	return v, nil
 }
 
-func (m IntEnumValidator) Validate(val int) bool {
-	for _, e := range m.Enumerate {
-		if val == e {
-			return true
+func (i IntEnumValidator) Validate(input int) *IntEnumValidationError {
+	for _, e := range i.definition.Enumerate {
+		if input == e {
+			return nil
 		}
 	}
-
-	return false
+	return &IntEnumValidationError{
+		i.definition,
+		input,
+	}
 }
 
 type StringEnumValidator struct {
-	Enumerate []string
+	definition StringEnumValidatorDefinition
 }
 
-func (m StringEnumValidator) Error(val string) string {
-	return fmt.Sprintf("%s expected include enumerate list: %v", val, m.Enumerate)
+type StringEnumValidatorDefinition struct {
+	Enumerate []string `json:"enum"`
 }
 
-func NewStringEnumValidator(enumerate []string) (*StringEnumValidator, error) {
+type StringEnumValidationError struct {
+	Definition StringEnumValidatorDefinition `json:"definition"`
+	Input      string                        `json:"input"`
+}
+
+func NewStringEnumValidator(definition StringEnumValidatorDefinition) (StringEnumValidator, error) {
+	enumerate := definition.Enumerate
 	if len(enumerate) == 0 {
-		return nil, errors.New("enumerate element should not be empty")
+		return StringEnumValidator{}, EmptyError{"the enumerate should have at least one element"}
 	}
 
-	// unique test
-	for idx, e := range enumerate {
-		for _, es := range enumerate[idx+1:] {
+	for i, e := range enumerate {
+		for _, es := range enumerate[i+1:] {
 			if e == es {
-				return nil, errors.New("enumerate element should be unique")
+				return StringEnumValidator{}, DuplicationError{"the elements of enumerate should not be duplicated"}
 			}
 		}
 	}
-
-	v := &StringEnumValidator{
-		Enumerate: enumerate,
-	}
-
-	return v, nil
+	return StringEnumValidator{definition}, nil
 }
 
-func (m StringEnumValidator) Validate(val string) bool {
-	for _, e := range m.Enumerate {
-		if val == e {
-			return true
+func (s StringEnumValidator) Validate(input string) *StringEnumValidationError {
+	for _, e := range s.definition.Enumerate {
+		if input == e {
+			return nil
 		}
 	}
-
-	return false
+	return &StringEnumValidationError{
+		s.definition,
+		input,
+	}
 }
 
 type FloatEnumValidator struct {
-	Enumerate []float64
+	definition FloatEnumValidatorDefinition
 }
 
-func (f FloatEnumValidator) Error(val float64) string {
-	return fmt.Sprintf("%s expected include enumerate list: %v", val, f.Enumerate)
+type FloatEnumValidatorDefinition struct {
+	Enumerate []float64 `json:"enum"`
 }
 
-func NewFloatEnumValidator(enumerate []float64) (*FloatEnumValidator, error) {
+type FloatEnumValidationError struct {
+	Definition FloatEnumValidatorDefinition `json:"definition"`
+	Input      float64                      `json:"input"`
+}
+
+func NewFloatEnumValidator(definition FloatEnumValidatorDefinition) (FloatEnumValidator, error) {
+	enumerate := definition.Enumerate
 	if len(enumerate) == 0 {
-		return nil, errors.New("enumerate element should not be empty")
+		return FloatEnumValidator{}, EmptyError{"the enumerate should have at least one element"}
 	}
 
-	// unique test
-	for idx, e := range enumerate {
-		for _, es := range enumerate[idx+1:] {
+	for i, e := range enumerate {
+		for _, es := range enumerate[i+1:] {
 			if e == es {
-				return nil, errors.New("enumerate element should be unique")
+				return FloatEnumValidator{}, DuplicationError{"the elements of enumerate should not be duplicated"}
 			}
 		}
 	}
+	return FloatEnumValidator{definition}, nil
 
-	v := &FloatEnumValidator{
-		Enumerate: enumerate,
-	}
-
-	return v, nil
 }
 
-func (f FloatEnumValidator) Validate(val float64) bool {
-	for _, e := range f.Enumerate {
-		if val == e {
-			return true
+func (f FloatEnumValidator) Validate(input float64) *FloatEnumValidationError {
+	for _, e := range f.definition.Enumerate {
+		if input == e {
+			return nil
 		}
 	}
-
-	return false
+	return &FloatEnumValidationError{
+		f.definition,
+		input,
+	}
 }
 
 type RequiredValidator struct {
-	Required []string
+	definition RequiredValidatorDefinition
 }
 
-func (r RequiredValidator) Error(val string) string {
-	return fmt.Sprint("%s", val)
+type RequiredValidatorDefinition struct {
+	Required []string `json:"pattern"`
 }
 
-func NewRequiredValidator(s []string) (*RequiredValidator, error) {
-	if len(s) == 0 {
-		return nil, errors.New("the required value should have at least one element")
+type RequiredValidationError struct {
+	Input      interface{}                 `json:"input"`
+	Definition RequiredValidatorDefinition `json:"definition"`
+}
+
+func NewRequiredValidator(definition RequiredValidatorDefinition) (RequiredValidator, error) {
+	required := definition.Required
+	if len(required) == 0 {
+		return RequiredValidator{}, EmptyError{"the required value should have at least one element"}
 	}
-
-	// unique test
-	for idx, e := range s {
-		for _, es := range s[idx+1:] {
+	for idx, e := range required {
+		for _, es := range required[idx+1:] {
 			if e == es {
-				return nil, errors.New("the required value should not be duplicated")
+				return RequiredValidator{}, DuplicationError{"the required value should not be duplicated"}
 			}
 		}
 	}
-
-	return &RequiredValidator{Required: s}, nil
+	return RequiredValidator{definition}, nil
 }
 
-func (r RequiredValidator) Validate(i interface{}) bool {
+func (r RequiredValidator) Validate(input interface{}) *RequiredValidationError {
 	// convert reflect data to interfaced struct
-	elem := reflect.ValueOf(i).Elem()
+	elem := reflect.ValueOf(input).Elem()
 	size := elem.NumField()
 
 	for s := 0; s < size; s++ {
-		for _, require := range r.Required {
+		for _, require := range r.definition.Required {
 			// getting required field
 			if require == elem.Type().Field(s).Name {
 				// change into a type that have null check function
@@ -408,15 +461,169 @@ func (r RequiredValidator) Validate(i interface{}) bool {
 					Value() (driver.Value, error)
 				})
 				if ok != true {
-					return false
+					return &RequiredValidationError{
+						Definition: r.definition,
+						Input:      input,
+					}
 				}
-
 				v, _ := n.Value()
 				if v == nil {
-					return false
+					return &RequiredValidationError{
+						Definition: r.definition,
+						Input:      input,
+					}
 				}
 			}
 		}
 	}
-	return true
+	return nil
+}
+
+type IntMaxItemsValidator struct {
+	definition IntMaxItemsValidatorDefinition
+}
+
+type IntMaxItemsValidatorDefinition struct {
+	MaxItems int `json:"max_items"`
+}
+
+type IntMaxItemsValidationError struct {
+	Definition IntMaxItemsValidatorDefinition `json:"definition"`
+	Input      []int                          `json:"input"`
+}
+
+func NewIntMaxItemsValidator(definition IntMaxItemsValidatorDefinition) (IntMaxItemsValidator, error) {
+	if definition.MaxItems < 0 {
+		return IntMaxItemsValidator{}, NoLengthError{"the value of maxItems should be greater than, or equal to, 0"}
+	}
+	return IntMaxItemsValidator{definition}, nil
+}
+
+func (i IntMaxItemsValidator) Validate(input []int) *IntMaxItemsValidationError {
+	if len(input) <= i.definition.MaxItems {
+		return nil
+	}
+	return &IntMaxItemsValidationError{
+		i.definition,
+		input,
+	}
+}
+
+type FloatMaxItemsValidator struct {
+	definition FloatMaxItemsValidatorDefinition
+}
+
+type FloatMaxItemsValidatorDefinition struct {
+	MaxItems int `json:"max_items"`
+}
+
+type FloatMaxItemsValidationError struct {
+	Definition FloatMaxItemsValidatorDefinition `json:"definition"`
+	Input      []float64                        `json:"input"`
+}
+
+func NewFloatMaxItemsValidator(definition FloatMaxItemsValidatorDefinition) (FloatMaxItemsValidator, error) {
+	if definition.MaxItems < 0 {
+		return FloatMaxItemsValidator{}, NoLengthError{"the value of maxItems should be greater than, or equal to, 0"}
+	}
+	return FloatMaxItemsValidator{definition}, nil
+}
+
+func (i FloatMaxItemsValidator) Validate(input []float64) *FloatMaxItemsValidationError {
+	if len(input) <= i.definition.MaxItems {
+		return nil
+	}
+	return &FloatMaxItemsValidationError{
+		i.definition,
+		input,
+	}
+}
+
+type StringMaxItemsValidator struct {
+	definition StringMaxItemsValidatorDefinition
+}
+
+type StringMaxItemsValidatorDefinition struct {
+	MaxItems int `json:"max_items"`
+}
+
+type StringMaxItemsValidationError struct {
+	Definition StringMaxItemsValidatorDefinition `json:"definition"`
+	Input      []string                          `json:"input"`
+}
+
+func NewStringMaxItemsValidator(definition StringMaxItemsValidatorDefinition) (StringMaxItemsValidator, error) {
+	if definition.MaxItems < 0 {
+		return StringMaxItemsValidator{}, NoLengthError{"the value of maxItems should be greater than, or equal to, 0"}
+	}
+
+	return StringMaxItemsValidator{definition}, nil
+}
+
+func (i StringMaxItemsValidator) Validate(input []string) *StringMaxItemsValidationError {
+	if len(input) <= i.definition.MaxItems {
+		return nil
+	}
+	return &StringMaxItemsValidationError{
+		i.definition,
+		input,
+	}
+}
+
+type FormatValidator struct {
+	definition FormatValidatorDefinition
+}
+
+type FormatValidatorDefinition struct {
+	Format string `json:"format"`
+}
+
+type FormatValidationError struct {
+	Definition FormatValidatorDefinition `json:"definition"`
+	Input      string                    `json:"input"`
+}
+
+func NewFormatValidator(definition FormatValidatorDefinition) (FormatValidator, error) {
+	switch definition.Format {
+	case "date-time":
+		return FormatValidator{definition}, nil
+	case "email":
+		return FormatValidator{definition}, nil
+	case "uri":
+		return FormatValidator{definition}, nil
+	}
+	return FormatValidator{}, InvalidFormatError{"the format is not found"}
+}
+
+func (f FormatValidator) Validate(input string) *FormatValidationError {
+	const (
+		rDateTime = "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$"
+		rEmail    = "^.+@.+\\..+$"
+		rURI      = "^https?:\\/\\/.+$"
+	)
+
+	switch f.definition.Format {
+	case "date-time":
+		ok, err := regexp.MatchString(rDateTime, input)
+		if ok == true && err == nil {
+			return nil
+		}
+		break
+	case "email":
+		ok, err := regexp.MatchString(rEmail, input)
+		if ok == true && err == nil {
+			return nil
+		}
+		break
+	case "uri":
+		ok, err := regexp.MatchString(rURI, input)
+		if ok == true && err == nil {
+			return nil
+		}
+		break
+	}
+	return &FormatValidationError{
+		f.definition,
+		input,
+	}
 }
