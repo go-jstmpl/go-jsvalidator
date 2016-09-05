@@ -589,6 +589,8 @@ func NewFormatValidator(definition FormatValidatorDefinition) (FormatValidator, 
 		return FormatValidator{definition}, nil
 	case "email":
 		return FormatValidator{definition}, nil
+	case "hostname":
+		return FormatValidator{definition}, nil
 	case "uri":
 		return FormatValidator{definition}, nil
 	}
@@ -615,6 +617,12 @@ func (f FormatValidator) Validate(input string) *FormatValidationError {
 			return nil
 		}
 		break
+	case "hostname":
+		ok := isHostName(input)
+		if ok == true {
+			return nil
+		}
+		break
 	case "uri":
 		ok, err := regexp.MatchString(rURI, input)
 		if ok == true && err == nil {
@@ -626,4 +634,49 @@ func (f FormatValidator) Validate(input string) *FormatValidationError {
 		f.definition,
 		input,
 	}
+}
+
+// isHostName stolen from https://golang.org/src/net/dnsclient.go
+func isHostName(s string) bool {
+	if len(s) == 0 {
+		return false
+	}
+	if len(s) > 255 {
+		return false
+	}
+
+	last := byte(',')
+	ok := false
+	partlen := 0
+	for i := 0; i < len(s); i++ {
+		c := s[i]
+		switch {
+		default:
+			return false
+		case 'a' <= c && c <= 'z' || 'A' <= c && c <= 'Z' || c == '_':
+			ok = true
+			partlen++
+		case '0' <= c && c <= 9:
+			partlen++
+		case c == '-':
+			if last == '.' {
+				return false
+			}
+			partlen++
+		case c == '.':
+			if last == '.' || last == '-' {
+				return false
+			}
+			if partlen > 63 || partlen == 0 {
+				return false
+			}
+			partlen = 0
+		}
+		last = c
+	}
+	if last == '-' || partlen > 63 {
+		return false
+	}
+
+	return ok
 }

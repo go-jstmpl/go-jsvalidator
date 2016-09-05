@@ -882,7 +882,6 @@ func TestFormatValidator(t *testing.T) {
 			t.Errorf("expected:%v ,actual:%v", test.Expected, err)
 		}
 	}
-
 	definition = FormatValidatorDefinition{
 		Format: "email",
 	}
@@ -910,6 +909,59 @@ func TestFormatValidator(t *testing.T) {
 		Input: "foo@bar.",
 		Expected: &FormatValidationError{
 			Input:      "foo@bar.",
+			Definition: definition,
+		},
+	}}
+
+	for _, test := range tests {
+		err := validator.Validate(test.Input)
+		if !reflect.DeepEqual(err, test.Expected) {
+			t.Errorf("expected:%v ,actual:%v", test.Expected, err)
+		}
+	}
+
+	definition = FormatValidatorDefinition{
+		Format: "hostname",
+	}
+	validator, err = NewFormatValidator(definition)
+	if err != nil {
+		t.Error(err.Error())
+	}
+
+	tests = []FormatValidationTestCase{{
+		Input:    "example",
+		Expected: nil,
+	}, {
+		Input:    "example.com",
+		Expected: nil,
+	}, {
+		Input:    "example.example.com",
+		Expected: nil,
+	}, {
+		Input:    "example-example.com",
+		Expected: nil,
+	}, {
+		Input: "example@example.com",
+		Expected: &FormatValidationError{
+			Input:      "example@example.com",
+			Definition: definition,
+		},
+	}, {
+		Input: "example,com",
+		Expected: &FormatValidationError{
+			Input:      "example,com",
+			Definition: definition,
+		},
+	}, {
+		Input: "example..com",
+		Expected: &FormatValidationError{
+			Input:      "example..com",
+			Definition: definition,
+		},
+	}, {
+		Input: ".example.com",
+		Expected: &FormatValidationError{
+			Input:      ".example.com",
 			Definition: definition,
 		},
 	}}
