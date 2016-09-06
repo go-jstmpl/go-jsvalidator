@@ -8,6 +8,13 @@ import (
 	"unicode/utf8"
 )
 
+var (
+	rDateTime = regexp.MustCompile("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$")
+	rEmail    = regexp.MustCompile("^.+@.+\\..+$")
+	rURI      = regexp.MustCompile("^[0-9a-zA-Z]+:\\/\\/.+$")
+)
+
+// EmptyError for Constructor methods
 type EmptyError struct {
 	message string
 }
@@ -16,6 +23,7 @@ func (e EmptyError) Error() string {
 	return e.message
 }
 
+// DuplicationError for Constructor methods
 type DuplicationError struct {
 	message string
 }
@@ -24,6 +32,7 @@ func (e DuplicationError) Error() string {
 	return e.message
 }
 
+// NoLengthError for Constructor methods
 type NoLengthError struct {
 	message string
 }
@@ -32,6 +41,7 @@ func (e NoLengthError) Error() string {
 	return e.message
 }
 
+// InvalidPatternError for Constructor methods
 type InvalidPatternError struct {
 	message string
 }
@@ -40,12 +50,23 @@ func (e InvalidPatternError) Error() string {
 	return e.message
 }
 
+// InvalidFormatError for Constructor methods
 type InvalidFormatError struct {
 	message string
 }
 
 func (e InvalidFormatError) Error() string {
 	return e.message
+}
+
+// InvalidFieldTypeError for Required Validate method
+type InvalidFieldTypeError struct {
+	Input      interface{}                 `json:"input"`
+	Definition RequiredValidatorDefinition `json:"definition"`
+}
+
+func (e InvalidFieldTypeError) Error() string {
+	return fmt.Sprintf("input struct have invalid field against required '%v'", e.Definition.Required)
 }
 
 type IntMaximumValidator struct {
@@ -60,6 +81,11 @@ type IntMaximumValidatorDefinition struct {
 type IntMaximumValidationError struct {
 	Definition IntMaximumValidatorDefinition `json:"definition"`
 	Input      int                           `json:"input"`
+}
+
+func (i IntMaximumValidationError) Error() string {
+	return fmt.Sprintf("IntMaximumValidator: expected less than %d but actual %d with option exlusive %t",
+		i.Definition.Maximum, i.Input, i.Definition.Exclusive)
 }
 
 func NewIntMaximumValidator(definition IntMaximumValidatorDefinition) (IntMaximumValidator, error) {
@@ -100,6 +126,11 @@ type IntMinimumValidationError struct {
 	Input      int                           `json:"input"`
 }
 
+func (i IntMinimumValidationError) Error() string {
+	return fmt.Sprintf("IntMinimumValidator: expected greater than %d but actual %d with option exlusive %t",
+		i.Definition.Minimum, i.Input, i.Definition.Exclusive)
+}
+
 func NewIntMinimumValidator(definition IntMinimumValidatorDefinition) (IntMinimumValidator, error) {
 	return IntMinimumValidator{definition}, nil
 }
@@ -135,6 +166,11 @@ type FloatMaximumValidatorDefinition struct {
 type FloatMaximumValidationError struct {
 	Definition FloatMaximumValidatorDefinition `json:"definition"`
 	Input      float64                         `json:"input"`
+}
+
+func (f FloatMaximumValidationError) Error() string {
+	return fmt.Sprintf("FloatMaximumValidator: expected less than %g but actual %g with option exlusive %t",
+		f.Definition.Maximum, f.Input, f.Definition.Exclusive)
 }
 
 func NewFloatMaximumValidator(definition FloatMaximumValidatorDefinition) (FloatMaximumValidator, error) {
@@ -174,6 +210,11 @@ type FloatMinimumValidationError struct {
 	Input      float64                         `json:"input"`
 }
 
+func (f FloatMinimumValidationError) Error() string {
+	return fmt.Sprintf("FloatMinimumValidator: expected greater than %g but actual %g with option exlusive %t",
+		f.Definition.Minimum, f.Input, f.Definition.Exclusive)
+}
+
 func NewFloatMinimumValidator(definition FloatMinimumValidatorDefinition) (FloatMinimumValidator, error) {
 	return FloatMinimumValidator{definition}, nil
 }
@@ -211,6 +252,11 @@ type MaxLengthValidationError struct {
 	Input      string                       `json:"input"`
 }
 
+func (m MaxLengthValidationError) Error() string {
+	return fmt.Sprintf("MaxLengthValidator: expected less than, or equal to, %d charactors but actual %d charactors",
+		m.Definition.MaxLength, utf8.RuneCountInString(m.Input))
+}
+
 func NewMaxLengthValidator(definition MaxLengthValidatorDefinition) (MaxLengthValidator, error) {
 	if definition.MaxLength < 0 {
 		return MaxLengthValidator{}, NoLengthError{"the max length should be greater than, or equal to, 0"}
@@ -239,6 +285,11 @@ type MinLengthValidatorDefinition struct {
 type MinLengthValidationError struct {
 	Definition MinLengthValidatorDefinition `json:"definition"`
 	Input      string                       `json:"input"`
+}
+
+func (m MinLengthValidationError) Error() string {
+	return fmt.Sprintf("MinLengthValidator: expected greater than, or equal to, %d charactors but actual %d charactors",
+		m.Definition.MinLength, utf8.RuneCountInString(m.Input))
 }
 
 func NewMinLengthValidator(definition MinLengthValidatorDefinition) (MinLengthValidator, error) {
@@ -272,6 +323,10 @@ type PatternValidationError struct {
 	Input      string                     `json:"input"`
 }
 
+func (p PatternValidationError) Error() string {
+	return fmt.Sprintf("PatternValidator: input value '%s' does not match the regex pattern '%s'", p.Input, p.Definition.Pattern)
+}
+
 func NewPatternValidator(definition PatternValidatorDefinition) (PatternValidator, error) {
 	if definition.Pattern == "" {
 		return PatternValidator{}, EmptyError{"the pattern should not be empty"}
@@ -285,6 +340,7 @@ func NewPatternValidator(definition PatternValidatorDefinition) (PatternValidato
 
 func (p PatternValidator) Validate(input string) *PatternValidationError {
 	ok, err := regexp.MatchString(p.definition.Pattern, input)
+
 	if ok == true && err == nil {
 		return nil
 	}
@@ -307,19 +363,26 @@ type IntEnumValidationError struct {
 	Input      int                        `json:"input"`
 }
 
+func (i IntEnumValidationError) Error() string {
+	return fmt.Sprintf("IntEnumValidator: input value '%d' does not listed in enumerate '%v'", i.Input, i.Definition.Enumerate)
+}
+
 func NewIntEnumValidator(definition IntEnumValidatorDefinition) (IntEnumValidator, error) {
 	enumerate := definition.Enumerate
-	if len(enumerate) == 0 {
-		return IntEnumValidator{}, EmptyError{"the enumurate should have at least one element"}
+	len := len(enumerate)
+	if len == 0 {
+		return IntEnumValidator{}, EmptyError{"the enumerate should have at least one element"}
 	}
 
-	for i, e := range enumerate {
-		for _, es := range enumerate[i+1:] {
-			if e == es {
-				return IntEnumValidator{}, DuplicationError{"the elements of enumurate should not be duplicated"}
+	for i := 0; i < len-1; i++ {
+		key := enumerate[i]
+		for j := i + 1; j < len; j++ {
+			if enumerate[j] == key {
+				return IntEnumValidator{}, DuplicationError{"the elements of enumerate should not be duplicated"}
 			}
 		}
 	}
+
 	return IntEnumValidator{definition}, nil
 
 }
@@ -349,19 +412,26 @@ type StringEnumValidationError struct {
 	Input      string                        `json:"input"`
 }
 
+func (s StringEnumValidationError) Error() string {
+	return fmt.Sprintf("StringEnumValidator: input value '%s' does not listed in enumerate '%v'", s.Input, s.Definition.Enumerate)
+}
+
 func NewStringEnumValidator(definition StringEnumValidatorDefinition) (StringEnumValidator, error) {
 	enumerate := definition.Enumerate
-	if len(enumerate) == 0 {
+	len := len(enumerate)
+	if len == 0 {
 		return StringEnumValidator{}, EmptyError{"the enumerate should have at least one element"}
 	}
 
-	for i, e := range enumerate {
-		for _, es := range enumerate[i+1:] {
-			if e == es {
+	for i := 0; i < len-1; i++ {
+		key := enumerate[i]
+		for j := i + 1; j < len; j++ {
+			if enumerate[j] == key {
 				return StringEnumValidator{}, DuplicationError{"the elements of enumerate should not be duplicated"}
 			}
 		}
 	}
+
 	return StringEnumValidator{definition}, nil
 }
 
@@ -390,15 +460,21 @@ type FloatEnumValidationError struct {
 	Input      float64                      `json:"input"`
 }
 
+func (s FloatEnumValidationError) Error() string {
+	return fmt.Sprintf("FloatEnumValidator: input value '%g' does not listed in enumerate '%v'", s.Input, s.Definition.Enumerate)
+}
+
 func NewFloatEnumValidator(definition FloatEnumValidatorDefinition) (FloatEnumValidator, error) {
 	enumerate := definition.Enumerate
-	if len(enumerate) == 0 {
+	len := len(enumerate)
+	if len == 0 {
 		return FloatEnumValidator{}, EmptyError{"the enumerate should have at least one element"}
 	}
 
-	for i, e := range enumerate {
-		for _, es := range enumerate[i+1:] {
-			if e == es {
+	for i := 0; i < len-1; i++ {
+		key := enumerate[i]
+		for j := i + 1; j < len; j++ {
+			if enumerate[j] == key {
 				return FloatEnumValidator{}, DuplicationError{"the elements of enumerate should not be duplicated"}
 			}
 		}
@@ -432,50 +508,62 @@ type RequiredValidationError struct {
 	Definition RequiredValidatorDefinition `json:"definition"`
 }
 
+func (r RequiredValidationError) Error() string {
+	return fmt.Sprintf("RequiredValidator: input sturct does not satisfy required values '%v'", r.Definition.Required)
+}
+
 func NewRequiredValidator(definition RequiredValidatorDefinition) (RequiredValidator, error) {
 	required := definition.Required
-	if len(required) == 0 {
+	len := len(required)
+	if len == 0 {
 		return RequiredValidator{}, EmptyError{"the required value should have at least one element"}
 	}
-	for idx, e := range required {
-		for _, es := range required[idx+1:] {
-			if e == es {
+
+	for i := 0; i < len-1; i++ {
+		key := required[i]
+		for j := i + 1; j < len; j++ {
+			if required[j] == key {
 				return RequiredValidator{}, DuplicationError{"the required value should not be duplicated"}
 			}
 		}
 	}
+
 	return RequiredValidator{definition}, nil
 }
 
-func (r RequiredValidator) Validate(input interface{}) *RequiredValidationError {
-	// convert reflect data to interfaced struct
+func (r RequiredValidator) Validate(input interface{}) error {
 	elem := reflect.ValueOf(input).Elem()
-	size := elem.NumField()
 
-	for s := 0; s < size; s++ {
-		for _, require := range r.definition.Required {
-			// getting required field
-			if require == elem.Type().Field(s).Name {
-				// change into a type that have null check function
-				n, ok := elem.Field(s).Interface().(interface {
-					Value() (driver.Value, error)
-				})
-				if ok != true {
-					return &RequiredValidationError{
-						Definition: r.definition,
-						Input:      input,
-					}
-				}
-				v, _ := n.Value()
-				if v == nil {
-					return &RequiredValidationError{
-						Definition: r.definition,
-						Input:      input,
-					}
-				}
+	for _, key := range r.definition.Required {
+		e := elem.FieldByName(key)
+		if !e.IsValid() {
+			return &InvalidFieldTypeError{
+				Definition: r.definition,
+				Input:      input,
+			}
+		}
+		n, ok := e.Interface().(driver.Valuer)
+		if !ok {
+			return &InvalidFieldTypeError{
+				Definition: r.definition,
+				Input:      input,
+			}
+		}
+		v, err := n.Value()
+		if err != nil {
+			return &InvalidFieldTypeError{
+				Definition: r.definition,
+				Input:      input,
+			}
+		}
+		if v == nil {
+			return &RequiredValidationError{
+				Definition: r.definition,
+				Input:      input,
 			}
 		}
 	}
+
 	return nil
 }
 
@@ -583,37 +671,30 @@ type FormatValidationError struct {
 	Input      string                    `json:"input"`
 }
 
+func (f FormatValidationError) Error() string {
+	return fmt.Sprintf("FormatValidator: value '%s' does not match the regex pattern for '%s'",
+		f.Input, f.Definition.Format)
+}
+
 func NewFormatValidator(definition FormatValidatorDefinition) (FormatValidator, error) {
 	switch definition.Format {
-	case "date-time":
-		return FormatValidator{definition}, nil
-	case "email":
-		return FormatValidator{definition}, nil
-	case "hostname":
-		return FormatValidator{definition}, nil
-	case "uri":
+	case "date-time", "email", "hostname", "uri":
 		return FormatValidator{definition}, nil
 	}
 	return FormatValidator{}, InvalidFormatError{"the format is not found"}
 }
 
 func (f FormatValidator) Validate(input string) *FormatValidationError {
-	const (
-		rDateTime = "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$"
-		rEmail    = "^.+@.+\\..+$"
-		rURI      = "^https?:\\/\\/.+$"
-	)
-
 	switch f.definition.Format {
 	case "date-time":
-		ok, err := regexp.MatchString(rDateTime, input)
-		if ok == true && err == nil {
+		ok := rDateTime.MatchString(input)
+		if ok == true {
 			return nil
 		}
 		break
 	case "email":
-		ok, err := regexp.MatchString(rEmail, input)
-		if ok == true && err == nil {
+		ok := rEmail.MatchString(input)
+		if ok == true {
 			return nil
 		}
 		break
@@ -624,8 +705,8 @@ func (f FormatValidator) Validate(input string) *FormatValidationError {
 		}
 		break
 	case "uri":
-		ok, err := regexp.MatchString(rURI, input)
-		if ok == true && err == nil {
+		ok := rURI.MatchString(input)
+		if ok == true {
 			return nil
 		}
 		break

@@ -619,12 +619,12 @@ type Sample struct {
 
 type RequiredValidatorTestCase struct {
 	Input    *Sample
-	Expected *RequiredValidationError
+	Expected error
 }
 
 func TestRequiredValidator(t *testing.T) {
 	definition := RequiredValidatorDefinition{
-		Required: []string{"Id", "Addr"},
+		Required: []string{"ID", "Addr"},
 	}
 	validator, err := NewRequiredValidator(definition)
 	if err != nil {
@@ -633,21 +633,29 @@ func TestRequiredValidator(t *testing.T) {
 
 	sample1 := &Sample{
 		ID:   dbr.NewNullInt64(1),
-		Name: dbr.NewNullString("hi"),
+		Name: dbr.NewNullString("MyName"),
 		Addr: dbr.NewNullString("foo@bar.com"),
 	}
 	sample2 := &Sample{
-		ID:   dbr.NewNullInt64(1),
-		Name: dbr.NewNullString("hi"),
+		ID:   dbr.NewNullInt64(2),
+		Name: dbr.NewNullString(nil),
+		Addr: dbr.NewNullString("foo@bar.com"),
 	}
-
+	sample3 := &Sample{
+		ID:   dbr.NewNullInt64(nil),
+		Name: dbr.NewNullString("hi"),
+		Addr: dbr.NewNullString("foo@bar.com"),
+	}
 	tests := []RequiredValidatorTestCase{{
 		Input:    sample1,
 		Expected: nil,
 	}, {
-		Input: sample2,
+		Input:    sample2,
+		Expected: nil,
+	}, {
+		Input: sample3,
 		Expected: &RequiredValidationError{
-			Input:      sample2,
+			Input:      sample3,
 			Definition: definition,
 		},
 	}}
@@ -991,21 +999,12 @@ func TestFormatValidator(t *testing.T) {
 		Input:    "https://example.com/foo/bar",
 		Expected: nil,
 	}, {
+		Input:    "ftp://example.com",
+		Expected: nil,
+	}, {
 		Input: "foobar.com",
 		Expected: &FormatValidationError{
 			Input:      "foobar.com",
-			Definition: definition,
-		},
-	}, {
-		Input: "ttp://example.com",
-		Expected: &FormatValidationError{
-			Input:      "ttp://example.com",
-			Definition: definition,
-		},
-	}, {
-		Input: "ftp://example.com",
-		Expected: &FormatValidationError{
-			Input:      "ftp://example.com",
 			Definition: definition,
 		},
 	}}
