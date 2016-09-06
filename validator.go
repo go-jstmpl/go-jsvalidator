@@ -92,7 +92,7 @@ func NewIntMaximumValidator(definition IntMaximumValidatorDefinition) (IntMaximu
 	return IntMaximumValidator{definition}, nil
 }
 
-func (m IntMaximumValidator) Validate(input int) *IntMaximumValidationError {
+func (m IntMaximumValidator) Validate(input int) error {
 	if !m.definition.Exclusive {
 		if input <= m.definition.Maximum {
 			return nil
@@ -135,7 +135,7 @@ func NewIntMinimumValidator(definition IntMinimumValidatorDefinition) (IntMinimu
 	return IntMinimumValidator{definition}, nil
 }
 
-func (m IntMinimumValidator) Validate(input int) *IntMinimumValidationError {
+func (m IntMinimumValidator) Validate(input int) error {
 	if !m.definition.Exclusive {
 		if input >= m.definition.Minimum {
 			return nil
@@ -177,7 +177,7 @@ func NewFloatMaximumValidator(definition FloatMaximumValidatorDefinition) (Float
 	return FloatMaximumValidator{definition}, nil
 }
 
-func (m FloatMaximumValidator) Validate(input float64) *FloatMaximumValidationError {
+func (m FloatMaximumValidator) Validate(input float64) error {
 	if !m.definition.Exclusive {
 		if input <= m.definition.Maximum {
 			return nil
@@ -219,7 +219,7 @@ func NewFloatMinimumValidator(definition FloatMinimumValidatorDefinition) (Float
 	return FloatMinimumValidator{definition}, nil
 }
 
-func (m FloatMinimumValidator) Validate(input float64) *FloatMinimumValidationError {
+func (m FloatMinimumValidator) Validate(input float64) error {
 	if !m.definition.Exclusive {
 		if input >= m.definition.Minimum {
 			return nil
@@ -264,7 +264,7 @@ func NewMaxLengthValidator(definition MaxLengthValidatorDefinition) (MaxLengthVa
 	return MaxLengthValidator{definition}, nil
 }
 
-func (m MaxLengthValidator) Validate(input string) *MaxLengthValidationError {
+func (m MaxLengthValidator) Validate(input string) error {
 	if utf8.RuneCountInString(input) <= m.definition.MaxLength {
 		return nil
 	}
@@ -300,7 +300,7 @@ func NewMinLengthValidator(definition MinLengthValidatorDefinition) (MinLengthVa
 	return MinLengthValidator{definition}, nil
 }
 
-func (m MinLengthValidator) Validate(input string) *MinLengthValidationError {
+func (m MinLengthValidator) Validate(input string) error {
 	if utf8.RuneCountInString(input) >= m.definition.MinLength {
 		return nil
 	}
@@ -338,7 +338,7 @@ func NewPatternValidator(definition PatternValidatorDefinition) (PatternValidato
 	return PatternValidator{definition}, nil
 }
 
-func (p PatternValidator) Validate(input string) *PatternValidationError {
+func (p PatternValidator) Validate(input string) error {
 	ok, err := regexp.MatchString(p.definition.Pattern, input)
 
 	if ok == true && err == nil {
@@ -387,7 +387,7 @@ func NewIntEnumValidator(definition IntEnumValidatorDefinition) (IntEnumValidato
 
 }
 
-func (i IntEnumValidator) Validate(input int) *IntEnumValidationError {
+func (i IntEnumValidator) Validate(input int) error {
 	for _, e := range i.definition.Enumerate {
 		if input == e {
 			return nil
@@ -435,7 +435,7 @@ func NewStringEnumValidator(definition StringEnumValidatorDefinition) (StringEnu
 	return StringEnumValidator{definition}, nil
 }
 
-func (s StringEnumValidator) Validate(input string) *StringEnumValidationError {
+func (s StringEnumValidator) Validate(input string) error {
 	for _, e := range s.definition.Enumerate {
 		if input == e {
 			return nil
@@ -483,7 +483,7 @@ func NewFloatEnumValidator(definition FloatEnumValidatorDefinition) (FloatEnumVa
 
 }
 
-func (f FloatEnumValidator) Validate(input float64) *FloatEnumValidationError {
+func (f FloatEnumValidator) Validate(input float64) error {
 	for _, e := range f.definition.Enumerate {
 		if input == e {
 			return nil
@@ -580,6 +580,10 @@ type IntMaxItemsValidationError struct {
 	Input      []int                          `json:"input"`
 }
 
+func (i IntMaxItemsValidationError) Error() string {
+	return fmt.Sprintf("IntMaxItemsValidator: the number of input values is greater than MaxItems:'%d'", i.Definition.MaxItems)
+}
+
 func NewIntMaxItemsValidator(definition IntMaxItemsValidatorDefinition) (IntMaxItemsValidator, error) {
 	if definition.MaxItems < 0 {
 		return IntMaxItemsValidator{}, NoLengthError{"the value of maxItems should be greater than, or equal to, 0"}
@@ -587,7 +591,7 @@ func NewIntMaxItemsValidator(definition IntMaxItemsValidatorDefinition) (IntMaxI
 	return IntMaxItemsValidator{definition}, nil
 }
 
-func (i IntMaxItemsValidator) Validate(input []int) *IntMaxItemsValidationError {
+func (i IntMaxItemsValidator) Validate(input []int) error {
 	if len(input) <= i.definition.MaxItems {
 		return nil
 	}
@@ -610,6 +614,10 @@ type FloatMaxItemsValidationError struct {
 	Input      []float64                        `json:"input"`
 }
 
+func (f FloatMaxItemsValidationError) Error() string {
+	return fmt.Sprintf("FloatMaxItemsValidator: the number of input values is greater than MaxItems:'%d'", f.Definition.MaxItems)
+}
+
 func NewFloatMaxItemsValidator(definition FloatMaxItemsValidatorDefinition) (FloatMaxItemsValidator, error) {
 	if definition.MaxItems < 0 {
 		return FloatMaxItemsValidator{}, NoLengthError{"the value of maxItems should be greater than, or equal to, 0"}
@@ -617,7 +625,7 @@ func NewFloatMaxItemsValidator(definition FloatMaxItemsValidatorDefinition) (Flo
 	return FloatMaxItemsValidator{definition}, nil
 }
 
-func (i FloatMaxItemsValidator) Validate(input []float64) *FloatMaxItemsValidationError {
+func (i FloatMaxItemsValidator) Validate(input []float64) error {
 	if len(input) <= i.definition.MaxItems {
 		return nil
 	}
@@ -640,6 +648,10 @@ type StringMaxItemsValidationError struct {
 	Input      []string                          `json:"input"`
 }
 
+func (s StringMaxItemsValidationError) Error() string {
+	return fmt.Sprintf("FloatMaxItemsValidator: the number of input values is greater than MaxItems:'%d'", s.Definition.MaxItems)
+}
+
 func NewStringMaxItemsValidator(definition StringMaxItemsValidatorDefinition) (StringMaxItemsValidator, error) {
 	if definition.MaxItems < 0 {
 		return StringMaxItemsValidator{}, NoLengthError{"the value of maxItems should be greater than, or equal to, 0"}
@@ -648,7 +660,7 @@ func NewStringMaxItemsValidator(definition StringMaxItemsValidatorDefinition) (S
 	return StringMaxItemsValidator{definition}, nil
 }
 
-func (i StringMaxItemsValidator) Validate(input []string) *StringMaxItemsValidationError {
+func (i StringMaxItemsValidator) Validate(input []string) error {
 	if len(input) <= i.definition.MaxItems {
 		return nil
 	}
@@ -684,7 +696,7 @@ func NewFormatValidator(definition FormatValidatorDefinition) (FormatValidator, 
 	return FormatValidator{}, InvalidFormatError{"the format is not found"}
 }
 
-func (f FormatValidator) Validate(input string) *FormatValidationError {
+func (f FormatValidator) Validate(input string) error {
 	switch f.definition.Format {
 	case "date-time":
 		ok := rDateTime.MatchString(input)
