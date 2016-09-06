@@ -9,7 +9,7 @@ Clone this repository
 ## Test
 
 ```
-go test
+go test ./...
 ```
 
 # Contoribution
