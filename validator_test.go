@@ -9,7 +9,7 @@ import (
 
 type IntMaximumValidatorTestCase struct {
 	Input    int
-	Expected *IntMaximumValidationError
+	Expected error
 }
 
 func TestIntMaximumValidator(t *testing.T) {
@@ -81,7 +81,7 @@ func TestIntMaximumValidator(t *testing.T) {
 
 type IntMinimumValidatorTestCase struct {
 	Input    int
-	Expected *IntMinimumValidationError
+	Expected error
 }
 
 func TestIntMinimumValidator(t *testing.T) {
@@ -153,7 +153,7 @@ func TestIntMinimumValidator(t *testing.T) {
 
 type FloatMaximumValidatorTestCase struct {
 	Input    float64
-	Expected *FloatMaximumValidationError
+	Expected error
 }
 
 func TestFloatMaximumValidator(t *testing.T) {
@@ -225,7 +225,7 @@ func TestFloatMaximumValidator(t *testing.T) {
 
 type FloatMinimumValidatorTestCase struct {
 	Input    float64
-	Expected *FloatMinimumValidationError
+	Expected error
 }
 
 func TestFloatMinimumValidator(t *testing.T) {
@@ -316,7 +316,7 @@ func TestMaxLength(t *testing.T) {
 
 type MaxLengthValidatorTestCase struct {
 	Input    string
-	Expected *MaxLengthValidationError
+	Expected error
 }
 
 func TestMaxLengthValidator(t *testing.T) {
@@ -376,7 +376,7 @@ func TestPattern(t *testing.T) {
 
 type PatternValidatorTestCase struct {
 	Input    string
-	Expected *PatternValidationError
+	Expected error
 }
 
 func TestPatternValidator(t *testing.T) {
@@ -430,7 +430,7 @@ func TestIntEnum(t *testing.T) {
 
 type IntEnumValidatorTestCase struct {
 	Input    int
-	Expected *IntEnumValidationError
+	Expected error
 }
 
 func TestIntEnumvalidator(t *testing.T) {
@@ -488,7 +488,7 @@ func TestFloatEnum(t *testing.T) {
 
 type FloatEnumValidatorTestCase struct {
 	Input    float64
-	Expected *FloatEnumValidationError
+	Expected error
 }
 
 func TestFloatEnumvalidator(t *testing.T) {
@@ -546,7 +546,7 @@ func TestStringEnum(t *testing.T) {
 
 type StringEnumValidatorTestCase struct {
 	Input    string
-	Expected *StringEnumValidationError
+	Expected error
 }
 
 func TestStringEnumvalidator(t *testing.T) {
@@ -688,7 +688,7 @@ func TestIntMaxItems(t *testing.T) {
 
 type IntMaxItemsValidatorTestCase struct {
 	Input    []int
-	Expected *IntMaxItemsValidationError
+	Expected error
 }
 
 func TestIntMaxItemsValidator(t *testing.T) {
@@ -745,7 +745,7 @@ func TestStringMaxItems(t *testing.T) {
 
 type StringMaxItemsValidatorTestCase struct {
 	Input    []string
-	Expected *StringMaxItemsValidationError
+	Expected error
 }
 
 func TestStringMaxItemsValidator(t *testing.T) {
@@ -803,7 +803,7 @@ func TestFloatMaxItems(t *testing.T) {
 
 type FloatMaxItemsValidatorTestCase struct {
 	Input    []float64
-	Expected *FloatMaxItemsValidationError
+	Expected error
 }
 
 func TestFloatMaxItemsValidator(t *testing.T) {
@@ -861,7 +861,7 @@ func TestFormat(t *testing.T) {
 
 type FormatValidationTestCase struct {
 	Input    string
-	Expected *FormatValidationError
+	Expected error
 }
 
 func TestFormatValidator(t *testing.T) {
