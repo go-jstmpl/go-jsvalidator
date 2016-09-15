@@ -5,35 +5,45 @@ import (
 	"testing"
 )
 
-type IntMaximumValidatorTestCase struct {
-	Input    int
+type MaximumValidatorTestCase struct {
+	Input    interface{}
 	Expected error
 }
 
-func TestIntMaximumValidator(t *testing.T) {
-	// Case exclusive is false
-	definition := IntMaximumValidatorDefinition{
+func TestMaximumValidator(t *testing.T) {
+	// Case type int and exclusive is false
+	definition := MaximumValidatorDefinition{
 		Maximum:   100,
 		Exclusive: false,
 	}
 
-	validator, err := NewIntMaximumValidator(definition)
+	validator, err := NewMaximumValidator(definition)
 	if err != nil {
 		t.Error(err.Error())
 	}
-	tests := []IntMaximumValidatorTestCase{{
-		Input:    99,
-		Expected: nil,
-	}, {
-		Input:    100,
-		Expected: nil,
-	}, {
-		Input: 101,
-		Expected: &IntMaximumValidationError{
-			Input:      101,
-			Definition: definition,
+	tests := []MaximumValidatorTestCase{
+		{
+			Input:    99,
+			Expected: nil,
 		},
-	}}
+		{
+			Input:    100,
+			Expected: nil,
+		},
+		{
+			Input: 101,
+			Expected: &MaximumValidationError{
+				Input:      101,
+				Definition: definition,
+			},
+		},
+		{
+			Input: 10.1,
+			Expected: TypeError{
+				message: "input and maximum should be same type",
+			},
+		},
+	}
 
 	for _, test := range tests {
 		err := validator.Validate(test.Input)
@@ -42,32 +52,36 @@ func TestIntMaximumValidator(t *testing.T) {
 		}
 	}
 
-	// Case exclusive is true
-	definition = IntMaximumValidatorDefinition{
+	// Case type int and exclusive is true
+	definition = MaximumValidatorDefinition{
 		Maximum:   100,
 		Exclusive: true,
 	}
 
-	validator, err = NewIntMaximumValidator(definition)
+	validator, err = NewMaximumValidator(definition)
 	if err != nil {
 		t.Error(err.Error())
 	}
-	tests = []IntMaximumValidatorTestCase{{
-		Input:    99,
-		Expected: nil,
-	}, {
-		Input: 100,
-		Expected: &IntMaximumValidationError{
-			Input:      100,
-			Definition: definition,
+	tests = []MaximumValidatorTestCase{
+		{
+			Input:    99,
+			Expected: nil,
 		},
-	}, {
-		Input: 101,
-		Expected: &IntMaximumValidationError{
-			Input:      101,
-			Definition: definition,
+		{
+			Input: 100,
+			Expected: &MaximumValidationError{
+				Input:      100,
+				Definition: definition,
+			},
 		},
-	}}
+		{
+			Input: 101,
+			Expected: &MaximumValidationError{
+				Input:      101,
+				Definition: definition,
+			},
+		},
+	}
 
 	for _, test := range tests {
 		err := validator.Validate(test.Input)
@@ -75,37 +89,40 @@ func TestIntMaximumValidator(t *testing.T) {
 			t.Errorf("expected:%v ,actual:%v", test.Expected, err)
 		}
 	}
-}
 
-type FloatMaximumValidatorTestCase struct {
-	Input    float64
-	Expected error
-}
-
-func TestFloatMaximumValidator(t *testing.T) {
-	// Case exclusive is false
-	definition := FloatMaximumValidatorDefinition{
+	// Case type float64 and exclusive is false
+	definition = MaximumValidatorDefinition{
 		Maximum:   1.0,
 		Exclusive: false,
 	}
 
-	validator, err := NewFloatMaximumValidator(definition)
+	validator, err = NewMaximumValidator(definition)
 	if err != nil {
 		t.Error(err.Error())
 	}
-	tests := []FloatMaximumValidatorTestCase{{
-		Input:    0.9,
-		Expected: nil,
-	}, {
-		Input:    1.0,
-		Expected: nil,
-	}, {
-		Input: 1.1,
-		Expected: &FloatMaximumValidationError{
-			Input:      1.1,
-			Definition: definition,
+	tests = []MaximumValidatorTestCase{
+		{
+			Input:    0.9,
+			Expected: nil,
 		},
-	}}
+		{
+			Input:    1.0,
+			Expected: nil,
+		},
+		{
+			Input: 1.1,
+			Expected: &MaximumValidationError{
+				Input:      1.1,
+				Definition: definition,
+			},
+		},
+		{
+			Input: 10,
+			Expected: TypeError{
+				message: "input and maximum should be same type",
+			},
+		},
+	}
 
 	for _, test := range tests {
 		err := validator.Validate(test.Input)
@@ -114,32 +131,36 @@ func TestFloatMaximumValidator(t *testing.T) {
 		}
 	}
 
-	// Case exclusive is true
-	definition = FloatMaximumValidatorDefinition{
+	// Case type float64 and exclusive is true
+	definition = MaximumValidatorDefinition{
 		Maximum:   1.0,
 		Exclusive: true,
 	}
 
-	validator, err = NewFloatMaximumValidator(definition)
+	validator, err = NewMaximumValidator(definition)
 	if err != nil {
 		t.Error(err.Error())
 	}
-	tests = []FloatMaximumValidatorTestCase{{
-		Input:    0.9,
-		Expected: nil,
-	}, {
-		Input: 1.0,
-		Expected: &FloatMaximumValidationError{
-			Input:      1.0,
-			Definition: definition,
+	tests = []MaximumValidatorTestCase{
+		{
+			Input:    0.9,
+			Expected: nil,
 		},
-	}, {
-		Input: 1.1,
-		Expected: &FloatMaximumValidationError{
-			Input:      1.1,
-			Definition: definition,
+		{
+			Input: 1.0,
+			Expected: &MaximumValidationError{
+				Input:      1.0,
+				Definition: definition,
+			},
 		},
-	}}
+		{
+			Input: 1.1,
+			Expected: &MaximumValidationError{
+				Input:      1.1,
+				Definition: definition,
+			},
+		},
+	}
 
 	for _, test := range tests {
 		err := validator.Validate(test.Input)
