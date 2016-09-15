@@ -2,6 +2,7 @@ package validator
 
 import (
 	"fmt"
+	"reflect"
 )
 
 type MaxItemsValidator struct {
@@ -31,22 +32,14 @@ func NewMaxItemsValidator(definition MaxItemsValidatorDefinition) (MaxItemsValid
 }
 
 func (i MaxItemsValidator) Validate(input interface{}) error {
-	switch input.(type) {
-	case []int:
-		l, _ := input.([]int)
-		if len(l) <= i.definition.MaxItems {
+	switch reflect.TypeOf(input).Kind() {
+	case reflect.Slice:
+		s := reflect.ValueOf(input)
+		if s.Len() <= i.definition.MaxItems {
 			return nil
 		}
-	case []string:
-		l, _ := input.([]string)
-		if len(l) <= i.definition.MaxItems {
-			return nil
-		}
-	case []float64:
-		l, _ := input.([]float64)
-		if len(l) <= i.definition.MaxItems {
-			return nil
-		}
+	default:
+		return TypeError{"input should be slice"}
 	}
 
 	return &MaxItemsValidationError{

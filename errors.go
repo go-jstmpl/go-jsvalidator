@@ -58,3 +58,12 @@ type InvalidFieldTypeError struct {
 func (e InvalidFieldTypeError) Error() string {
 	return fmt.Sprintf("input struct have invalid field against required '%v'", e.Definition.Required)
 }
+
+// TypeError for Validate method
+type TypeError struct {
+	message string
+}
+
+func (e TypeError) Error() string {
+	return e.message
+}
