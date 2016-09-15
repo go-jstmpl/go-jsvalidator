@@ -70,7 +70,7 @@ func (f FormatValidator) Validate(input string) error {
 	}
 }
 
-// isHostName stolen from https://golang.org/src/net/dnsclient.go
+// isHostName is cited from https://golang.org/src/net/dnsclient.go
 func isHostName(s string) bool {
 	if len(s) == 0 {
 		return false

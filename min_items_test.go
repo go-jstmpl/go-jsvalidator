@@ -6,165 +6,92 @@ import (
 )
 
 type IntMinItemsTestCase struct {
-	Definition IntMinItemsValidatorDefinition
+	Definition MinItemsValidatorDefinition
 	Expected   error
 }
 
 func TestIntMinItems(t *testing.T) {
 	tests := []IntMinItemsTestCase{{
-		Definition: IntMinItemsValidatorDefinition{MinItems: -1},
+		Definition: MinItemsValidatorDefinition{MinItems: -1},
 		Expected:   NoLengthError{},
 	}}
 	for _, test := range tests {
-		_, err := NewIntMinItemsValidator(test.Definition)
-		if reflect.TypeOf(err) != reflect.TypeOf(test.Expected) {
-			t.Errorf("expected:%v, actual:%v", reflect.TypeOf(test.Expected), reflect.TypeOf(err))
+		_, err := NewMinItemsValidator(test.Definition)
+		if err == nil {
+			t.Errorf("expected:%v, actual:%v", test.Expected, err)
 		}
 	}
 }
 
-type IntMinItemsValidatorTestCase struct {
-	Input    []int
+type MinItemsValidatorTestCase struct {
+	Input    interface{}
 	Expected error
 }
 
-func TestIntMinItemsValidator(t *testing.T) {
-	definition := IntMinItemsValidatorDefinition{
+func TestMinItemsValidator(t *testing.T) {
+	definition := MinItemsValidatorDefinition{
 		MinItems: 3,
 	}
-	validator, err := NewIntMinItemsValidator(definition)
+	validator, err := NewMinItemsValidator(definition)
 	if err != nil {
 		t.Error(err.Error())
 	}
 
-	tests := []IntMinItemsValidatorTestCase{{
-		Input: []int{1},
-		Expected: &IntMinItemsValidationError{
-			Input:      []int{1},
-			Definition: definition,
+	tests := []MinItemsValidatorTestCase{
+		{
+			Input: []int{1},
+			Expected: &MinItemsValidationError{
+				Input:      []int{1},
+				Definition: definition,
+			},
 		},
-	}, {
-		Input: []int{1, 2},
-		Expected: &IntMinItemsValidationError{
-			Input:      []int{1, 2},
-			Definition: definition,
+		{
+			Input: []int{1, 2},
+			Expected: &MinItemsValidationError{
+				Input:      []int{1, 2},
+				Definition: definition,
+			},
 		},
-	}, {
-		Input:    []int{1, 2, 3},
-		Expected: nil,
-	}, {
-		Input:    []int{1, 2, 3, 4},
-		Expected: nil,
-	}}
-
-	for _, test := range tests {
-		err := validator.Validate(test.Input)
-		if !reflect.DeepEqual(err, test.Expected) {
-			t.Errorf("expected:%v ,actual:%v", test.Expected, err)
-		}
-	}
-}
-
-type StringMinItemsTestCase struct {
-	Definition StringMinItemsValidatorDefinition
-	Expected   error
-}
-
-func TestStringMinItems(t *testing.T) {
-	tests := []StringMinItemsTestCase{{
-		Definition: StringMinItemsValidatorDefinition{MinItems: -1},
-		Expected:   NoLengthError{},
-	}}
-	for _, test := range tests {
-		_, err := NewStringMinItemsValidator(test.Definition)
-		if reflect.TypeOf(err) != reflect.TypeOf(test.Expected) {
-			t.Errorf("expected:%v, actual:%v", reflect.TypeOf(test.Expected), reflect.TypeOf(err))
-		}
-	}
-}
-
-type StringMinItemsValidatorTestCase struct {
-	Input    []string
-	Expected error
-}
-
-func TestStringMinItemsValidator(t *testing.T) {
-	definition := StringMinItemsValidatorDefinition{
-		MinItems: 3,
-	}
-	validator, err := NewStringMinItemsValidator(definition)
-	if err != nil {
-		t.Error(err.Error())
-	}
-
-	tests := []StringMinItemsValidatorTestCase{{
-		Input: []string{"foo"},
-		Expected: &StringMinItemsValidationError{
+		{
+			Input:    []int{1, 2, 3},
+			Expected: nil,
+		},
+		{
+			Input:    []int{1, 2, 3, 4},
+			Expected: nil,
+		},
+		{
 			Input: []string{"foo"},
+			Expected: &MinItemsValidationError{
+				Input: []string{"foo"},
 
-			Definition: definition,
+				Definition: definition,
+			},
 		},
-	}, {
-		Input:    []string{"foo", "bar", "baz"},
-		Expected: nil,
-	}, {
-		Input:    []string{"foo", "bar", "bas", "qux"},
-		Expected: nil,
-	}}
-
-	for _, test := range tests {
-		err := validator.Validate(test.Input)
-		if !reflect.DeepEqual(err, test.Expected) {
-			t.Errorf("expected:%v ,actual:%v", test.Expected, err)
-		}
-	}
-}
-
-type FloatMinItemsTestCase struct {
-	Definition FloatMinItemsValidatorDefinition
-	Expected   error
-}
-
-func TestFloatMinItems(t *testing.T) {
-	tests := []FloatMinItemsTestCase{{
-		Definition: FloatMinItemsValidatorDefinition{MinItems: -1},
-		Expected:   NoLengthError{},
-	}}
-	for _, test := range tests {
-		_, err := NewFloatMinItemsValidator(test.Definition)
-		if reflect.TypeOf(err) != reflect.TypeOf(test.Expected) {
-			t.Errorf("expected:%v, actual:%v", reflect.TypeOf(test.Expected), reflect.TypeOf(err))
-		}
-	}
-}
-
-type FloatMinItemsValidatorTestCase struct {
-	Input    []float64
-	Expected error
-}
-
-func TestFloatMinItemsValidator(t *testing.T) {
-	definition := FloatMinItemsValidatorDefinition{
-		MinItems: 3,
-	}
-	validator, err := NewFloatMinItemsValidator(definition)
-	if err != nil {
-		t.Error(err.Error())
-	}
-
-	tests := []FloatMinItemsValidatorTestCase{{
-		Input: []float64{1},
-		Expected: &FloatMinItemsValidationError{
-			Input:      []float64{1},
-			Definition: definition,
+		{
+			Input:    []string{"foo", "bar", "baz"},
+			Expected: nil,
 		},
-	}, {
-		Input:    []float64{1, 2, 3},
-		Expected: nil,
-	}, {
-		Input:    []float64{1, 2, 3, 4},
-		Expected: nil,
-	}}
+		{
+			Input:    []string{"foo", "bar", "bas", "qux"},
+			Expected: nil,
+		},
+		{
+			Input: []float64{1},
+			Expected: &MinItemsValidationError{
+				Input:      []float64{1},
+				Definition: definition,
+			},
+		},
+		{
+			Input:    []float64{1, 2, 3},
+			Expected: nil,
+		},
+		{
+			Input:    []float64{1, 2, 3, 4},
+			Expected: nil,
+		},
+	}
 
 	for _, test := range tests {
 		err := validator.Validate(test.Input)
