@@ -2,6 +2,7 @@ package validator
 
 import (
 	"fmt"
+	"reflect"
 )
 
 type MinItemsValidator struct {
@@ -31,22 +32,14 @@ func NewMinItemsValidator(definition MinItemsValidatorDefinition) (MinItemsValid
 }
 
 func (i MinItemsValidator) Validate(input interface{}) error {
-	switch input.(type) {
-	case []int:
-		l, _ := input.([]int)
-		if len(l) >= i.definition.MinItems {
+	switch reflect.TypeOf(input).Kind() {
+	case reflect.Slice:
+		s := reflect.ValueOf(input)
+		if s.Len() >= i.definition.MinItems {
 			return nil
 		}
-	case []string:
-		l, _ := input.([]string)
-		if len(l) >= i.definition.MinItems {
-			return nil
-		}
-	case []float64:
-		l, _ := input.([]float64)
-		if len(l) >= i.definition.MinItems {
-			return nil
-		}
+	default:
+		return TypeError{"input should be slice"}
 	}
 
 	return &MinItemsValidationError{

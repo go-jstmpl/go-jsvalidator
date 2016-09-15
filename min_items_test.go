@@ -1,6 +1,9 @@
 package validator
 
-import "testing"
+import (
+	"reflect"
+	"testing"
+)
 
 type IntMinItemsTestCase struct {
 	Definition MinItemsValidatorDefinition
@@ -34,59 +37,66 @@ func TestMinItemsValidator(t *testing.T) {
 		t.Error(err.Error())
 	}
 
-	tests := []MinItemsValidatorTestCase{{
-		Input: []int{1},
-		Expected: &MinItemsValidationError{
-			Input:      []int{1},
-			Definition: definition,
+	tests := []MinItemsValidatorTestCase{
+		{
+			Input: []int{1},
+			Expected: &MinItemsValidationError{
+				Input:      []int{1},
+				Definition: definition,
+			},
 		},
-	}, {
-		Input: []int{1, 2},
-		Expected: &MinItemsValidationError{
-			Input:      []int{1, 2},
-			Definition: definition,
+		{
+			Input: []int{1, 2},
+			Expected: &MinItemsValidationError{
+				Input:      []int{1, 2},
+				Definition: definition,
+			},
 		},
-	}, {
-		Input:    []int{1, 2, 3},
-		Expected: nil,
-	}, {
-		Input:    []int{1, 2, 3, 4},
-		Expected: nil,
-	}, {
-		Input: []string{"foo"},
-		Expected: &MinItemsValidationError{
+		{
+			Input:    []int{1, 2, 3},
+			Expected: nil,
+		},
+		{
+			Input:    []int{1, 2, 3, 4},
+			Expected: nil,
+		},
+		{
 			Input: []string{"foo"},
+			Expected: &MinItemsValidationError{
+				Input: []string{"foo"},
 
-			Definition: definition,
+				Definition: definition,
+			},
 		},
-	}, {
-		Input:    []string{"foo", "bar", "baz"},
-		Expected: nil,
-	}, {
-		Input:    []string{"foo", "bar", "bas", "qux"},
-		Expected: nil,
-	}, {
-		Input: []float64{1},
-		Expected: &MinItemsValidationError{
-			Input:      []float64{1},
-			Definition: definition,
+		{
+			Input:    []string{"foo", "bar", "baz"},
+			Expected: nil,
 		},
-	}, {
-		Input:    []float64{1, 2, 3},
-		Expected: nil,
-	}, {
-		Input:    []float64{1, 2, 3, 4},
-		Expected: nil,
-	}}
+		{
+			Input:    []string{"foo", "bar", "bas", "qux"},
+			Expected: nil,
+		},
+		{
+			Input: []float64{1},
+			Expected: &MinItemsValidationError{
+				Input:      []float64{1},
+				Definition: definition,
+			},
+		},
+		{
+			Input:    []float64{1, 2, 3},
+			Expected: nil,
+		},
+		{
+			Input:    []float64{1, 2, 3, 4},
+			Expected: nil,
+		},
+	}
 
 	for _, test := range tests {
 		err := validator.Validate(test.Input)
-		if test.Expected == nil && err != nil {
-			t.Errorf("expected: %+v ,actual: %+v", test.Expected, err)
-		}
-
-		if test.Expected != nil && err == nil {
-			t.Errorf("expected: %+v ,actual: %+v", test.Expected, err)
+		if !reflect.DeepEqual(err, test.Expected) {
+			t.Errorf("expected:%v ,actual:%v", test.Expected, err)
 		}
 	}
 }
