@@ -5,172 +5,190 @@ import (
 	"testing"
 )
 
-type IntEnumTestCase struct {
-	Definition IntEnumValidatorDefinition
+type EnumTestCase struct {
+	Definition EnumValidatorDefinition
 	Expected   error
 }
 
-func TestIntEnum(t *testing.T) {
-	tests := []IntEnumTestCase{{
-		Definition: IntEnumValidatorDefinition{Enumerate: []int{}},
-		Expected:   EmptyError{},
-	}, {
-		Definition: IntEnumValidatorDefinition{Enumerate: []int{0, 1, 0}},
-		Expected:   DuplicationError{},
-	}}
+func TestEnum(t *testing.T) {
+	tests := []EnumTestCase{
+		{
+			Definition: EnumValidatorDefinition{Enumerate: []int{}},
+			Expected:   EmptyError{},
+		},
+		{
+			Definition: EnumValidatorDefinition{Enumerate: []int{0, 1, 0}},
+			Expected:   DuplicationError{},
+		},
+		{
+			Definition: EnumValidatorDefinition{Enumerate: []float64{}},
+			Expected:   EmptyError{},
+		},
+		{
+			Definition: EnumValidatorDefinition{Enumerate: []float64{0.9, 1.0, 1.0}},
+			Expected:   DuplicationError{},
+		},
+		{
+			Definition: EnumValidatorDefinition{Enumerate: []string{}},
+			Expected:   EmptyError{},
+		},
+		{
+			Definition: EnumValidatorDefinition{Enumerate: []string{"foo", "bar", "foo"}},
+			Expected:   DuplicationError{},
+		},
+		{
+			Definition: EnumValidatorDefinition{Enumerate: []bool{true, false}},
+			Expected:   TypeError{},
+		},
+	}
 	for _, test := range tests {
-		_, err := NewIntEnumValidator(test.Definition)
+		_, err := NewEnumValidator(test.Definition)
 		if reflect.TypeOf(err) != reflect.TypeOf(test.Expected) {
 			t.Errorf("expected:%v, actual:%v", reflect.TypeOf(test.Expected), reflect.TypeOf(err))
 		}
 	}
 }
 
-type IntEnumValidatorTestCase struct {
-	Input    int
+type EnumValidatorTestCase struct {
+	Input    interface{}
 	Expected error
 }
 
-func TestIntEnumvalidator(t *testing.T) {
-	definition := IntEnumValidatorDefinition{
+func TestEnumvalidator(t *testing.T) {
+	definition := EnumValidatorDefinition{
 		Enumerate: []int{401, 402, 403},
 	}
-	validator, err := NewIntEnumValidator(definition)
+	validator, err := NewEnumValidator(definition)
 	if err != nil {
 		t.Error(err.Error())
 	}
-	tests := []IntEnumValidatorTestCase{{
-		Input:    401,
-		Expected: nil,
-	}, {
-		Input:    402,
-		Expected: nil,
-	}, {
-		Input:    403,
-		Expected: nil,
-	}, {
-		Input: 501,
-		Expected: &IntEnumValidationError{
-			Input:      501,
-			Definition: definition,
+	tests := []EnumValidatorTestCase{
+		{
+			Input:    401,
+			Expected: nil,
 		},
-	}}
+		{
+			Input:    402,
+			Expected: nil,
+		},
+		{
+			Input:    403,
+			Expected: nil,
+		},
+		{
+			Input: 501,
+			Expected: &EnumValidationError{
+				Input:      501,
+				Definition: definition,
+			},
+		},
+		{
+			Input: 10.1,
+			Expected: TypeError{
+				message: "input and element of enumerate should be same type",
+			},
+		},
+		{
+			Input: true,
+			Expected: TypeError{
+				message: "input should be same type as element of enumerate",
+			},
+		},
+	}
 	for _, test := range tests {
 		err := validator.Validate(test.Input)
 		if !reflect.DeepEqual(err, test.Expected) {
-			t.Errorf("expected:%v ,actual:%v", test.Expected, err)
+			t.Errorf("\nexpected: %v \n  actual: %v", test.Expected, err)
 		}
 	}
-}
 
-type FloatEnumTestCase struct {
-	Definition FloatEnumValidatorDefinition
-	Expected   error
-}
-
-func TestFloatEnum(t *testing.T) {
-	tests := []FloatEnumTestCase{{
-		Definition: FloatEnumValidatorDefinition{Enumerate: []float64{}},
-		Expected:   EmptyError{},
-	}, {
-		Definition: FloatEnumValidatorDefinition{Enumerate: []float64{0.9, 1.0, 1.0}},
-		Expected:   DuplicationError{},
-	}}
-	for _, test := range tests {
-		_, err := NewFloatEnumValidator(test.Definition)
-		if reflect.TypeOf(err) != reflect.TypeOf(test.Expected) {
-			t.Errorf("expected:%v, actual:%v", reflect.TypeOf(test.Expected), reflect.TypeOf(err))
-		}
-	}
-}
-
-type FloatEnumValidatorTestCase struct {
-	Input    float64
-	Expected error
-}
-
-func TestFloatEnumvalidator(t *testing.T) {
-	definition := FloatEnumValidatorDefinition{
+	definition = EnumValidatorDefinition{
 		Enumerate: []float64{0.9, 1.0, 1.1},
 	}
-	validator, err := NewFloatEnumValidator(definition)
+	validator, err = NewEnumValidator(definition)
 	if err != nil {
 		t.Error(err.Error())
 	}
-	tests := []FloatEnumValidatorTestCase{{
-		Input:    0.9,
-		Expected: nil,
-	}, {
-		Input:    1.0,
-		Expected: nil,
-	}, {
-		Input:    1.1,
-		Expected: nil,
-	}, {
-		Input: 1.5,
-		Expected: &FloatEnumValidationError{
-			Input:      1.5,
-			Definition: definition,
+	tests = []EnumValidatorTestCase{
+		{
+			Input:    0.9,
+			Expected: nil,
 		},
-	}}
+		{
+			Input:    1.0,
+			Expected: nil,
+		},
+		{
+			Input:    1.1,
+			Expected: nil,
+		},
+		{
+			Input: 1.5,
+			Expected: &EnumValidationError{
+				Input:      1.5,
+				Definition: definition,
+			},
+		},
+		{
+			Input: "hoge",
+			Expected: TypeError{
+				message: "input and element of enumerate should be same type",
+			},
+		},
+		{
+			Input: true,
+			Expected: TypeError{
+				message: "input should be same type as element of enumerate",
+			},
+		},
+	}
 	for _, test := range tests {
 		err := validator.Validate(test.Input)
 		if !reflect.DeepEqual(err, test.Expected) {
 			t.Errorf("expected:%v ,actual:%v", test.Expected, err)
 		}
 	}
-}
 
-type StringEnumTestCase struct {
-	Definition StringEnumValidatorDefinition
-	Expected   error
-}
-
-func TestStringEnum(t *testing.T) {
-	tests := []StringEnumTestCase{{
-		Definition: StringEnumValidatorDefinition{Enumerate: []string{}},
-		Expected:   EmptyError{},
-	}, {
-		Definition: StringEnumValidatorDefinition{Enumerate: []string{"foo", "bar", "foo"}},
-		Expected:   DuplicationError{},
-	}}
-	for _, test := range tests {
-		_, err := NewStringEnumValidator(test.Definition)
-		if reflect.TypeOf(err) != reflect.TypeOf(test.Expected) {
-			t.Errorf("expected:%v, actual:%v", reflect.TypeOf(test.Expected), reflect.TypeOf(err))
-		}
-	}
-}
-
-type StringEnumValidatorTestCase struct {
-	Input    string
-	Expected error
-}
-
-func TestStringEnumvalidator(t *testing.T) {
-	definition := StringEnumValidatorDefinition{
+	definition = EnumValidatorDefinition{
 		Enumerate: []string{"foo", "bar", "baz"},
 	}
-	validator, err := NewStringEnumValidator(definition)
+	validator, err = NewEnumValidator(definition)
 	if err != nil {
 		t.Error(err.Error())
 	}
-	tests := []StringEnumValidatorTestCase{{
-		Input:    "foo",
-		Expected: nil,
-	}, {
-		Input:    "bar",
-		Expected: nil,
-	}, {
-		Input:    "baz",
-		Expected: nil,
-	}, {
-		Input: "qux",
-		Expected: &StringEnumValidationError{
-			Input:      "qux",
-			Definition: definition,
+	tests = []EnumValidatorTestCase{
+		{
+			Input:    "foo",
+			Expected: nil,
 		},
-	}}
+		{
+			Input:    "bar",
+			Expected: nil,
+		},
+		{
+			Input:    "baz",
+			Expected: nil,
+		},
+		{
+			Input: "qux",
+			Expected: &EnumValidationError{
+				Input:      "qux",
+				Definition: definition,
+			},
+		},
+		{
+			Input: 10,
+			Expected: TypeError{
+				message: "input and element of enumerate should be same type",
+			},
+		},
+		{
+			Input: true,
+			Expected: TypeError{
+				message: "input should be same type as element of enumerate",
+			},
+		},
+	}
 	for _, test := range tests {
 		err := validator.Validate(test.Input)
 		if !reflect.DeepEqual(err, test.Expected) {
