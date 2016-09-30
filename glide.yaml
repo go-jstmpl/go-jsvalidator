@@ -1,0 +1,5 @@
+package: github.com/go-jstmpl/go-jsvalidator
+import: []
+testImport:
+- package: github.com/gocraft/dbr
+  version: ^2.1.0
