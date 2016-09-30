@@ -1,0 +1,8 @@
+hash: 872c47c5d783cd889460e14c4cd0f21f0ff2693a8588fbfb5536dcfc55983536
+updated: 2016-09-30T16:28:46.039801736+09:00
+imports: []
+testImports:
+- name: github.com/gocraft/dbr
+  version: b2f0ffcef2a64c0729d5818e103bc019caed7b22
+  subpackages:
+  - dialect
