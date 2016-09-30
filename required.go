@@ -43,10 +43,21 @@ func NewRequiredValidator(definition RequiredValidatorDefinition) (RequiredValid
 }
 
 func (r RequiredValidator) Validate(input interface{}) error {
-	elem := reflect.ValueOf(input).Elem()
+	var v reflect.Value
+	if reflect.TypeOf(input).Kind() != reflect.Ptr {
+		v = reflect.ValueOf(input)
+	} else {
+		v = reflect.ValueOf(input).Elem()
+	}
+	if v.Kind() != reflect.Struct {
+		return &InvalidFieldTypeError{
+			Definition: r.definition,
+			Input:      input,
+		}
+	}
 
 	for _, key := range r.definition.Required {
-		e := elem.FieldByName(key)
+		e := v.FieldByName(key)
 		if !e.IsValid() {
 			return &InvalidFieldTypeError{
 				Definition: r.definition,

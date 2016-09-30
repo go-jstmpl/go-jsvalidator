@@ -1,9 +1,10 @@
 package validator
 
 import (
-	"github.com/gocraft/dbr"
 	"reflect"
 	"testing"
+
+	"github.com/gocraft/dbr"
 )
 
 type RequiredTestCase struct {
@@ -12,7 +13,7 @@ type RequiredTestCase struct {
 }
 
 func TestRequired(t *testing.T) {
-	tests := []RequiredTestCase{{
+	cases := []RequiredTestCase{{
 		Definition: RequiredValidatorDefinition{Required: []string{}},
 		Expected:   EmptyError{},
 	}, {
@@ -28,23 +29,12 @@ func TestRequired(t *testing.T) {
 		Definition: RequiredValidatorDefinition{Required: []string{"foo", "foo", "foo"}},
 		Expected:   DuplicationError{},
 	}}
-	for _, test := range tests {
-		_, err := NewRequiredValidator(test.Definition)
-		if reflect.TypeOf(err) != reflect.TypeOf(test.Expected) {
-			t.Errorf("expected:%v, actual:%v", reflect.TypeOf(test.Expected), reflect.TypeOf(err))
+	for _, c := range cases {
+		_, err := NewRequiredValidator(c.Definition)
+		if reflect.TypeOf(err) != reflect.TypeOf(c.Expected) {
+			t.Errorf("expected:%v, actual:%v", reflect.TypeOf(c.Expected), reflect.TypeOf(err))
 		}
 	}
-}
-
-type Sample struct {
-	ID   dbr.NullInt64
-	Name dbr.NullString
-	Addr dbr.NullString
-}
-
-type RequiredValidatorTestCase struct {
-	Input    *Sample
-	Expected error
 }
 
 func TestRequiredValidator(t *testing.T) {
@@ -56,39 +46,83 @@ func TestRequiredValidator(t *testing.T) {
 		t.Error(err.Error())
 	}
 
-	sample1 := &Sample{
+	type Sample struct {
+		ID   dbr.NullInt64
+		Name dbr.NullString
+		Addr dbr.NullString
+	}
+	sample1 := Sample{
 		ID:   dbr.NewNullInt64(1),
 		Name: dbr.NewNullString("MyName"),
 		Addr: dbr.NewNullString("foo@bar.com"),
 	}
-	sample2 := &Sample{
+	sample2 := Sample{
 		ID:   dbr.NewNullInt64(2),
 		Name: dbr.NewNullString(nil),
 		Addr: dbr.NewNullString("foo@bar.com"),
 	}
-	sample3 := &Sample{
+	sample3 := Sample{
 		ID:   dbr.NewNullInt64(nil),
 		Name: dbr.NewNullString("hi"),
 		Addr: dbr.NewNullString("foo@bar.com"),
 	}
-	tests := []RequiredValidatorTestCase{{
-		Input:    sample1,
-		Expected: nil,
-	}, {
-		Input:    sample2,
-		Expected: nil,
-	}, {
-		Input: sample3,
-		Expected: &RequiredValidationError{
-			Input:      sample3,
-			Definition: definition,
-		},
-	}}
 
-	for _, test := range tests {
-		err := validator.Validate(test.Input)
-		if !reflect.DeepEqual(err, test.Expected) {
-			t.Errorf("expected:%v ,actual:%v", test.Expected, err)
+	type RequiredValidatorTestCase struct {
+		Message  string
+		Input    interface{}
+		Expected error
+	}
+	cases := []RequiredValidatorTestCase{
+		{
+			Message: "non-struct",
+			Input:   "foo",
+			Expected: &InvalidFieldTypeError{
+				Input:      "foo",
+				Definition: definition,
+			},
+		},
+		{
+			Message:  "non-pointer of sample1",
+			Input:    sample1,
+			Expected: nil,
+		},
+		{
+			Message:  "non-pointer of sample2",
+			Input:    sample2,
+			Expected: nil,
+		},
+		{
+			Message: "non-pointer of sample3",
+			Input:   sample3,
+			Expected: &RequiredValidationError{
+				Input:      sample3,
+				Definition: definition,
+			},
+		},
+		{
+			Message:  "pointer of sample1",
+			Input:    &sample1,
+			Expected: nil,
+		},
+		{
+			Message:  "pointer of sample2",
+			Input:    &sample2,
+			Expected: nil,
+		},
+		{
+			Message: "pointer of sample3",
+			Input:   &sample3,
+			Expected: &RequiredValidationError{
+				Input:      &sample3,
+				Definition: definition,
+			},
+		},
+	}
+
+	for _, c := range cases {
+		err := validator.Validate(c.Input)
+		if !reflect.DeepEqual(err, c.Expected) {
+			t.Errorf("%s: expected %+v, but actual %+v", c.Expected, err)
 		}
 	}
 }
