@@ -5,11 +5,6 @@ import (
 	"testing"
 )
 
-type MinimumValidatorTestCase struct {
-	Input    interface{}
-	Expected error
-}
-
 func TestMinimumValidator(t *testing.T) {
 	// Case exclusive is false
 	definition := MinimumValidatorDefinition{
@@ -21,7 +16,12 @@ func TestMinimumValidator(t *testing.T) {
 	if err != nil {
 		t.Error(err.Error())
 	}
-	tests := []MinimumValidatorTestCase{
+
+	type MinimumValidatorTestCase struct {
+		Input    interface{}
+		Expected error
+	}
+	cases := []MinimumValidatorTestCase{
 		{
 			Input:    101,
 			Expected: nil,
@@ -45,10 +45,10 @@ func TestMinimumValidator(t *testing.T) {
 		},
 	}
 
-	for _, test := range tests {
-		err := validator.Validate(test.Input)
-		if !reflect.DeepEqual(err, test.Expected) {
-			t.Errorf("expected:%v ,actual:%v", test.Expected, err)
+	for _, c := range cases {
+		err := validator.Validate(c.Input)
+		if !reflect.DeepEqual(err, c.Expected) {
+			t.Errorf("expected %v, but actual %v", c.Expected, err)
 		}
 	}
 
@@ -62,7 +62,7 @@ func TestMinimumValidator(t *testing.T) {
 	if err != nil {
 		t.Error(err.Error())
 	}
-	tests = []MinimumValidatorTestCase{
+	cases = []MinimumValidatorTestCase{
 		{
 			Input:    101,
 			Expected: nil,
@@ -83,10 +83,10 @@ func TestMinimumValidator(t *testing.T) {
 		},
 	}
 
-	for _, test := range tests {
-		err := validator.Validate(test.Input)
-		if !reflect.DeepEqual(err, test.Expected) {
-			t.Errorf("expected:%v ,actual:%v", test.Expected, err)
+	for _, c := range cases {
+		err := validator.Validate(c.Input)
+		if !reflect.DeepEqual(err, c.Expected) {
+			t.Errorf("expected %v, actual %v", c.Expected, err)
 		}
 	}
 
@@ -100,7 +100,7 @@ func TestMinimumValidator(t *testing.T) {
 	if err != nil {
 		t.Error(err.Error())
 	}
-	tests = []MinimumValidatorTestCase{
+	cases = []MinimumValidatorTestCase{
 		{
 			Input:    1.1,
 			Expected: nil,
@@ -124,10 +124,10 @@ func TestMinimumValidator(t *testing.T) {
 		},
 	}
 
-	for _, test := range tests {
-		err := validator.Validate(test.Input)
-		if !reflect.DeepEqual(err, test.Expected) {
-			t.Errorf("expected:%v ,actual:%v", test.Expected, err)
+	for _, c := range cases {
+		err := validator.Validate(c.Input)
+		if !reflect.DeepEqual(err, c.Expected) {
+			t.Errorf("expected %v, but actual %v", c.Expected, err)
 		}
 	}
 
@@ -141,7 +141,7 @@ func TestMinimumValidator(t *testing.T) {
 	if err != nil {
 		t.Error(err.Error())
 	}
-	tests = []MinimumValidatorTestCase{
+	cases = []MinimumValidatorTestCase{
 		{
 			Input:    1.1,
 			Expected: nil,
@@ -162,10 +162,10 @@ func TestMinimumValidator(t *testing.T) {
 		},
 	}
 
-	for _, test := range tests {
-		err := validator.Validate(test.Input)
-		if !reflect.DeepEqual(err, test.Expected) {
-			t.Errorf("expected:%v ,actual:%v", test.Expected, err)
+	for _, c := range cases {
+		err := validator.Validate(c.Input)
+		if !reflect.DeepEqual(err, c.Expected) {
+			t.Errorf("expected %v, but actual %v", c.Expected, err)
 		}
 	}
 }

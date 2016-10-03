@@ -5,30 +5,27 @@ import (
 	"testing"
 )
 
-type PatternTestCase struct {
-	Definition PatternValidatorDefinition
-	Expected   error
-}
-
 func TestPattern(t *testing.T) {
-	tests := []PatternTestCase{{
-		Definition: PatternValidatorDefinition{Pattern: ""},
-		Expected:   EmptyError{},
-	}, {
-		Definition: PatternValidatorDefinition{Pattern: "[a-z"},
-		Expected:   InvalidPatternError{},
-	}}
-	for _, test := range tests {
-		_, err := NewPatternValidator(test.Definition)
-		if reflect.TypeOf(err) != reflect.TypeOf(test.Expected) {
-			t.Errorf("expected:%v, actual:%v", reflect.TypeOf(test.Expected), reflect.TypeOf(err))
+	type PatternTestCase struct {
+		Definition PatternValidatorDefinition
+		Expected   error
+	}
+	cases := []PatternTestCase{
+		{
+			Definition: PatternValidatorDefinition{Pattern: ""},
+			Expected:   EmptyError{},
+		},
+		{
+			Definition: PatternValidatorDefinition{Pattern: "[a-z"},
+			Expected:   InvalidPatternError{},
+		},
+	}
+	for _, c := range cases {
+		_, err := NewPatternValidator(c.Definition)
+		if reflect.TypeOf(err) != reflect.TypeOf(c.Expected) {
+			t.Errorf("expected %v, but actual %v", reflect.TypeOf(c.Expected), reflect.TypeOf(err))
 		}
 	}
-}
-
-type PatternValidatorTestCase struct {
-	Input    string
-	Expected error
 }
 
 func TestPatternValidator(t *testing.T) {
@@ -40,21 +37,28 @@ func TestPatternValidator(t *testing.T) {
 		t.Error(err.Error())
 	}
 
-	tests := []PatternValidatorTestCase{{
-		Input:    "1234567",
-		Expected: nil,
-	}, {
-		Input: "abcdefg",
-		Expected: &PatternValidationError{
-			Input:      "abcdefg",
-			Definition: definition,
+	type PatternValidatorTestCase struct {
+		Input    string
+		Expected error
+	}
+	cases := []PatternValidatorTestCase{
+		{
+			Input:    "1234567",
+			Expected: nil,
 		},
-	}}
+		{
+			Input: "abcdefg",
+			Expected: &PatternValidationError{
+				Input:      "abcdefg",
+				Definition: definition,
+			},
+		},
+	}
 
-	for _, test := range tests {
-		err := validator.Validate(test.Input)
-		if !reflect.DeepEqual(err, test.Expected) {
-			t.Errorf("expected:%v ,actual:%v", test.Expected, err)
+	for _, c := range cases {
+		err := validator.Validate(c.Input)
+		if !reflect.DeepEqual(err, c.Expected) {
+			t.Errorf("expected %v, but actual %v", c.Expected, err)
 		}
 	}
 }

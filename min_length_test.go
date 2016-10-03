@@ -5,28 +5,24 @@ import (
 	"testing"
 )
 
-type MinLengthTestCase struct {
-	Definition MinLengthValidatorDefinition
-	Expected   error
-}
-
 func TestMinLength(t *testing.T) {
-	tests := []MinLengthTestCase{{
-		Definition: MinLengthValidatorDefinition{MinLength: -1},
-		Expected:   NoLengthError{},
-	}}
+	type MinLengthTestCase struct {
+		Definition MinLengthValidatorDefinition
+		Expected   error
+	}
+	cases := []MinLengthTestCase{
+		{
+			Definition: MinLengthValidatorDefinition{MinLength: -1},
+			Expected:   NoLengthError{},
+		},
+	}
 
-	for _, test := range tests {
-		_, err := NewMinLengthValidator(test.Definition)
-		if reflect.TypeOf(err) != reflect.TypeOf(test.Expected) {
-			t.Errorf("expected:%v, actual:%v", reflect.TypeOf(test.Expected), reflect.TypeOf(err))
+	for _, c := range cases {
+		_, err := NewMinLengthValidator(c.Definition)
+		if reflect.TypeOf(err) != reflect.TypeOf(c.Expected) {
+			t.Errorf("expected %v, but actual %v", reflect.TypeOf(c.Expected), reflect.TypeOf(err))
 		}
 	}
-}
-
-type MinLengthValidatorTestCase struct {
-	Input    string
-	Expected error
 }
 
 func TestMinLengthValidator(t *testing.T) {
@@ -38,27 +34,36 @@ func TestMinLengthValidator(t *testing.T) {
 		t.Error(err.Error())
 	}
 
-	tests := []MinLengthValidatorTestCase{{
-		Input:    "あいうえおか",
-		Expected: nil,
-	}, {
-		Input:    "あいうえお",
-		Expected: nil,
-	}, {
-		Input: "あいうえ",
-		Expected: &MinLengthValidationError{
-			Input:      "あいうえ",
-			Definition: definition,
+	type MinLengthValidatorTestCase struct {
+		Input    string
+		Expected error
+	}
+	cases := []MinLengthValidatorTestCase{
+		{
+			Input:    "あいうえおか",
+			Expected: nil,
 		},
-	}, {
-		Input:    "abcde",
-		Expected: nil,
-	}}
+		{
+			Input:    "あいうえお",
+			Expected: nil,
+		},
+		{
+			Input: "あいうえ",
+			Expected: &MinLengthValidationError{
+				Input:      "あいうえ",
+				Definition: definition,
+			},
+		},
+		{
+			Input:    "abcde",
+			Expected: nil,
+		},
+	}
 
-	for _, test := range tests {
-		err := validator.Validate(test.Input)
-		if !reflect.DeepEqual(err, test.Expected) {
-			t.Errorf("expected:%v ,actual:%v", test.Expected, err)
+	for _, c := range cases {
+		err := validator.Validate(c.Input)
+		if !reflect.DeepEqual(err, c.Expected) {
+			t.Errorf("expected %v, but actual %v", c.Expected, err)
 		}
 	}
 }

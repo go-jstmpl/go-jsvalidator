@@ -7,32 +7,37 @@ import (
 	"github.com/gocraft/dbr"
 )
 
-type RequiredTestCase struct {
-	Definition RequiredValidatorDefinition
-	Expected   error
-}
-
 func TestRequired(t *testing.T) {
-	cases := []RequiredTestCase{{
-		Definition: RequiredValidatorDefinition{Required: []string{}},
-		Expected:   EmptyError{},
-	}, {
-		Definition: RequiredValidatorDefinition{Required: []string{"foo", "foo", "bar"}},
-		Expected:   DuplicationError{},
-	}, {
-		Definition: RequiredValidatorDefinition{Required: []string{"foo", "bar", "foo"}},
-		Expected:   DuplicationError{},
-	}, {
-		Definition: RequiredValidatorDefinition{Required: []string{"bar", "foo", "foo"}},
-		Expected:   DuplicationError{},
-	}, {
-		Definition: RequiredValidatorDefinition{Required: []string{"foo", "foo", "foo"}},
-		Expected:   DuplicationError{},
-	}}
+	type RequiredTestCase struct {
+		Definition RequiredValidatorDefinition
+		Expected   error
+	}
+	cases := []RequiredTestCase{
+		{
+			Definition: RequiredValidatorDefinition{Required: []string{}},
+			Expected:   EmptyError{},
+		},
+		{
+			Definition: RequiredValidatorDefinition{Required: []string{"foo", "foo", "bar"}},
+			Expected:   DuplicationError{},
+		},
+		{
+			Definition: RequiredValidatorDefinition{Required: []string{"foo", "bar", "foo"}},
+			Expected:   DuplicationError{},
+		},
+		{
+			Definition: RequiredValidatorDefinition{Required: []string{"bar", "foo", "foo"}},
+			Expected:   DuplicationError{},
+		},
+		{
+			Definition: RequiredValidatorDefinition{Required: []string{"foo", "foo", "foo"}},
+			Expected:   DuplicationError{},
+		},
+	}
 	for _, c := range cases {
 		_, err := NewRequiredValidator(c.Definition)
 		if reflect.TypeOf(err) != reflect.TypeOf(c.Expected) {
-			t.Errorf("expected:%v, actual:%v", reflect.TypeOf(c.Expected), reflect.TypeOf(err))
+			t.Errorf("expected %v, but actual %v", reflect.TypeOf(c.Expected), reflect.TypeOf(err))
 		}
 	}
 }
@@ -122,7 +127,7 @@ func TestRequiredValidator(t *testing.T) {
 	for _, c := range cases {
 		err := validator.Validate(c.Input)
 		if !reflect.DeepEqual(err, c.Expected) {
-			t.Errorf("%s: expected %+v, but actual %+v", c.Expected, err)
+			t.Errorf("%s: expected %+v, but actual %+v", c.Message, c.Expected, err)
 		}
 	}
 }
