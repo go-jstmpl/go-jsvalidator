@@ -5,27 +5,23 @@ import (
 	"testing"
 )
 
-type IntMinItemsTestCase struct {
-	Definition MinItemsValidatorDefinition
-	Expected   error
-}
-
 func TestIntMinItems(t *testing.T) {
-	tests := []IntMinItemsTestCase{{
-		Definition: MinItemsValidatorDefinition{MinItems: -1},
-		Expected:   NoLengthError{},
-	}}
-	for _, test := range tests {
-		_, err := NewMinItemsValidator(test.Definition)
+	type IntMinItemsTestCase struct {
+		Definition MinItemsValidatorDefinition
+		Expected   error
+	}
+	cases := []IntMinItemsTestCase{
+		{
+			Definition: MinItemsValidatorDefinition{MinItems: -1},
+			Expected:   NoLengthError{},
+		},
+	}
+	for _, c := range cases {
+		_, err := NewMinItemsValidator(c.Definition)
 		if err == nil {
-			t.Errorf("expected:%v, actual:%v", test.Expected, err)
+			t.Errorf("expected %v, but actual %v", c.Expected, err)
 		}
 	}
-}
-
-type MinItemsValidatorTestCase struct {
-	Input    interface{}
-	Expected error
 }
 
 func TestMinItemsValidator(t *testing.T) {
@@ -37,7 +33,11 @@ func TestMinItemsValidator(t *testing.T) {
 		t.Error(err.Error())
 	}
 
-	tests := []MinItemsValidatorTestCase{
+	type MinItemsValidatorTestCase struct {
+		Input    interface{}
+		Expected error
+	}
+	cases := []MinItemsValidatorTestCase{
 		{
 			Input: []int{1},
 			Expected: &MinItemsValidationError{
@@ -93,10 +93,10 @@ func TestMinItemsValidator(t *testing.T) {
 		},
 	}
 
-	for _, test := range tests {
-		err := validator.Validate(test.Input)
-		if !reflect.DeepEqual(err, test.Expected) {
-			t.Errorf("expected:%v ,actual:%v", test.Expected, err)
+	for _, c := range cases {
+		err := validator.Validate(c.Input)
+		if !reflect.DeepEqual(err, c.Expected) {
+			t.Errorf("expected %v, but actual %v", c.Expected, err)
 		}
 	}
 }

@@ -5,13 +5,12 @@ import (
 	"testing"
 )
 
-type EnumTestCase struct {
-	Definition EnumValidatorDefinition
-	Expected   error
-}
-
 func TestEnum(t *testing.T) {
-	tests := []EnumTestCase{
+	type EnumTestCase struct {
+		Definition EnumValidatorDefinition
+		Expected   error
+	}
+	cases := []EnumTestCase{
 		{
 			Definition: EnumValidatorDefinition{Enumerate: []int{}},
 			Expected:   EmptyError{},
@@ -41,10 +40,10 @@ func TestEnum(t *testing.T) {
 			Expected:   TypeError{},
 		},
 	}
-	for _, test := range tests {
-		_, err := NewEnumValidator(test.Definition)
-		if reflect.TypeOf(err) != reflect.TypeOf(test.Expected) {
-			t.Errorf("expected:%v, actual:%v", reflect.TypeOf(test.Expected), reflect.TypeOf(err))
+	for _, c := range cases {
+		_, err := NewEnumValidator(c.Definition)
+		if reflect.TypeOf(err) != reflect.TypeOf(c.Expected) {
+			t.Errorf("expected %v, but actual %v", reflect.TypeOf(c.Expected), reflect.TypeOf(err))
 		}
 	}
 }
@@ -62,7 +61,7 @@ func TestEnumvalidator(t *testing.T) {
 	if err != nil {
 		t.Error(err.Error())
 	}
-	tests := []EnumValidatorTestCase{
+	cases := []EnumValidatorTestCase{
 		{
 			Input:    401,
 			Expected: nil,
@@ -95,10 +94,10 @@ func TestEnumvalidator(t *testing.T) {
 			},
 		},
 	}
-	for _, test := range tests {
-		err := validator.Validate(test.Input)
-		if !reflect.DeepEqual(err, test.Expected) {
-			t.Errorf("\nexpected: %v \n  actual: %v", test.Expected, err)
+	for _, c := range cases {
+		err := validator.Validate(c.Input)
+		if !reflect.DeepEqual(err, c.Expected) {
+			t.Errorf("expected %v, but actual %v", c.Expected, err)
 		}
 	}
 
@@ -109,7 +108,7 @@ func TestEnumvalidator(t *testing.T) {
 	if err != nil {
 		t.Error(err.Error())
 	}
-	tests = []EnumValidatorTestCase{
+	cases = []EnumValidatorTestCase{
 		{
 			Input:    0.9,
 			Expected: nil,
@@ -142,10 +141,10 @@ func TestEnumvalidator(t *testing.T) {
 			},
 		},
 	}
-	for _, test := range tests {
-		err := validator.Validate(test.Input)
-		if !reflect.DeepEqual(err, test.Expected) {
-			t.Errorf("expected:%v ,actual:%v", test.Expected, err)
+	for _, c := range cases {
+		err := validator.Validate(c.Input)
+		if !reflect.DeepEqual(err, c.Expected) {
+			t.Errorf("expected %v, but actual %v", c.Expected, err)
 		}
 	}
 
@@ -156,7 +155,7 @@ func TestEnumvalidator(t *testing.T) {
 	if err != nil {
 		t.Error(err.Error())
 	}
-	tests = []EnumValidatorTestCase{
+	cases = []EnumValidatorTestCase{
 		{
 			Input:    "foo",
 			Expected: nil,
@@ -189,10 +188,10 @@ func TestEnumvalidator(t *testing.T) {
 			},
 		},
 	}
-	for _, test := range tests {
-		err := validator.Validate(test.Input)
-		if !reflect.DeepEqual(err, test.Expected) {
-			t.Errorf("expected:%v ,actual:%v", test.Expected, err)
+	for _, c := range cases {
+		err := validator.Validate(c.Input)
+		if !reflect.DeepEqual(err, c.Expected) {
+			t.Errorf("expected %v, but actual %v", c.Expected, err)
 		}
 	}
 }

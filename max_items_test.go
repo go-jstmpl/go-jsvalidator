@@ -5,27 +5,21 @@ import (
 	"testing"
 )
 
-type MaxItemsTestCase struct {
-	Definition MaxItemsValidatorDefinition
-	Expected   error
-}
-
 func TestMaxItems(t *testing.T) {
-	tests := []MaxItemsTestCase{{
+	type MaxItemsTestCase struct {
+		Definition MaxItemsValidatorDefinition
+		Expected   error
+	}
+	cases := []MaxItemsTestCase{{
 		Definition: MaxItemsValidatorDefinition{MaxItems: -1},
 		Expected:   NoLengthError{},
 	}}
-	for _, test := range tests {
-		_, err := NewMaxItemsValidator(test.Definition)
+	for _, c := range cases {
+		_, err := NewMaxItemsValidator(c.Definition)
 		if err == nil {
-			t.Errorf("expected:%v, actual:%v", test.Expected, err)
+			t.Errorf("expected %+v, but actual %+v", c.Expected, err)
 		}
 	}
-}
-
-type MaxItemsValidatorTestCase struct {
-	Input    interface{}
-	Expected error
 }
 
 func TestMaxItemsValidator(t *testing.T) {
@@ -37,7 +31,11 @@ func TestMaxItemsValidator(t *testing.T) {
 		t.Error(err.Error())
 	}
 
-	tests := []MaxItemsValidatorTestCase{
+	type MaxItemsValidatorTestCase struct {
+		Input    interface{}
+		Expected error
+	}
+	cases := []MaxItemsValidatorTestCase{
 		{
 			Input:    []int{1},
 			Expected: nil,
@@ -98,11 +96,10 @@ func TestMaxItemsValidator(t *testing.T) {
 		},
 	}
 
-	for _, test := range tests {
-		err := validator.Validate(test.Input)
-		if !reflect.DeepEqual(err, test.Expected) {
-			t.Errorf("expected:%v ,actual:%v", test.Expected, err)
-
+	for _, c := range cases {
+		err := validator.Validate(c.Input)
+		if !reflect.DeepEqual(err, c.Expected) {
+			t.Errorf("expected %+v, but actual %+v", c.Expected, err)
 		}
 	}
 }

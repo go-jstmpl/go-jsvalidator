@@ -5,11 +5,6 @@ import (
 	"testing"
 )
 
-type MaximumValidatorTestCase struct {
-	Input    interface{}
-	Expected error
-}
-
 func TestMaximumValidator(t *testing.T) {
 	// Case type int and exclusive is false
 	definition := MaximumValidatorDefinition{
@@ -21,7 +16,12 @@ func TestMaximumValidator(t *testing.T) {
 	if err != nil {
 		t.Error(err.Error())
 	}
-	tests := []MaximumValidatorTestCase{
+
+	type MaximumValidatorTestCase struct {
+		Input    interface{}
+		Expected error
+	}
+	cases := []MaximumValidatorTestCase{
 		{
 			Input:    99,
 			Expected: nil,
@@ -45,10 +45,10 @@ func TestMaximumValidator(t *testing.T) {
 		},
 	}
 
-	for _, test := range tests {
-		err := validator.Validate(test.Input)
-		if !reflect.DeepEqual(err, test.Expected) {
-			t.Errorf("expected:%v ,actual:%v", test.Expected, err)
+	for _, c := range cases {
+		err := validator.Validate(c.Input)
+		if !reflect.DeepEqual(err, c.Expected) {
+			t.Errorf("expected %v, but actual %v", c.Expected, err)
 		}
 	}
 
@@ -62,7 +62,7 @@ func TestMaximumValidator(t *testing.T) {
 	if err != nil {
 		t.Error(err.Error())
 	}
-	tests = []MaximumValidatorTestCase{
+	cases = []MaximumValidatorTestCase{
 		{
 			Input:    99,
 			Expected: nil,
@@ -83,10 +83,10 @@ func TestMaximumValidator(t *testing.T) {
 		},
 	}
 
-	for _, test := range tests {
-		err := validator.Validate(test.Input)
-		if !reflect.DeepEqual(err, test.Expected) {
-			t.Errorf("expected:%v ,actual:%v", test.Expected, err)
+	for _, c := range cases {
+		err := validator.Validate(c.Input)
+		if !reflect.DeepEqual(err, c.Expected) {
+			t.Errorf("expected %v, but actual %v", c.Expected, err)
 		}
 	}
 
@@ -100,7 +100,7 @@ func TestMaximumValidator(t *testing.T) {
 	if err != nil {
 		t.Error(err.Error())
 	}
-	tests = []MaximumValidatorTestCase{
+	cases = []MaximumValidatorTestCase{
 		{
 			Input:    0.9,
 			Expected: nil,
@@ -124,10 +124,10 @@ func TestMaximumValidator(t *testing.T) {
 		},
 	}
 
-	for _, test := range tests {
-		err := validator.Validate(test.Input)
-		if !reflect.DeepEqual(err, test.Expected) {
-			t.Errorf("expected:%v ,actual:%v", test.Expected, err)
+	for _, c := range cases {
+		err := validator.Validate(c.Input)
+		if !reflect.DeepEqual(err, c.Expected) {
+			t.Errorf("expected %v, but actual %v", c.Expected, err)
 		}
 	}
 
@@ -141,7 +141,7 @@ func TestMaximumValidator(t *testing.T) {
 	if err != nil {
 		t.Error(err.Error())
 	}
-	tests = []MaximumValidatorTestCase{
+	cases = []MaximumValidatorTestCase{
 		{
 			Input:    0.9,
 			Expected: nil,
@@ -162,10 +162,10 @@ func TestMaximumValidator(t *testing.T) {
 		},
 	}
 
-	for _, test := range tests {
-		err := validator.Validate(test.Input)
-		if !reflect.DeepEqual(err, test.Expected) {
-			t.Errorf("expected:%v ,actual:%v", test.Expected, err)
+	for _, c := range cases {
+		err := validator.Validate(c.Input)
+		if !reflect.DeepEqual(err, c.Expected) {
+			t.Errorf("expected %v, but actual %v", c.Expected, err)
 		}
 	}
 }
