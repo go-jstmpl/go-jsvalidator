@@ -6,25 +6,16 @@ import (
 )
 
 func TestPattern(t *testing.T) {
-	type PatternTestCase struct {
-		Definition PatternValidatorDefinition
-		Expected   error
+	_, err := NewPatternValidator(PatternValidatorDefinition{Pattern: ""})
+	_, ok := err.(EmptyError)
+	if !ok {
+		t.Errorf("Type of error expected %v, but not.", "EmptyError")
 	}
-	cases := []PatternTestCase{
-		{
-			Definition: PatternValidatorDefinition{Pattern: ""},
-			Expected:   EmptyError{},
-		},
-		{
-			Definition: PatternValidatorDefinition{Pattern: "[a-z"},
-			Expected:   InvalidPatternError{},
-		},
-	}
-	for _, c := range cases {
-		_, err := NewPatternValidator(c.Definition)
-		if reflect.TypeOf(err) != reflect.TypeOf(c.Expected) {
-			t.Errorf("expected %v, but actual %v", reflect.TypeOf(c.Expected), reflect.TypeOf(err))
-		}
+
+	_, err = NewPatternValidator(PatternValidatorDefinition{Pattern: "[a-z"})
+	_, ok = err.(InvalidPatternError)
+	if !ok {
+		t.Errorf("Type of error expected %v, but not.", "InvalidPatternError")
 	}
 }
 

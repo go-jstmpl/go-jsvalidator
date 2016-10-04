@@ -6,22 +6,10 @@ import (
 )
 
 func TestMinLength(t *testing.T) {
-	type MinLengthTestCase struct {
-		Definition MinLengthValidatorDefinition
-		Expected   error
-	}
-	cases := []MinLengthTestCase{
-		{
-			Definition: MinLengthValidatorDefinition{MinLength: -1},
-			Expected:   NoLengthError{},
-		},
-	}
-
-	for _, c := range cases {
-		_, err := NewMinLengthValidator(c.Definition)
-		if reflect.TypeOf(err) != reflect.TypeOf(c.Expected) {
-			t.Errorf("expected %v, but actual %v", reflect.TypeOf(c.Expected), reflect.TypeOf(err))
-		}
+	_, err := NewMinLengthValidator(MinLengthValidatorDefinition{MinLength: -1})
+	_, ok := err.(NoLengthError)
+	if !ok {
+		t.Errorf("Type of error expected %v, but not.", "NoLengthError")
 	}
 }
 

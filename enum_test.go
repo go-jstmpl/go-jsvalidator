@@ -6,45 +6,46 @@ import (
 )
 
 func TestEnum(t *testing.T) {
-	type EnumTestCase struct {
-		Definition EnumValidatorDefinition
-		Expected   error
+	_, err := NewEnumValidator(EnumValidatorDefinition{Enumerate: []int{}})
+	_, ok := err.(EmptyError)
+	if !ok {
+		t.Errorf("Type of error expected %v, but not.", "EmptyError")
 	}
-	cases := []EnumTestCase{
-		{
-			Definition: EnumValidatorDefinition{Enumerate: []int{}},
-			Expected:   EmptyError{},
-		},
-		{
-			Definition: EnumValidatorDefinition{Enumerate: []int{0, 1, 0}},
-			Expected:   DuplicationError{},
-		},
-		{
-			Definition: EnumValidatorDefinition{Enumerate: []float64{}},
-			Expected:   EmptyError{},
-		},
-		{
-			Definition: EnumValidatorDefinition{Enumerate: []float64{0.9, 1.0, 1.0}},
-			Expected:   DuplicationError{},
-		},
-		{
-			Definition: EnumValidatorDefinition{Enumerate: []string{}},
-			Expected:   EmptyError{},
-		},
-		{
-			Definition: EnumValidatorDefinition{Enumerate: []string{"foo", "bar", "foo"}},
-			Expected:   DuplicationError{},
-		},
-		{
-			Definition: EnumValidatorDefinition{Enumerate: []bool{true, false}},
-			Expected:   TypeError{},
-		},
+
+	_, err = NewEnumValidator(EnumValidatorDefinition{Enumerate: []int{0, 1, 0}})
+	_, ok = err.(DuplicationError)
+	if !ok {
+		t.Errorf("Type of error expected %v, but not.", "DuplicationError")
 	}
-	for _, c := range cases {
-		_, err := NewEnumValidator(c.Definition)
-		if reflect.TypeOf(err) != reflect.TypeOf(c.Expected) {
-			t.Errorf("expected %v, but actual %v", reflect.TypeOf(c.Expected), reflect.TypeOf(err))
-		}
+
+	_, err = NewEnumValidator(EnumValidatorDefinition{Enumerate: []float64{}})
+	_, ok = err.(EmptyError)
+	if !ok {
+		t.Errorf("Type of error expected %v, but not.", "EmptyError")
+	}
+
+	_, err = NewEnumValidator(EnumValidatorDefinition{Enumerate: []float64{0.9, 1.0, 1.0}})
+	_, ok = err.(DuplicationError)
+	if !ok {
+		t.Errorf("Type of error expected %v, but not.", "DuplicationError")
+	}
+
+	_, err = NewEnumValidator(EnumValidatorDefinition{Enumerate: []string{}})
+	_, ok = err.(EmptyError)
+	if !ok {
+		t.Errorf("Type of error expected %v, but not.", "EmptyError")
+	}
+
+	_, err = NewEnumValidator(EnumValidatorDefinition{Enumerate: []string{"foo", "bar", "foo"}})
+	_, ok = err.(DuplicationError)
+	if !ok {
+		t.Errorf("Type of error expected %v, but not.", "DuplicationError")
+	}
+
+	_, err = NewEnumValidator(EnumValidatorDefinition{Enumerate: []bool{true, false}})
+	_, ok = err.(TypeError)
+	if !ok {
+		t.Errorf("Type of error expected %v, but not.", "TypeError")
 	}
 }
 
