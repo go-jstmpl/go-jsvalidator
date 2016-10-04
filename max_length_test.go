@@ -6,23 +6,10 @@ import (
 )
 
 func TestMaxLength(t *testing.T) {
-	type MaxLengthTestCase struct {
-		Definition MaxLengthValidatorDefinition
-		Expected   error
-	}
-
-	cases := []MaxLengthTestCase{
-		{
-			Definition: MaxLengthValidatorDefinition{MaxLength: -1},
-			Expected:   NoLengthError{},
-		},
-	}
-
-	for _, c := range cases {
-		_, err := NewMaxLengthValidator(c.Definition)
-		if reflect.TypeOf(err) != reflect.TypeOf(c.Expected) {
-			t.Errorf("expected %v, but actual %v", reflect.TypeOf(c.Expected), reflect.TypeOf(err))
-		}
+	_, err := NewMaxLengthValidator(MaxLengthValidatorDefinition{MaxLength: -1})
+	_, ok := err.(NoLengthError)
+	if !ok {
+		t.Errorf("Type of error expected %v, but not.", "NoLengthError")
 	}
 }
 

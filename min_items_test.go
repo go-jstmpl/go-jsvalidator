@@ -5,22 +5,11 @@ import (
 	"testing"
 )
 
-func TestIntMinItems(t *testing.T) {
-	type IntMinItemsTestCase struct {
-		Definition MinItemsValidatorDefinition
-		Expected   error
-	}
-	cases := []IntMinItemsTestCase{
-		{
-			Definition: MinItemsValidatorDefinition{MinItems: -1},
-			Expected:   NoLengthError{},
-		},
-	}
-	for _, c := range cases {
-		_, err := NewMinItemsValidator(c.Definition)
-		if err == nil {
-			t.Errorf("expected %v, but actual %v", c.Expected, err)
-		}
+func TestMinItems(t *testing.T) {
+	_, err := NewMinItemsValidator(MinItemsValidatorDefinition{MinItems: -1})
+	_, ok := err.(NoLengthError)
+	if !ok {
+		t.Errorf("Type of error expected %v, but not.", "NoLengthError")
 	}
 }
 

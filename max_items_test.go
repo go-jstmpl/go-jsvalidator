@@ -6,19 +6,10 @@ import (
 )
 
 func TestMaxItems(t *testing.T) {
-	type MaxItemsTestCase struct {
-		Definition MaxItemsValidatorDefinition
-		Expected   error
-	}
-	cases := []MaxItemsTestCase{{
-		Definition: MaxItemsValidatorDefinition{MaxItems: -1},
-		Expected:   NoLengthError{},
-	}}
-	for _, c := range cases {
-		_, err := NewMaxItemsValidator(c.Definition)
-		if err == nil {
-			t.Errorf("expected %+v, but actual %+v", c.Expected, err)
-		}
+	_, err := NewMaxItemsValidator(MaxItemsValidatorDefinition{MaxItems: -1})
+	_, ok := err.(NoLengthError)
+	if !ok {
+		t.Errorf("Type of error expected %v, but not.", "NoLengthError")
 	}
 }
 

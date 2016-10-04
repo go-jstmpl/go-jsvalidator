@@ -8,37 +8,34 @@ import (
 )
 
 func TestRequired(t *testing.T) {
-	type RequiredTestCase struct {
-		Definition RequiredValidatorDefinition
-		Expected   error
+	_, err := NewRequiredValidator(RequiredValidatorDefinition{Required: []string{}})
+	_, ok := err.(EmptyError)
+	if !ok {
+		t.Errorf("Type of error expected %v, but not.", "EmptyError")
 	}
-	cases := []RequiredTestCase{
-		{
-			Definition: RequiredValidatorDefinition{Required: []string{}},
-			Expected:   EmptyError{},
-		},
-		{
-			Definition: RequiredValidatorDefinition{Required: []string{"foo", "foo", "bar"}},
-			Expected:   DuplicationError{},
-		},
-		{
-			Definition: RequiredValidatorDefinition{Required: []string{"foo", "bar", "foo"}},
-			Expected:   DuplicationError{},
-		},
-		{
-			Definition: RequiredValidatorDefinition{Required: []string{"bar", "foo", "foo"}},
-			Expected:   DuplicationError{},
-		},
-		{
-			Definition: RequiredValidatorDefinition{Required: []string{"foo", "foo", "foo"}},
-			Expected:   DuplicationError{},
-		},
+
+	_, err = NewRequiredValidator(RequiredValidatorDefinition{Required: []string{"foo", "foo", "bar"}})
+	_, ok = err.(DuplicationError)
+	if !ok {
+		t.Errorf("Type of error expected %v, but not.", "DuplicationError")
 	}
-	for _, c := range cases {
-		_, err := NewRequiredValidator(c.Definition)
-		if reflect.TypeOf(err) != reflect.TypeOf(c.Expected) {
-			t.Errorf("expected %v, but actual %v", reflect.TypeOf(c.Expected), reflect.TypeOf(err))
-		}
+
+	_, err = NewRequiredValidator(RequiredValidatorDefinition{Required: []string{"foo", "bar", "foo"}})
+	_, ok = err.(DuplicationError)
+	if !ok {
+		t.Errorf("Type of error expected %v, but not.", "DuplicationError")
+	}
+
+	_, err = NewRequiredValidator(RequiredValidatorDefinition{Required: []string{"bar", "foo", "foo"}})
+	_, ok = err.(DuplicationError)
+	if !ok {
+		t.Errorf("Type of error expected %v, but not.", "DuplicationError")
+	}
+
+	_, err = NewRequiredValidator(RequiredValidatorDefinition{Required: []string{"foo", "foo", "foo"}})
+	_, ok = err.(DuplicationError)
+	if !ok {
+		t.Errorf("Type of error expected %v, but not.", "DuplicationError")
 	}
 }
 

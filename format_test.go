@@ -6,22 +6,10 @@ import (
 )
 
 func TestFormat(t *testing.T) {
-	type FormatTestCase struct {
-		Definition FormatValidatorDefinition
-		Expected   error
-	}
-	cases := []FormatTestCase{
-		{
-			Definition: FormatValidatorDefinition{Format: "password"},
-			Expected:   InvalidFormatError{},
-		},
-	}
-
-	for _, c := range cases {
-		_, err := NewFormatValidator(c.Definition)
-		if reflect.TypeOf(err) != reflect.TypeOf(c.Expected) {
-			t.Errorf("expected %v, but actual %v", reflect.TypeOf(c.Expected), reflect.TypeOf(err))
-		}
+	_, err := NewFormatValidator(FormatValidatorDefinition{Format: "password"})
+	_, ok := err.(InvalidFormatError)
+	if !ok {
+		t.Errorf("Type of error expected %v, but not.", "InvalidFormatError")
 	}
 }
 
