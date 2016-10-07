@@ -1,29 +1,31 @@
-package validator
+package validator_test
 
 import (
 	"reflect"
 	"testing"
+
+	"github.com/go-jstmpl/go-jsvalidator"
 )
 
 func TestPattern(t *testing.T) {
-	_, err := NewPatternValidator(PatternValidatorDefinition{Pattern: ""})
-	_, ok := err.(EmptyError)
+	_, err := validator.NewPatternValidator(validator.PatternValidatorDefinition{Pattern: ""})
+	_, ok := err.(validator.EmptyError)
 	if !ok {
 		t.Errorf("Type of error expected %v, but not.", "EmptyError")
 	}
 
-	_, err = NewPatternValidator(PatternValidatorDefinition{Pattern: "[a-z"})
-	_, ok = err.(InvalidPatternError)
+	_, err = validator.NewPatternValidator(validator.PatternValidatorDefinition{Pattern: "[a-z"})
+	_, ok = err.(validator.InvalidPatternError)
 	if !ok {
 		t.Errorf("Type of error expected %v, but not.", "InvalidPatternError")
 	}
 }
 
 func TestPatternValidator(t *testing.T) {
-	definition := PatternValidatorDefinition{
+	definition := validator.PatternValidatorDefinition{
 		Pattern: "^\\d{7}$",
 	}
-	validator, err := NewPatternValidator(definition)
+	va, err := validator.NewPatternValidator(definition)
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -39,7 +41,7 @@ func TestPatternValidator(t *testing.T) {
 		},
 		{
 			Input: "abcdefg",
-			Expected: &PatternValidationError{
+			Expected: &validator.PatternValidationError{
 				Input:      "abcdefg",
 				Definition: definition,
 			},
@@ -47,7 +49,7 @@ func TestPatternValidator(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		err := validator.Validate(c.Input)
+		err := va.Validate(c.Input)
 		if !reflect.DeepEqual(err, c.Expected) {
 			t.Errorf("expected %v, but actual %v", c.Expected, err)
 		}

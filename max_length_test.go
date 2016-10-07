@@ -1,23 +1,25 @@
-package validator
+package validator_test
 
 import (
 	"reflect"
 	"testing"
+
+	"github.com/go-jstmpl/go-jsvalidator"
 )
 
 func TestMaxLength(t *testing.T) {
-	_, err := NewMaxLengthValidator(MaxLengthValidatorDefinition{MaxLength: -1})
-	_, ok := err.(NoLengthError)
+	_, err := validator.NewMaxLengthValidator(validator.MaxLengthValidatorDefinition{MaxLength: -1})
+	_, ok := err.(validator.NoLengthError)
 	if !ok {
 		t.Errorf("Type of error expected %v, but not.", "NoLengthError")
 	}
 }
 
 func TestMaxLengthValidator(t *testing.T) {
-	definition := MaxLengthValidatorDefinition{
+	definition := validator.MaxLengthValidatorDefinition{
 		MaxLength: 5,
 	}
-	validator, err := NewMaxLengthValidator(definition)
+	va, err := validator.NewMaxLengthValidator(definition)
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -38,7 +40,7 @@ func TestMaxLengthValidator(t *testing.T) {
 		},
 		{
 			Input: "あいうえおか",
-			Expected: &MaxLengthValidationError{
+			Expected: &validator.MaxLengthValidationError{
 				Input:      "あいうえおか",
 				Definition: definition,
 			},
@@ -50,7 +52,7 @@ func TestMaxLengthValidator(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		err := validator.Validate(c.Input)
+		err := va.Validate(c.Input)
 		if !reflect.DeepEqual(err, c.Expected) {
 			t.Errorf("expected %v, but actual %v", c.Expected, err)
 		}

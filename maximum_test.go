@@ -1,18 +1,20 @@
-package validator
+package validator_test
 
 import (
 	"reflect"
 	"testing"
+
+	"github.com/go-jstmpl/go-jsvalidator"
 )
 
 func TestMaximumValidator(t *testing.T) {
 	// Case type int and exclusive is false
-	definition := MaximumValidatorDefinition{
+	definition := validator.MaximumValidatorDefinition{
 		Maximum:   100,
 		Exclusive: false,
 	}
 
-	validator, err := NewMaximumValidator(definition)
+	va, err := validator.NewMaximumValidator(definition)
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -32,33 +34,33 @@ func TestMaximumValidator(t *testing.T) {
 		},
 		{
 			Input: 101,
-			Expected: &MaximumValidationError{
+			Expected: &validator.MaximumValidationError{
 				Input:      101,
 				Definition: definition,
 			},
 		},
 		{
 			Input: 10.1,
-			Expected: TypeError{
-				message: "input and maximum should be same type",
+			Expected: validator.TypeError{
+				Message: "input and maximum should be same type",
 			},
 		},
 	}
 
 	for _, c := range cases {
-		err := validator.Validate(c.Input)
+		err := va.Validate(c.Input)
 		if !reflect.DeepEqual(err, c.Expected) {
 			t.Errorf("expected %v, but actual %v", c.Expected, err)
 		}
 	}
 
 	// Case type int and exclusive is true
-	definition = MaximumValidatorDefinition{
+	definition = validator.MaximumValidatorDefinition{
 		Maximum:   100,
 		Exclusive: true,
 	}
 
-	validator, err = NewMaximumValidator(definition)
+	va, err = validator.NewMaximumValidator(definition)
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -69,14 +71,14 @@ func TestMaximumValidator(t *testing.T) {
 		},
 		{
 			Input: 100,
-			Expected: &MaximumValidationError{
+			Expected: &validator.MaximumValidationError{
 				Input:      100,
 				Definition: definition,
 			},
 		},
 		{
 			Input: 101,
-			Expected: &MaximumValidationError{
+			Expected: &validator.MaximumValidationError{
 				Input:      101,
 				Definition: definition,
 			},
@@ -84,19 +86,19 @@ func TestMaximumValidator(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		err := validator.Validate(c.Input)
+		err := va.Validate(c.Input)
 		if !reflect.DeepEqual(err, c.Expected) {
 			t.Errorf("expected %v, but actual %v", c.Expected, err)
 		}
 	}
 
 	// Case type float64 and exclusive is false
-	definition = MaximumValidatorDefinition{
+	definition = validator.MaximumValidatorDefinition{
 		Maximum:   1.0,
 		Exclusive: false,
 	}
 
-	validator, err = NewMaximumValidator(definition)
+	va, err = validator.NewMaximumValidator(definition)
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -111,33 +113,33 @@ func TestMaximumValidator(t *testing.T) {
 		},
 		{
 			Input: 1.1,
-			Expected: &MaximumValidationError{
+			Expected: &validator.MaximumValidationError{
 				Input:      1.1,
 				Definition: definition,
 			},
 		},
 		{
 			Input: 10,
-			Expected: TypeError{
-				message: "input and maximum should be same type",
+			Expected: validator.TypeError{
+				Message: "input and maximum should be same type",
 			},
 		},
 	}
 
 	for _, c := range cases {
-		err := validator.Validate(c.Input)
+		err := va.Validate(c.Input)
 		if !reflect.DeepEqual(err, c.Expected) {
 			t.Errorf("expected %v, but actual %v", c.Expected, err)
 		}
 	}
 
 	// Case type float64 and exclusive is true
-	definition = MaximumValidatorDefinition{
+	definition = validator.MaximumValidatorDefinition{
 		Maximum:   1.0,
 		Exclusive: true,
 	}
 
-	validator, err = NewMaximumValidator(definition)
+	va, err = validator.NewMaximumValidator(definition)
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -148,14 +150,14 @@ func TestMaximumValidator(t *testing.T) {
 		},
 		{
 			Input: 1.0,
-			Expected: &MaximumValidationError{
+			Expected: &validator.MaximumValidationError{
 				Input:      1.0,
 				Definition: definition,
 			},
 		},
 		{
 			Input: 1.1,
-			Expected: &MaximumValidationError{
+			Expected: &validator.MaximumValidationError{
 				Input:      1.1,
 				Definition: definition,
 			},
@@ -163,7 +165,7 @@ func TestMaximumValidator(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		err := validator.Validate(c.Input)
+		err := va.Validate(c.Input)
 		if !reflect.DeepEqual(err, c.Expected) {
 			t.Errorf("expected %v, but actual %v", c.Expected, err)
 		}

@@ -1,23 +1,25 @@
-package validator
+package validator_test
 
 import (
 	"reflect"
 	"testing"
+
+	"github.com/go-jstmpl/go-jsvalidator"
 )
 
 func TestMaxItems(t *testing.T) {
-	_, err := NewMaxItemsValidator(MaxItemsValidatorDefinition{MaxItems: -1})
-	_, ok := err.(NoLengthError)
+	_, err := validator.NewMaxItemsValidator(validator.MaxItemsValidatorDefinition{MaxItems: -1})
+	_, ok := err.(validator.NoLengthError)
 	if !ok {
 		t.Errorf("Type of error expected %v, but not.", "NoLengthError")
 	}
 }
 
 func TestMaxItemsValidator(t *testing.T) {
-	definition := MaxItemsValidatorDefinition{
+	definition := validator.MaxItemsValidatorDefinition{
 		MaxItems: 3,
 	}
-	validator, err := NewMaxItemsValidator(definition)
+	va, err := validator.NewMaxItemsValidator(definition)
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -66,21 +68,21 @@ func TestMaxItemsValidator(t *testing.T) {
 		},
 		{
 			Input: []int{1, 2, 3, 4},
-			Expected: &MaxItemsValidationError{
+			Expected: &validator.MaxItemsValidationError{
 				Input:      []int{1, 2, 3, 4},
 				Definition: definition,
 			},
 		},
 		{
 			Input: []string{"foo", "bar", "bas", "qux"},
-			Expected: &MaxItemsValidationError{
+			Expected: &validator.MaxItemsValidationError{
 				Input:      []string{"foo", "bar", "bas", "qux"},
 				Definition: definition,
 			},
 		},
 		{
 			Input: []float64{1, 2, 3, 4},
-			Expected: &MaxItemsValidationError{
+			Expected: &validator.MaxItemsValidationError{
 				Input:      []float64{1, 2, 3, 4},
 				Definition: definition,
 			},
@@ -88,7 +90,7 @@ func TestMaxItemsValidator(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		err := validator.Validate(c.Input)
+		err := va.Validate(c.Input)
 		if !reflect.DeepEqual(err, c.Expected) {
 			t.Errorf("expected %+v, but actual %+v", c.Expected, err)
 		}
