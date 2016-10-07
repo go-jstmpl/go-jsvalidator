@@ -191,4 +191,79 @@ func TestFormatValidator(t *testing.T) {
 			t.Errorf("expected %v, but actual %v", c.Expected, err)
 		}
 	}
+
+	definition = FormatValidatorDefinition{
+		Format: "password-0aA",
+	}
+	validator, err = NewFormatValidator(definition)
+	if err != nil {
+		t.Error(err.Error())
+	}
+
+	cases = []FormatValidationTestCase{
+		{
+			Input:    "aA0",
+			Expected: nil,
+		},
+		{
+			Input:    "aA0!",
+			Expected: nil,
+		},
+		{
+			Input: "aA0!あ",
+			Expected: &FormatValidationError{
+				Input:      "aA0!あ",
+				Definition: definition,
+			},
+		},
+		{
+			Input: "12345678",
+			Expected: &FormatValidationError{
+				Input:      "12345678",
+				Definition: definition,
+			},
+		},
+		{
+			Input: "password",
+			Expected: &FormatValidationError{
+				Input:      "password",
+				Definition: definition,
+			},
+		},
+		{
+			Input: "PASSWORD",
+			Expected: &FormatValidationError{
+				Input:      "PASSWORD",
+				Definition: definition,
+			},
+		},
+		{
+			Input: "Password",
+			Expected: &FormatValidationError{
+				Input:      "Password",
+				Definition: definition,
+			},
+		},
+		{
+			Input: "password123",
+			Expected: &FormatValidationError{
+				Input:      "password123",
+				Definition: definition,
+			},
+		},
+		{
+			Input: "PASSWORD123",
+			Expected: &FormatValidationError{
+				Input:      "PASSWORD123",
+				Definition: definition,
+			},
+		},
+	}
+
+	for _, c := range cases {
+		err := validator.Validate(c.Input)
+		if !reflect.DeepEqual(err, c.Expected) {
+			t.Errorf("expected %v, but actual %v", c.Expected, err)
+		}
+	}
 }
