@@ -6,7 +6,7 @@ import (
 )
 
 var (
-	rDateTime = regexp.MustCompile("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$")
+	rDateTime = regexp.MustCompile("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?(?:[+-]\\d{2}:\\d{2}|Z)$")
 	rEmail    = regexp.MustCompile("^.+@.+\\..+$")
 	rURI      = regexp.MustCompile("^[0-9a-zA-Z]+:\\/\\/.+$")
 )
