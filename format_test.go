@@ -30,7 +30,39 @@ func TestFormatValidator(t *testing.T) {
 	}
 	cases := []FormatValidationTestCase{
 		{
-			Input:    "2016-05-09T19:45:32Z",
+			Input:    "2016-10-07T16:58:37Z",
+			Expected: nil,
+		},
+		{
+			Input:    "2016-10-07T16:58:37+09:00",
+			Expected: nil,
+		},
+		{
+			Input:    "2016-10-07T16:58:37-09:00",
+			Expected: nil,
+		},
+		{
+			Input:    "2016-10-07T16:58:37.091Z",
+			Expected: nil,
+		},
+		{
+			Input:    "2016-10-07T16:58:37.091+09:00",
+			Expected: nil,
+		},
+		{
+			Input:    "2016-10-07T16:58:37.091-09:00",
+			Expected: nil,
+		},
+		{
+			Input:    "2016-10-07T16:58:37.091232123Z",
+			Expected: nil,
+		},
+		{
+			Input:    "2016-10-07T16:58:37.091232123+09:00",
+			Expected: nil,
+		},
+		{
+			Input:    "2016-10-07T16:58:37.091232123-09:00",
 			Expected: nil,
 		},
 		{
