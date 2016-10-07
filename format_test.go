@@ -193,7 +193,7 @@ func TestFormatValidator(t *testing.T) {
 	}
 
 	definition = FormatValidatorDefinition{
-		Format: "password-0aA",
+		Format: "password-0Aa",
 	}
 	validator, err = NewFormatValidator(definition)
 	if err != nil {
@@ -202,11 +202,127 @@ func TestFormatValidator(t *testing.T) {
 
 	cases = []FormatValidationTestCase{
 		{
+			Input:    "0Aa",
+			Expected: nil,
+		},
+		{
+			Input:    "0aA",
+			Expected: nil,
+		},
+		{
+			Input:    "A0a",
+			Expected: nil,
+		},
+		{
+			Input:    "Aa0",
+			Expected: nil,
+		},
+		{
+			Input:    "a0A",
+			Expected: nil,
+		},
+		{
 			Input:    "aA0",
 			Expected: nil,
 		},
 		{
+			Input:    "!0Aa",
+			Expected: nil,
+		},
+		{
+			Input:    "!0aA",
+			Expected: nil,
+		},
+		{
+			Input:    "!A0a",
+			Expected: nil,
+		},
+		{
+			Input:    "!Aa0",
+			Expected: nil,
+		},
+		{
+			Input:    "!a0A",
+			Expected: nil,
+		},
+		{
+			Input:    "!aA0",
+			Expected: nil,
+		},
+		{
+			Input:    "0!Aa",
+			Expected: nil,
+		},
+		{
+			Input:    "0!aA",
+			Expected: nil,
+		},
+		{
+			Input:    "0A!a",
+			Expected: nil,
+		},
+		{
+			Input:    "0Aa!",
+			Expected: nil,
+		},
+		{
+			Input:    "0a!A",
+			Expected: nil,
+		},
+		{
+			Input:    "0aA!",
+			Expected: nil,
+		},
+		{
+			Input:    "A!0a",
+			Expected: nil,
+		},
+		{
+			Input:    "A!a0",
+			Expected: nil,
+		},
+		{
+			Input:    "A0!a",
+			Expected: nil,
+		},
+		{
+			Input:    "A0a!",
+			Expected: nil,
+		},
+		{
+			Input:    "Aa!0",
+			Expected: nil,
+		},
+		{
+			Input:    "Aa0!",
+			Expected: nil,
+		},
+		{
+			Input:    "a!0A",
+			Expected: nil,
+		},
+		{
+			Input:    "a!A0",
+			Expected: nil,
+		},
+		{
+			Input:    "a0!A",
+			Expected: nil,
+		},
+		{
+			Input:    "a0A!",
+			Expected: nil,
+		},
+		{
+			Input:    "aA!0",
+			Expected: nil,
+		},
+		{
 			Input:    "aA0!",
+			Expected: nil,
+		},
+		{
+			Input:    "AZaz09!\"#$%&'()*+,-./:;<=>?@[\\]^_{|}~`",
 			Expected: nil,
 		},
 		{

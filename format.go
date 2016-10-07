@@ -41,31 +41,31 @@ func (f FormatValidator) Validate(input string) error {
 	switch f.definition.Format {
 	case "date-time":
 		ok := rDateTime.MatchString(input)
-		if ok == true {
+		if ok {
 			return nil
 		}
 		break
 	case "email":
 		ok := rEmail.MatchString(input)
-		if ok == true {
+		if ok {
 			return nil
 		}
 		break
 	case "hostname":
 		ok := isHostName(input)
-		if ok == true {
+		if ok {
 			return nil
 		}
 		break
 	case "uri":
 		ok := rURI.MatchString(input)
-		if ok == true {
+		if ok {
 			return nil
 		}
 		break
-	case "password-0aA":
+	case "password-0Aa":
 		ok := isPassword0Aa(input)
-		if ok == true {
+		if ok {
 			return nil
 		}
 		break
