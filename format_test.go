@@ -324,7 +324,7 @@ func TestFormatValidator(t *testing.T) {
 			Expected: nil,
 		},
 		{
-			Input:    "AZaz09!\"#$%&'()*+,-./:;<=>?@[\\]^_{|}~`",
+			Input:    "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~",
 			Expected: nil,
 		},
 		{
