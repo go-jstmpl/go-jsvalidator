@@ -1,23 +1,25 @@
-package validator
+package validator_test
 
 import (
 	"reflect"
 	"testing"
+
+	validator "github.com/go-jstmpl/go-jsvalidator"
 )
 
 func TestFormat(t *testing.T) {
-	_, err := NewFormatValidator(FormatValidatorDefinition{Format: "password"})
-	_, ok := err.(InvalidFormatError)
+	_, err := validator.NewFormatValidator(validator.FormatValidatorDefinition{Format: "password"})
+	_, ok := err.(validator.InvalidFormatError)
 	if !ok {
 		t.Errorf("Type of error expected %v, but not.", "InvalidFormatError")
 	}
 }
 
 func TestFormatValidator(t *testing.T) {
-	definition := FormatValidatorDefinition{
+	definition := validator.FormatValidatorDefinition{
 		Format: "date-time",
 	}
-	validator, err := NewFormatValidator(definition)
+	va, err := validator.NewFormatValidator(definition)
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -33,7 +35,7 @@ func TestFormatValidator(t *testing.T) {
 		},
 		{
 			Input: "209385790284750",
-			Expected: &FormatValidationError{
+			Expected: &validator.FormatValidationError{
 				Input:      "209385790284750",
 				Definition: definition,
 			},
@@ -41,15 +43,15 @@ func TestFormatValidator(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		err := validator.Validate(c.Input)
+		err := va.Validate(c.Input)
 		if !reflect.DeepEqual(err, c.Expected) {
 			t.Errorf("expected:%v ,actual:%v", c.Expected, err)
 		}
 	}
-	definition = FormatValidatorDefinition{
+	definition = validator.FormatValidatorDefinition{
 		Format: "email",
 	}
-	validator, err = NewFormatValidator(definition)
+	va, err = validator.NewFormatValidator(definition)
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -61,21 +63,21 @@ func TestFormatValidator(t *testing.T) {
 		},
 		{
 			Input: "foobar.com",
-			Expected: &FormatValidationError{
+			Expected: &validator.FormatValidationError{
 				Input:      "foobar.com",
 				Definition: definition,
 			},
 		},
 		{
 			Input: "foo@bar",
-			Expected: &FormatValidationError{
+			Expected: &validator.FormatValidationError{
 				Input:      "foo@bar",
 				Definition: definition,
 			},
 		},
 		{
 			Input: "foo@bar.",
-			Expected: &FormatValidationError{
+			Expected: &validator.FormatValidationError{
 				Input:      "foo@bar.",
 				Definition: definition,
 			},
@@ -83,16 +85,16 @@ func TestFormatValidator(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		err := validator.Validate(c.Input)
+		err := va.Validate(c.Input)
 		if !reflect.DeepEqual(err, c.Expected) {
 			t.Errorf("expected %v, but actual %v", c.Expected, err)
 		}
 	}
 
-	definition = FormatValidatorDefinition{
+	definition = validator.FormatValidatorDefinition{
 		Format: "hostname",
 	}
-	validator, err = NewFormatValidator(definition)
+	va, err = validator.NewFormatValidator(definition)
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -116,28 +118,28 @@ func TestFormatValidator(t *testing.T) {
 		},
 		{
 			Input: "example@example.com",
-			Expected: &FormatValidationError{
+			Expected: &validator.FormatValidationError{
 				Input:      "example@example.com",
 				Definition: definition,
 			},
 		},
 		{
 			Input: "example,com",
-			Expected: &FormatValidationError{
+			Expected: &validator.FormatValidationError{
 				Input:      "example,com",
 				Definition: definition,
 			},
 		},
 		{
 			Input: "example..com",
-			Expected: &FormatValidationError{
+			Expected: &validator.FormatValidationError{
 				Input:      "example..com",
 				Definition: definition,
 			},
 		},
 		{
 			Input: ".example.com",
-			Expected: &FormatValidationError{
+			Expected: &validator.FormatValidationError{
 				Input:      ".example.com",
 				Definition: definition,
 			},
@@ -145,16 +147,16 @@ func TestFormatValidator(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		err := validator.Validate(c.Input)
+		err := va.Validate(c.Input)
 		if !reflect.DeepEqual(err, c.Expected) {
 			t.Errorf("expected %v, but actual %v", c.Expected, err)
 		}
 	}
 
-	definition = FormatValidatorDefinition{
+	definition = validator.FormatValidatorDefinition{
 		Format: "uri",
 	}
-	validator, err = NewFormatValidator(definition)
+	va, err = validator.NewFormatValidator(definition)
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -178,7 +180,7 @@ func TestFormatValidator(t *testing.T) {
 		},
 		{
 			Input: "foobar.com",
-			Expected: &FormatValidationError{
+			Expected: &validator.FormatValidationError{
 				Input:      "foobar.com",
 				Definition: definition,
 			},
@@ -186,16 +188,16 @@ func TestFormatValidator(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		err := validator.Validate(c.Input)
+		err := va.Validate(c.Input)
 		if !reflect.DeepEqual(err, c.Expected) {
 			t.Errorf("expected %v, but actual %v", c.Expected, err)
 		}
 	}
 
-	definition = FormatValidatorDefinition{
+	definition = validator.FormatValidatorDefinition{
 		Format: "password-0Aa",
 	}
-	validator, err = NewFormatValidator(definition)
+	va, err = validator.NewFormatValidator(definition)
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -327,49 +329,49 @@ func TestFormatValidator(t *testing.T) {
 		},
 		{
 			Input: "aA0!あ",
-			Expected: &FormatValidationError{
+			Expected: &validator.FormatValidationError{
 				Input:      "aA0!あ",
 				Definition: definition,
 			},
 		},
 		{
 			Input: "12345678",
-			Expected: &FormatValidationError{
+			Expected: &validator.FormatValidationError{
 				Input:      "12345678",
 				Definition: definition,
 			},
 		},
 		{
 			Input: "password",
-			Expected: &FormatValidationError{
+			Expected: &validator.FormatValidationError{
 				Input:      "password",
 				Definition: definition,
 			},
 		},
 		{
 			Input: "PASSWORD",
-			Expected: &FormatValidationError{
+			Expected: &validator.FormatValidationError{
 				Input:      "PASSWORD",
 				Definition: definition,
 			},
 		},
 		{
 			Input: "Password",
-			Expected: &FormatValidationError{
+			Expected: &validator.FormatValidationError{
 				Input:      "Password",
 				Definition: definition,
 			},
 		},
 		{
 			Input: "password123",
-			Expected: &FormatValidationError{
+			Expected: &validator.FormatValidationError{
 				Input:      "password123",
 				Definition: definition,
 			},
 		},
 		{
 			Input: "PASSWORD123",
-			Expected: &FormatValidationError{
+			Expected: &validator.FormatValidationError{
 				Input:      "PASSWORD123",
 				Definition: definition,
 			},
@@ -377,7 +379,7 @@ func TestFormatValidator(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		err := validator.Validate(c.Input)
+		err := va.Validate(c.Input)
 		if !reflect.DeepEqual(err, c.Expected) {
 			t.Errorf("expected %v, but actual %v", c.Expected, err)
 		}
