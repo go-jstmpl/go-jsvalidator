@@ -31,7 +31,7 @@ func (f FormatValidationError) Error() string {
 
 func NewFormatValidator(definition FormatValidatorDefinition) (FormatValidator, error) {
 	switch definition.Format {
-	case "date-time", "email", "hostname", "uri":
+	case "date-time", "email", "hostname", "uri", "password-0Aa":
 		return FormatValidator{definition}, nil
 	}
 	return FormatValidator{}, InvalidFormatError{"the format is not found"}
@@ -41,25 +41,31 @@ func (f FormatValidator) Validate(input string) error {
 	switch f.definition.Format {
 	case "date-time":
 		ok := rDateTime.MatchString(input)
-		if ok == true {
+		if ok {
 			return nil
 		}
 		break
 	case "email":
 		ok := rEmail.MatchString(input)
-		if ok == true {
+		if ok {
 			return nil
 		}
 		break
 	case "hostname":
 		ok := isHostName(input)
-		if ok == true {
+		if ok {
 			return nil
 		}
 		break
 	case "uri":
 		ok := rURI.MatchString(input)
-		if ok == true {
+		if ok {
+			return nil
+		}
+		break
+	case "password-0Aa":
+		ok := isPassword0Aa(input)
+		if ok {
 			return nil
 		}
 		break
@@ -113,4 +119,29 @@ func isHostName(s string) bool {
 	}
 
 	return ok
+}
+
+func isPassword0Aa(pw string) bool {
+	large := false
+	small := false
+	number := false
+
+	for _, r := range pw {
+		switch {
+		case '0' <= r && r <= '9':
+			number = true
+			continue
+		case 'A' <= r && r <= 'Z':
+			large = true
+			continue
+		case 'a' <= r && r <= 'z':
+			small = true
+			continue
+		case '!' <= r && r <= '~': // when other ASCII characters
+			continue
+		default:
+			return false
+		}
+	}
+	return large && small && number
 }
