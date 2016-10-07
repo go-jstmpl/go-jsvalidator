@@ -1,23 +1,25 @@
-package validator
+package validator_test
 
 import (
 	"reflect"
 	"testing"
+
+	"github.com/go-jstmpl/go-jsvalidator"
 )
 
 func TestMinItems(t *testing.T) {
-	_, err := NewMinItemsValidator(MinItemsValidatorDefinition{MinItems: -1})
-	_, ok := err.(NoLengthError)
+	_, err := validator.NewMinItemsValidator(validator.MinItemsValidatorDefinition{MinItems: -1})
+	_, ok := err.(validator.NoLengthError)
 	if !ok {
 		t.Errorf("Type of error expected %v, but not.", "NoLengthError")
 	}
 }
 
 func TestMinItemsValidator(t *testing.T) {
-	definition := MinItemsValidatorDefinition{
+	definition := validator.MinItemsValidatorDefinition{
 		MinItems: 3,
 	}
-	validator, err := NewMinItemsValidator(definition)
+	va, err := validator.NewMinItemsValidator(definition)
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -29,14 +31,14 @@ func TestMinItemsValidator(t *testing.T) {
 	cases := []MinItemsValidatorTestCase{
 		{
 			Input: []int{1},
-			Expected: &MinItemsValidationError{
+			Expected: &validator.MinItemsValidationError{
 				Input:      []int{1},
 				Definition: definition,
 			},
 		},
 		{
 			Input: []int{1, 2},
-			Expected: &MinItemsValidationError{
+			Expected: &validator.MinItemsValidationError{
 				Input:      []int{1, 2},
 				Definition: definition,
 			},
@@ -51,7 +53,7 @@ func TestMinItemsValidator(t *testing.T) {
 		},
 		{
 			Input: []string{"foo"},
-			Expected: &MinItemsValidationError{
+			Expected: &validator.MinItemsValidationError{
 				Input: []string{"foo"},
 
 				Definition: definition,
@@ -67,7 +69,7 @@ func TestMinItemsValidator(t *testing.T) {
 		},
 		{
 			Input: []float64{1},
-			Expected: &MinItemsValidationError{
+			Expected: &validator.MinItemsValidationError{
 				Input:      []float64{1},
 				Definition: definition,
 			},
@@ -83,7 +85,7 @@ func TestMinItemsValidator(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		err := validator.Validate(c.Input)
+		err := va.Validate(c.Input)
 		if !reflect.DeepEqual(err, c.Expected) {
 			t.Errorf("expected %v, but actual %v", c.Expected, err)
 		}

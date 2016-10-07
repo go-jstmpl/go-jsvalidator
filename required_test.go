@@ -1,49 +1,50 @@
-package validator
+package validator_test
 
 import (
 	"reflect"
 	"testing"
 
+	"github.com/go-jstmpl/go-jsvalidator"
 	"github.com/gocraft/dbr"
 )
 
 func TestRequired(t *testing.T) {
-	_, err := NewRequiredValidator(RequiredValidatorDefinition{Required: []string{}})
-	_, ok := err.(EmptyError)
+	_, err := validator.NewRequiredValidator(validator.RequiredValidatorDefinition{Required: []string{}})
+	_, ok := err.(validator.EmptyError)
 	if !ok {
 		t.Errorf("Type of error expected %v, but not.", "EmptyError")
 	}
 
-	_, err = NewRequiredValidator(RequiredValidatorDefinition{Required: []string{"foo", "foo", "bar"}})
-	_, ok = err.(DuplicationError)
+	_, err = validator.NewRequiredValidator(validator.RequiredValidatorDefinition{Required: []string{"foo", "foo", "bar"}})
+	_, ok = err.(validator.DuplicationError)
 	if !ok {
 		t.Errorf("Type of error expected %v, but not.", "DuplicationError")
 	}
 
-	_, err = NewRequiredValidator(RequiredValidatorDefinition{Required: []string{"foo", "bar", "foo"}})
-	_, ok = err.(DuplicationError)
+	_, err = validator.NewRequiredValidator(validator.RequiredValidatorDefinition{Required: []string{"foo", "bar", "foo"}})
+	_, ok = err.(validator.DuplicationError)
 	if !ok {
 		t.Errorf("Type of error expected %v, but not.", "DuplicationError")
 	}
 
-	_, err = NewRequiredValidator(RequiredValidatorDefinition{Required: []string{"bar", "foo", "foo"}})
-	_, ok = err.(DuplicationError)
+	_, err = validator.NewRequiredValidator(validator.RequiredValidatorDefinition{Required: []string{"bar", "foo", "foo"}})
+	_, ok = err.(validator.DuplicationError)
 	if !ok {
 		t.Errorf("Type of error expected %v, but not.", "DuplicationError")
 	}
 
-	_, err = NewRequiredValidator(RequiredValidatorDefinition{Required: []string{"foo", "foo", "foo"}})
-	_, ok = err.(DuplicationError)
+	_, err = validator.NewRequiredValidator(validator.RequiredValidatorDefinition{Required: []string{"foo", "foo", "foo"}})
+	_, ok = err.(validator.DuplicationError)
 	if !ok {
 		t.Errorf("Type of error expected %v, but not.", "DuplicationError")
 	}
 }
 
 func TestRequiredValidator(t *testing.T) {
-	definition := RequiredValidatorDefinition{
+	definition := validator.RequiredValidatorDefinition{
 		Required: []string{"ID", "Addr"},
 	}
-	validator, err := NewRequiredValidator(definition)
+	va, err := validator.NewRequiredValidator(definition)
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -78,7 +79,7 @@ func TestRequiredValidator(t *testing.T) {
 		{
 			Message: "non-struct",
 			Input:   "foo",
-			Expected: &InvalidFieldTypeError{
+			Expected: &validator.InvalidFieldTypeError{
 				Input:      "foo",
 				Definition: definition,
 			},
@@ -96,7 +97,7 @@ func TestRequiredValidator(t *testing.T) {
 		{
 			Message: "non-pointer of sample3",
 			Input:   sample3,
-			Expected: &RequiredValidationError{
+			Expected: &validator.RequiredValidationError{
 				Input:      sample3,
 				Definition: definition,
 			},
@@ -114,7 +115,7 @@ func TestRequiredValidator(t *testing.T) {
 		{
 			Message: "pointer of sample3",
 			Input:   &sample3,
-			Expected: &RequiredValidationError{
+			Expected: &validator.RequiredValidationError{
 				Input:      &sample3,
 				Definition: definition,
 			},
@@ -122,7 +123,7 @@ func TestRequiredValidator(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		err := validator.Validate(c.Input)
+		err := va.Validate(c.Input)
 		if !reflect.DeepEqual(err, c.Expected) {
 			t.Errorf("%s: expected %+v, but actual %+v", c.Message, c.Expected, err)
 		}

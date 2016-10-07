@@ -61,9 +61,9 @@ func (e InvalidFieldTypeError) Error() string {
 
 // TypeError for Validate method
 type TypeError struct {
-	message string
+	Message string
 }
 
 func (e TypeError) Error() string {
-	return e.message
+	return e.Message
 }

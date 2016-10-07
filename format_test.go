@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	validator "github.com/go-jstmpl/go-jsvalidator"
+	"github.com/go-jstmpl/go-jsvalidator"
 )
 
 func TestFormat(t *testing.T) {

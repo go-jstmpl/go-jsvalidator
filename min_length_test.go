@@ -1,23 +1,25 @@
-package validator
+package validator_test
 
 import (
 	"reflect"
 	"testing"
+
+	"github.com/go-jstmpl/go-jsvalidator"
 )
 
 func TestMinLength(t *testing.T) {
-	_, err := NewMinLengthValidator(MinLengthValidatorDefinition{MinLength: -1})
-	_, ok := err.(NoLengthError)
+	_, err := validator.NewMinLengthValidator(validator.MinLengthValidatorDefinition{MinLength: -1})
+	_, ok := err.(validator.NoLengthError)
 	if !ok {
 		t.Errorf("Type of error expected %v, but not.", "NoLengthError")
 	}
 }
 
 func TestMinLengthValidator(t *testing.T) {
-	definition := MinLengthValidatorDefinition{
+	definition := validator.MinLengthValidatorDefinition{
 		MinLength: 5,
 	}
-	validator, err := NewMinLengthValidator(definition)
+	va, err := validator.NewMinLengthValidator(definition)
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -37,7 +39,7 @@ func TestMinLengthValidator(t *testing.T) {
 		},
 		{
 			Input: "あいうえ",
-			Expected: &MinLengthValidationError{
+			Expected: &validator.MinLengthValidationError{
 				Input:      "あいうえ",
 				Definition: definition,
 			},
@@ -49,7 +51,7 @@ func TestMinLengthValidator(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		err := validator.Validate(c.Input)
+		err := va.Validate(c.Input)
 		if !reflect.DeepEqual(err, c.Expected) {
 			t.Errorf("expected %v, but actual %v", c.Expected, err)
 		}
