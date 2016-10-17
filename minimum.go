@@ -4,72 +4,86 @@ import (
 	"fmt"
 )
 
-type MinimumValidator struct {
-	definition MinimumValidatorDefinition
+type IntMinimumValidator struct {
+	definition IntMinimumValidatorDefinition
 }
 
-type MinimumValidatorDefinition struct {
-	Minimum   interface{} `json:"minimum"`
-	Exclusive bool        `json:"exclusive"`
+type IntMinimumValidatorDefinition struct {
+	Minimum   int  `json:"minimum"`
+	Exclusive bool `json:"exclusive"`
 }
 
-type MinimumValidationError struct {
-	Definition MinimumValidatorDefinition `json:"definition"`
-	Input      interface{}                `json:"input"`
+type IntMinimumValidationError struct {
+	Definition IntMinimumValidatorDefinition `json:"definition"`
+	Input      int                           `json:"input"`
 }
 
-func (i MinimumValidationError) Error() string {
-	return fmt.Sprintf("should be greater than %+v but actual value is %+v with option exlusive %t\n",
+func (i IntMinimumValidationError) Error() string {
+	return fmt.Sprintf("should be greater than %d but actual value is %d with option exlusive %t\n",
 		i.Definition.Minimum, i.Input, i.Definition.Exclusive)
 }
 
-func NewMinimumValidator(definition MinimumValidatorDefinition) (MinimumValidator, error) {
-	return MinimumValidator{definition}, nil
+func NewIntMinimumValidator(definition IntMinimumValidatorDefinition) (IntMinimumValidator, error) {
+	return IntMinimumValidator{definition}, nil
 }
 
-func (m MinimumValidator) Validate(input interface{}) error {
-	switch input := input.(type) {
-	case int:
-		min, ok := m.definition.Minimum.(int)
-		if !ok {
-			return TypeError{"input and maximum should be same type"}
-		}
-
-		if !m.definition.Exclusive {
-			if input >= min {
-				return nil
-			}
-			return &MinimumValidationError{
-				m.definition,
-				input,
-			}
-		}
-		if input > min {
+func (m IntMinimumValidator) Validate(input int) error {
+	if !m.definition.Exclusive {
+		if input >= m.definition.Minimum {
 			return nil
 		}
-	case float64:
-		min, ok := m.definition.Minimum.(float64)
-		if !ok {
-			return TypeError{"input and maximum should be same type"}
+		return &IntMinimumValidationError{
+			m.definition,
+			input,
 		}
+	}
+	if input > m.definition.Minimum {
+		return nil
+	}
+	return &IntMinimumValidationError{
+		m.definition,
+		input,
+	}
+}
 
-		if !m.definition.Exclusive {
-			if input >= min {
-				return nil
-			}
-			return &MinimumValidationError{
-				m.definition,
-				input,
-			}
-		}
-		if input > min {
+type FloatMinimumValidator struct {
+	definition FloatMinimumValidatorDefinition
+}
+
+type FloatMinimumValidatorDefinition struct {
+	Minimum   float64 `json:"minimum"`
+	Exclusive bool    `json:"exclusive"`
+}
+
+type FloatMinimumValidationError struct {
+	Definition FloatMinimumValidatorDefinition `json:"definition"`
+	Input      float64                         `json:"input"`
+}
+
+func (f FloatMinimumValidationError) Error() string {
+	return fmt.Sprintf("should be greater than %g but actual value is %g with option exlusive %t\n",
+		f.Definition.Minimum, f.Input, f.Definition.Exclusive)
+}
+
+func NewFloatMinimumValidator(definition FloatMinimumValidatorDefinition) (FloatMinimumValidator, error) {
+	return FloatMinimumValidator{definition}, nil
+}
+
+func (m FloatMinimumValidator) Validate(input float64) error {
+	if !m.definition.Exclusive {
+		if input >= m.definition.Minimum {
 			return nil
 		}
-	default:
-		return TypeError{"should be int or float64"}
+		return &FloatMinimumValidationError{
+			m.definition,
+			input,
+		}
 	}
 
-	return &MinimumValidationError{
+	if input > m.definition.Minimum {
+		return nil
+	}
+	return &FloatMinimumValidationError{
 		m.definition,
 		input,
 	}
