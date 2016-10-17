@@ -1,9 +1,6 @@
-package validator
+package slices
 
-import (
-	"fmt"
-	"reflect"
-)
+import "fmt"
 
 type MaxItemsValidator struct {
 	definition MaxItemsValidatorDefinition
@@ -18,30 +15,27 @@ type MaxItemsValidationError struct {
 	Input      interface{}                 `json:"input"`
 }
 
-func (i MaxItemsValidationError) Error() string {
-	l, _ := i.Input.([]interface{})
-	return fmt.Sprintf("the number of input items should be less than MaxItems:'%d' but actual value of input has '%d' items",
-		i.Definition.MaxItems, len(l))
+func (err MaxItemsValidationError) Error() string {
+	return fmt.Sprintf("the length of %v should be less than %d",
+		err.Input, err.Definition.MaxItems)
 }
 
 func NewMaxItemsValidator(definition MaxItemsValidatorDefinition) (MaxItemsValidator, error) {
 	if definition.MaxItems < 0 {
-		return MaxItemsValidator{}, NoLengthError{"the value of maxItems should be greater than, or equal to, 0"}
+		return MaxItemsValidator{}, &NoLengthError{}
 	}
 	return MaxItemsValidator{definition}, nil
 }
 
 func (i MaxItemsValidator) Validate(input interface{}) error {
-	switch reflect.TypeOf(input).Kind() {
-	case reflect.Slice:
-		s := reflect.ValueOf(input)
-		if s.Len() <= i.definition.MaxItems {
-			return nil
-		}
-	default:
-		return TypeError{"input should be slice"}
+	slice, err := toSlice(input)
+	if err != nil {
+		return err
 	}
 
+	if len(slice) <= i.definition.MaxItems {
+		return nil
+	}
 	return &MaxItemsValidationError{
 		i.definition,
 		input,

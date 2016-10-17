@@ -1,25 +1,25 @@
-package validator_test
+package strings_test
 
 import (
 	"reflect"
 	"testing"
 
-	"github.com/go-jstmpl/go-jsvalidator"
+	"github.com/go-jstmpl/go-jsvalidator/strings"
 )
 
 func TestMinLength(t *testing.T) {
-	_, err := validator.NewMinLengthValidator(validator.MinLengthValidatorDefinition{MinLength: -1})
-	_, ok := err.(validator.NoLengthError)
+	_, err := strings.NewMinLengthValidator(strings.MinLengthValidatorDefinition{MinLength: -1})
+	_, ok := err.(strings.NoLengthError)
 	if !ok {
 		t.Errorf("Type of error expected %v, but not.", "NoLengthError")
 	}
 }
 
 func TestMinLengthValidator(t *testing.T) {
-	definition := validator.MinLengthValidatorDefinition{
+	definition := strings.MinLengthValidatorDefinition{
 		MinLength: 5,
 	}
-	va, err := validator.NewMinLengthValidator(definition)
+	va, err := strings.NewMinLengthValidator(definition)
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -39,7 +39,7 @@ func TestMinLengthValidator(t *testing.T) {
 		},
 		{
 			Input: "あいうえ",
-			Expected: &validator.MinLengthValidationError{
+			Expected: &strings.MinLengthValidationError{
 				Input:      "あいうえ",
 				Definition: definition,
 			},
