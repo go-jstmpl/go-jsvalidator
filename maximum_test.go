@@ -7,167 +7,146 @@ import (
 	"github.com/go-jstmpl/go-jsvalidator"
 )
 
-func TestMaximumValidator(t *testing.T) {
-	// Case type int and exclusive is false
-	definition := validator.MaximumValidatorDefinition{
+type IntMaximumValidatorTestCase struct {
+	Input    int
+	Expected error
+}
+
+func TestIntMaximumValidator(t *testing.T) {
+	// Case exclusive is false
+	definition := validator.IntMaximumValidatorDefinition{
 		Maximum:   100,
 		Exclusive: false,
 	}
 
-	va, err := validator.NewMaximumValidator(definition)
+	va, err := validator.NewIntMaximumValidator(definition)
 	if err != nil {
 		t.Error(err.Error())
 	}
+	tests := []IntMaximumValidatorTestCase{{
+		Input:    99,
+		Expected: nil,
+	}, {
+		Input:    100,
+		Expected: nil,
+	}, {
+		Input: 101,
+		Expected: &validator.IntMaximumValidationError{
+			Input:      101,
+			Definition: definition,
+		},
+	}}
 
-	type MaximumValidatorTestCase struct {
-		Input    interface{}
-		Expected error
-	}
-	cases := []MaximumValidatorTestCase{
-		{
-			Input:    99,
-			Expected: nil,
-		},
-		{
-			Input:    100,
-			Expected: nil,
-		},
-		{
-			Input: 101,
-			Expected: &validator.MaximumValidationError{
-				Input:      101,
-				Definition: definition,
-			},
-		},
-		{
-			Input: 10.1,
-			Expected: validator.TypeError{
-				Message: "input and maximum should be same type",
-			},
-		},
-	}
-
-	for _, c := range cases {
-		err := va.Validate(c.Input)
-		if !reflect.DeepEqual(err, c.Expected) {
-			t.Errorf("expected %v, but actual %v", c.Expected, err)
+	for _, test := range tests {
+		err := va.Validate(test.Input)
+		if !reflect.DeepEqual(err, test.Expected) {
+			t.Errorf("expected:%v ,actual:%v", test.Expected, err)
 		}
 	}
 
-	// Case type int and exclusive is true
-	definition = validator.MaximumValidatorDefinition{
+	// Case exclusive is true
+	definition = validator.IntMaximumValidatorDefinition{
 		Maximum:   100,
 		Exclusive: true,
 	}
 
-	va, err = validator.NewMaximumValidator(definition)
+	va, err = validator.NewIntMaximumValidator(definition)
 	if err != nil {
 		t.Error(err.Error())
 	}
-	cases = []MaximumValidatorTestCase{
-		{
-			Input:    99,
-			Expected: nil,
+	tests = []IntMaximumValidatorTestCase{{
+		Input:    99,
+		Expected: nil,
+	}, {
+		Input: 100,
+		Expected: &validator.IntMaximumValidationError{
+			Input:      100,
+			Definition: definition,
 		},
-		{
-			Input: 100,
-			Expected: &validator.MaximumValidationError{
-				Input:      100,
-				Definition: definition,
-			},
+	}, {
+		Input: 101,
+		Expected: &validator.IntMaximumValidationError{
+			Input:      101,
+			Definition: definition,
 		},
-		{
-			Input: 101,
-			Expected: &validator.MaximumValidationError{
-				Input:      101,
-				Definition: definition,
-			},
-		},
-	}
+	}}
 
-	for _, c := range cases {
-		err := va.Validate(c.Input)
-		if !reflect.DeepEqual(err, c.Expected) {
-			t.Errorf("expected %v, but actual %v", c.Expected, err)
+	for _, test := range tests {
+		err := va.Validate(test.Input)
+		if !reflect.DeepEqual(err, test.Expected) {
+			t.Errorf("expected:%v ,actual:%v", test.Expected, err)
 		}
 	}
+}
 
-	// Case type float64 and exclusive is false
-	definition = validator.MaximumValidatorDefinition{
+type FloatMaximumValidatorTestCase struct {
+	Input    float64
+	Expected error
+}
+
+func TestFloatMaximumValidator(t *testing.T) {
+	// Case exclusive is false
+	definition := validator.FloatMaximumValidatorDefinition{
 		Maximum:   1.0,
 		Exclusive: false,
 	}
 
-	va, err = validator.NewMaximumValidator(definition)
+	va, err := validator.NewFloatMaximumValidator(definition)
 	if err != nil {
 		t.Error(err.Error())
 	}
-	cases = []MaximumValidatorTestCase{
-		{
-			Input:    0.9,
-			Expected: nil,
+	tests := []FloatMaximumValidatorTestCase{{
+		Input:    0.9,
+		Expected: nil,
+	}, {
+		Input:    1.0,
+		Expected: nil,
+	}, {
+		Input: 1.1,
+		Expected: &validator.FloatMaximumValidationError{
+			Input:      1.1,
+			Definition: definition,
 		},
-		{
-			Input:    1.0,
-			Expected: nil,
-		},
-		{
-			Input: 1.1,
-			Expected: &validator.MaximumValidationError{
-				Input:      1.1,
-				Definition: definition,
-			},
-		},
-		{
-			Input: 10,
-			Expected: validator.TypeError{
-				Message: "input and maximum should be same type",
-			},
-		},
-	}
+	}}
 
-	for _, c := range cases {
-		err := va.Validate(c.Input)
-		if !reflect.DeepEqual(err, c.Expected) {
-			t.Errorf("expected %v, but actual %v", c.Expected, err)
+	for _, test := range tests {
+		err := va.Validate(test.Input)
+		if !reflect.DeepEqual(err, test.Expected) {
+			t.Errorf("expected:%v ,actual:%v", test.Expected, err)
 		}
 	}
 
-	// Case type float64 and exclusive is true
-	definition = validator.MaximumValidatorDefinition{
+	// Case exclusive is true
+	definition = validator.FloatMaximumValidatorDefinition{
 		Maximum:   1.0,
 		Exclusive: true,
 	}
 
-	va, err = validator.NewMaximumValidator(definition)
+	va, err = validator.NewFloatMaximumValidator(definition)
 	if err != nil {
 		t.Error(err.Error())
 	}
-	cases = []MaximumValidatorTestCase{
-		{
-			Input:    0.9,
-			Expected: nil,
+	tests = []FloatMaximumValidatorTestCase{{
+		Input:    0.9,
+		Expected: nil,
+	}, {
+		Input: 1.0,
+		Expected: &validator.FloatMaximumValidationError{
+			Input:      1.0,
+			Definition: definition,
 		},
-		{
-			Input: 1.0,
-			Expected: &validator.MaximumValidationError{
-				Input:      1.0,
-				Definition: definition,
-			},
+	}, {
+		Input: 1.1,
+		Expected: &validator.FloatMaximumValidationError{
+			Input:      1.1,
+			Definition: definition,
 		},
-		{
-			Input: 1.1,
-			Expected: &validator.MaximumValidationError{
-				Input:      1.1,
-				Definition: definition,
-			},
-		},
-	}
+	}}
 
-	for _, c := range cases {
-		err := va.Validate(c.Input)
-		if !reflect.DeepEqual(err, c.Expected) {
-			t.Errorf("expected %v, but actual %v", c.Expected, err)
+	for _, test := range tests {
+		err := va.Validate(test.Input)
+		if !reflect.DeepEqual(err, test.Expected) {
+			t.Errorf("expected:%v ,actual:%v", test.Expected, err)
 		}
 	}
 }
