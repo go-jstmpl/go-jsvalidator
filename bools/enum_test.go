@@ -17,22 +17,22 @@ func TestNewEnumValidator(t *testing.T) {
 	cases := []Case{
 		{
 			Message:    "empty slice",
-			Definition: bools.EnumValidatorDefinition{Enumerate: []bool{}},
+			Definition: bools.EnumValidatorDefinition{Enum: []bool{}},
 			Error:      bools.EnumDefinitionEmptyError,
 		},
 		{
 			Message:    "single element",
-			Definition: bools.EnumValidatorDefinition{Enumerate: []bool{true}},
+			Definition: bools.EnumValidatorDefinition{Enum: []bool{true}},
 			Error:      nil,
 		},
 		{
 			Message:    "multi elements",
-			Definition: bools.EnumValidatorDefinition{Enumerate: []bool{true, false}},
+			Definition: bools.EnumValidatorDefinition{Enum: []bool{true, false}},
 			Error:      nil,
 		},
 		{
 			Message:    "duplicated elements",
-			Definition: bools.EnumValidatorDefinition{Enumerate: []bool{true, false, true}},
+			Definition: bools.EnumValidatorDefinition{Enum: []bool{true, false, true}},
 			Error:      bools.EnumDefinitionDuplicationError,
 		},
 	}
@@ -47,7 +47,7 @@ func TestNewEnumValidator(t *testing.T) {
 
 func TestEnumvalidator(t *testing.T) {
 	def := bools.EnumValidatorDefinition{
-		Enumerate: []bool{true},
+		Enum: []bool{true},
 	}
 	v, err := bools.NewEnumValidator(def)
 	if err != nil {
@@ -61,12 +61,12 @@ func TestEnumvalidator(t *testing.T) {
 	}
 	cases := []Case{
 		{
-			Message: "a value exists in Enumerate",
+			Message: "a value exists in Enum",
 			Input:   true,
 			Error:   nil,
 		},
 		{
-			Message: "a value doesn't exist in Enumerate",
+			Message: "a value doesn't exist in Enum",
 			Input:   false,
 			Error: &bools.EnumValidationError{
 				Input:      false,

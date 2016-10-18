@@ -17,22 +17,22 @@ func TestNewEnumValidator(t *testing.T) {
 	cases := []Case{
 		{
 			Message:    "empty slice",
-			Definition: ints.EnumValidatorDefinition{Enumerate: []int{}},
+			Definition: ints.EnumValidatorDefinition{Enum: []int{}},
 			Error:      ints.EnumDefinitionEmptyError,
 		},
 		{
 			Message:    "single element",
-			Definition: ints.EnumValidatorDefinition{Enumerate: []int{-10}},
+			Definition: ints.EnumValidatorDefinition{Enum: []int{-10}},
 			Error:      nil,
 		},
 		{
 			Message:    "multi elements",
-			Definition: ints.EnumValidatorDefinition{Enumerate: []int{-10, 0, 10}},
+			Definition: ints.EnumValidatorDefinition{Enum: []int{-10, 0, 10}},
 			Error:      nil,
 		},
 		{
 			Message:    "duplicated elements",
-			Definition: ints.EnumValidatorDefinition{Enumerate: []int{-10, 0, -10}},
+			Definition: ints.EnumValidatorDefinition{Enum: []int{-10, 0, -10}},
 			Error:      ints.EnumDefinitionDuplicationError,
 		},
 	}
@@ -47,7 +47,7 @@ func TestNewEnumValidator(t *testing.T) {
 
 func TestEnumvalidator(t *testing.T) {
 	def := ints.EnumValidatorDefinition{
-		Enumerate: []int{-10, 0, 10},
+		Enum: []int{-10, 0, 10},
 	}
 	v, err := ints.NewEnumValidator(def)
 	if err != nil {
@@ -61,22 +61,22 @@ func TestEnumvalidator(t *testing.T) {
 	}
 	cases := []Case{
 		{
-			Message: "a value exists at first in Enumerate",
+			Message: "a value exists at first in Enum",
 			Input:   -10,
 			Error:   nil,
 		},
 		{
-			Message: "a value exists at second in Enumerate",
+			Message: "a value exists at second in Enum",
 			Input:   0,
 			Error:   nil,
 		},
 		{
-			Message: "a value exists at end in Enumerate",
+			Message: "a value exists at end in Enum",
 			Input:   10,
 			Error:   nil,
 		},
 		{
-			Message: "a value doesn't exist in Enumerate",
+			Message: "a value doesn't exist in Enum",
 			Input:   -20,
 			Error: &ints.EnumValidationError{
 				Input:      -20,

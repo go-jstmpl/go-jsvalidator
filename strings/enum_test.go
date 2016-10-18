@@ -17,22 +17,22 @@ func TestNewEnumValidator(t *testing.T) {
 	cases := []Case{
 		{
 			Message:    "empty slice",
-			Definition: strings.EnumValidatorDefinition{Enumerate: []string{}},
+			Definition: strings.EnumValidatorDefinition{Enum: []string{}},
 			Error:      strings.EnumDefinitionEmptyError,
 		},
 		{
 			Message:    "single element",
-			Definition: strings.EnumValidatorDefinition{Enumerate: []string{"foo"}},
+			Definition: strings.EnumValidatorDefinition{Enum: []string{"foo"}},
 			Error:      nil,
 		},
 		{
 			Message:    "multi elements",
-			Definition: strings.EnumValidatorDefinition{Enumerate: []string{"foo", "bar"}},
+			Definition: strings.EnumValidatorDefinition{Enum: []string{"foo", "bar"}},
 			Error:      nil,
 		},
 		{
 			Message:    "duplicated elements",
-			Definition: strings.EnumValidatorDefinition{Enumerate: []string{"foo", "bar", "foo"}},
+			Definition: strings.EnumValidatorDefinition{Enum: []string{"foo", "bar", "foo"}},
 			Error:      strings.EnumDefinitionDuplicationError,
 		},
 	}
@@ -47,7 +47,7 @@ func TestNewEnumValidator(t *testing.T) {
 
 func TestEnumvalidator(t *testing.T) {
 	def := strings.EnumValidatorDefinition{
-		Enumerate: []string{"foo", "bar", "baz"},
+		Enum: []string{"foo", "bar", "baz"},
 	}
 	v, err := strings.NewEnumValidator(def)
 	if err != nil {
@@ -61,22 +61,22 @@ func TestEnumvalidator(t *testing.T) {
 	}
 	cases := []Case{
 		{
-			Message: "a value exists at first in Enumerate",
+			Message: "a value exists at first in Enum",
 			Input:   "foo",
 			Error:   nil,
 		},
 		{
-			Message: "a value exists at second in Enumerate",
+			Message: "a value exists at second in Enum",
 			Input:   "bar",
 			Error:   nil,
 		},
 		{
-			Message: "a value exists at end in Enumerate",
+			Message: "a value exists at end in Enum",
 			Input:   "baz",
 			Error:   nil,
 		},
 		{
-			Message: "a value doesn't exist in Enumerate",
+			Message: "a value doesn't exist in Enum",
 			Input:   "qux",
 			Error: &strings.EnumValidationError{
 				Input:      "qux",
