@@ -1,4 +1,4 @@
-package ints
+package integers
 
 import "fmt"
 

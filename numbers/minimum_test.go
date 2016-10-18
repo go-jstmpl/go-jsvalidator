@@ -1,63 +1,63 @@
-package float64s_test
+package numbers_test
 
 import (
 	"reflect"
 	"testing"
 
-	"github.com/go-jstmpl/go-jsvalidator/float64s"
+	"github.com/go-jstmpl/go-jsvalidator/numbers"
 )
 
 func TestNewMinimumValidator(t *testing.T) {
 	type Case struct {
 		Message    string
-		Definition float64s.MinimumValidatorDefinition
+		Definition numbers.MinimumValidatorDefinition
 	}
 	cases := []Case{
 		{
 			Message: "positive number and positive exclusive",
-			Definition: float64s.MinimumValidatorDefinition{
+			Definition: numbers.MinimumValidatorDefinition{
 				Minimum:   1.0,
 				Exclusive: true,
 			},
 		},
 		{
 			Message: "positive number and negative exclusive",
-			Definition: float64s.MinimumValidatorDefinition{
+			Definition: numbers.MinimumValidatorDefinition{
 				Minimum:   1.0,
 				Exclusive: false,
 			},
 		},
 		{
 			Message: "zero and positive exclusive",
-			Definition: float64s.MinimumValidatorDefinition{
+			Definition: numbers.MinimumValidatorDefinition{
 				Minimum:   0.0,
 				Exclusive: true,
 			},
 		},
 		{
 			Message: "zero number and negative exclusive",
-			Definition: float64s.MinimumValidatorDefinition{
+			Definition: numbers.MinimumValidatorDefinition{
 				Minimum:   0.0,
 				Exclusive: false,
 			},
 		},
 		{
 			Message: "negative number and positive exclusive",
-			Definition: float64s.MinimumValidatorDefinition{
+			Definition: numbers.MinimumValidatorDefinition{
 				Minimum:   -1.0,
 				Exclusive: true,
 			},
 		},
 		{
 			Message: "negative number and negative exclusive",
-			Definition: float64s.MinimumValidatorDefinition{
+			Definition: numbers.MinimumValidatorDefinition{
 				Minimum:   -1.0,
 				Exclusive: false,
 			},
 		},
 	}
 	for _, c := range cases {
-		_, err := float64s.NewMinimumValidator(c.Definition)
+		_, err := numbers.NewMinimumValidator(c.Definition)
 		if err != nil {
 			t.Errorf("Test with %s: fail to NewMinimumValidator with error %v", c.Message, err)
 		}
@@ -71,12 +71,12 @@ type MinimumValidatorTestCase struct {
 }
 
 func TestValidateOfMinimumValidatorWithPositiveNumberAndPositiveExclusive(t *testing.T) {
-	def := float64s.MinimumValidatorDefinition{
+	def := numbers.MinimumValidatorDefinition{
 		Minimum:   1.0,
 		Exclusive: true,
 	}
 
-	v, err := float64s.NewMinimumValidator(def)
+	v, err := numbers.NewMinimumValidator(def)
 	if err != nil {
 		t.Fatalf("Fail to NewMinimumValidator: %s", err)
 	}
@@ -90,7 +90,7 @@ func TestValidateOfMinimumValidatorWithPositiveNumberAndPositiveExclusive(t *tes
 		{
 			Message: "same number",
 			Input:   1.0,
-			Error: &float64s.MinimumValidationError{
+			Error: &numbers.MinimumValidationError{
 				Input:      1.0,
 				Definition: def,
 			},
@@ -98,7 +98,7 @@ func TestValidateOfMinimumValidatorWithPositiveNumberAndPositiveExclusive(t *tes
 		{
 			Message: "less number",
 			Input:   0.9,
-			Error: &float64s.MinimumValidationError{
+			Error: &numbers.MinimumValidationError{
 				Input:      0.9,
 				Definition: def,
 			},
@@ -113,12 +113,12 @@ func TestValidateOfMinimumValidatorWithPositiveNumberAndPositiveExclusive(t *tes
 }
 
 func TestValidateOfMinimumValidatorWithPositiveNumberAndNegativeExclusive(t *testing.T) {
-	def := float64s.MinimumValidatorDefinition{
+	def := numbers.MinimumValidatorDefinition{
 		Minimum:   1.0,
 		Exclusive: false,
 	}
 
-	v, err := float64s.NewMinimumValidator(def)
+	v, err := numbers.NewMinimumValidator(def)
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -136,7 +136,7 @@ func TestValidateOfMinimumValidatorWithPositiveNumberAndNegativeExclusive(t *tes
 		{
 			Message: "less number",
 			Input:   0.9,
-			Error: &float64s.MinimumValidationError{
+			Error: &numbers.MinimumValidationError{
 				Input:      0.9,
 				Definition: def,
 			},
@@ -151,12 +151,12 @@ func TestValidateOfMinimumValidatorWithPositiveNumberAndNegativeExclusive(t *tes
 }
 
 func TestValidateOfMinimumValidatorWithZeroAndPositiveExclusive(t *testing.T) {
-	def := float64s.MinimumValidatorDefinition{
+	def := numbers.MinimumValidatorDefinition{
 		Minimum:   0.0,
 		Exclusive: true,
 	}
 
-	v, err := float64s.NewMinimumValidator(def)
+	v, err := numbers.NewMinimumValidator(def)
 	if err != nil {
 		t.Fatalf("Fail to NewMinimumValidator: %s", err)
 	}
@@ -170,7 +170,7 @@ func TestValidateOfMinimumValidatorWithZeroAndPositiveExclusive(t *testing.T) {
 		{
 			Message: "same number",
 			Input:   0.0,
-			Error: &float64s.MinimumValidationError{
+			Error: &numbers.MinimumValidationError{
 				Input:      0.0,
 				Definition: def,
 			},
@@ -178,7 +178,7 @@ func TestValidateOfMinimumValidatorWithZeroAndPositiveExclusive(t *testing.T) {
 		{
 			Message: "less number",
 			Input:   -0.1,
-			Error: &float64s.MinimumValidationError{
+			Error: &numbers.MinimumValidationError{
 				Input:      -0.1,
 				Definition: def,
 			},
@@ -193,12 +193,12 @@ func TestValidateOfMinimumValidatorWithZeroAndPositiveExclusive(t *testing.T) {
 }
 
 func TestValidateOfMinimumValidatorWithZeroAndNegativeExclusive(t *testing.T) {
-	def := float64s.MinimumValidatorDefinition{
+	def := numbers.MinimumValidatorDefinition{
 		Minimum:   0.0,
 		Exclusive: false,
 	}
 
-	v, err := float64s.NewMinimumValidator(def)
+	v, err := numbers.NewMinimumValidator(def)
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -216,7 +216,7 @@ func TestValidateOfMinimumValidatorWithZeroAndNegativeExclusive(t *testing.T) {
 		{
 			Message: "less number",
 			Input:   -0.1,
-			Error: &float64s.MinimumValidationError{
+			Error: &numbers.MinimumValidationError{
 				Input:      -0.1,
 				Definition: def,
 			},
@@ -231,12 +231,12 @@ func TestValidateOfMinimumValidatorWithZeroAndNegativeExclusive(t *testing.T) {
 }
 
 func TestValidateOfMinimumValidatorWithNegativeNumberAndPositiveExclusive(t *testing.T) {
-	def := float64s.MinimumValidatorDefinition{
+	def := numbers.MinimumValidatorDefinition{
 		Minimum:   -1.0,
 		Exclusive: true,
 	}
 
-	v, err := float64s.NewMinimumValidator(def)
+	v, err := numbers.NewMinimumValidator(def)
 	if err != nil {
 		t.Fatalf("Fail to NewMinimumValidator: %s", err)
 	}
@@ -250,7 +250,7 @@ func TestValidateOfMinimumValidatorWithNegativeNumberAndPositiveExclusive(t *tes
 		{
 			Message: "same number",
 			Input:   -1.0,
-			Error: &float64s.MinimumValidationError{
+			Error: &numbers.MinimumValidationError{
 				Input:      -1.0,
 				Definition: def,
 			},
@@ -258,7 +258,7 @@ func TestValidateOfMinimumValidatorWithNegativeNumberAndPositiveExclusive(t *tes
 		{
 			Message: "less number",
 			Input:   -1.1,
-			Error: &float64s.MinimumValidationError{
+			Error: &numbers.MinimumValidationError{
 				Input:      -1.1,
 				Definition: def,
 			},
@@ -273,12 +273,12 @@ func TestValidateOfMinimumValidatorWithNegativeNumberAndPositiveExclusive(t *tes
 }
 
 func TestValidateOfMinimumValidatorWithNegativeNumberAndNegativeExclusive(t *testing.T) {
-	def := float64s.MinimumValidatorDefinition{
+	def := numbers.MinimumValidatorDefinition{
 		Minimum:   -1.0,
 		Exclusive: false,
 	}
 
-	v, err := float64s.NewMinimumValidator(def)
+	v, err := numbers.NewMinimumValidator(def)
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -296,7 +296,7 @@ func TestValidateOfMinimumValidatorWithNegativeNumberAndNegativeExclusive(t *tes
 		{
 			Message: "less number",
 			Input:   -1.1,
-			Error: &float64s.MinimumValidationError{
+			Error: &numbers.MinimumValidationError{
 				Input:      -1.1,
 				Definition: def,
 			},

@@ -1,4 +1,4 @@
-package float64s
+package numbers
 
 import "fmt"
 

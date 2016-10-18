@@ -1,44 +1,44 @@
-package bools_test
+package booleans_test
 
 import (
 	"reflect"
 	"testing"
 
-	"github.com/go-jstmpl/go-jsvalidator/bools"
+	"github.com/go-jstmpl/go-jsvalidator/booleans"
 )
 
 func TestNewEnumValidator(t *testing.T) {
 	type Case struct {
 		Message    string
-		Definition bools.EnumValidatorDefinition
+		Definition booleans.EnumValidatorDefinition
 		Error      error
 	}
 
 	cases := []Case{
 		{
 			Message:    "empty slice",
-			Definition: bools.EnumValidatorDefinition{Enumerate: []bool{}},
-			Error:      bools.EnumDefinitionEmptyError,
+			Definition: booleans.EnumValidatorDefinition{Enum: []bool{}},
+			Error:      booleans.EnumDefinitionEmptyError,
 		},
 		{
 			Message:    "single element",
-			Definition: bools.EnumValidatorDefinition{Enumerate: []bool{true}},
+			Definition: booleans.EnumValidatorDefinition{Enum: []bool{true}},
 			Error:      nil,
 		},
 		{
 			Message:    "multi elements",
-			Definition: bools.EnumValidatorDefinition{Enumerate: []bool{true, false}},
+			Definition: booleans.EnumValidatorDefinition{Enum: []bool{true, false}},
 			Error:      nil,
 		},
 		{
 			Message:    "duplicated elements",
-			Definition: bools.EnumValidatorDefinition{Enumerate: []bool{true, false, true}},
-			Error:      bools.EnumDefinitionDuplicationError,
+			Definition: booleans.EnumValidatorDefinition{Enum: []bool{true, false, true}},
+			Error:      booleans.EnumDefinitionDuplicationError,
 		},
 	}
 
 	for _, c := range cases {
-		_, err := bools.NewEnumValidator(c.Definition)
+		_, err := booleans.NewEnumValidator(c.Definition)
 		if !reflect.DeepEqual(err, c.Error) {
 			t.Errorf("Test with %s: fail to NewEnumValidator with error %v", c.Message, err)
 		}
@@ -46,10 +46,10 @@ func TestNewEnumValidator(t *testing.T) {
 }
 
 func TestEnumvalidator(t *testing.T) {
-	def := bools.EnumValidatorDefinition{
-		Enumerate: []bool{true},
+	def := booleans.EnumValidatorDefinition{
+		Enum: []bool{true},
 	}
-	v, err := bools.NewEnumValidator(def)
+	v, err := booleans.NewEnumValidator(def)
 	if err != nil {
 		t.Fatalf("Fail to NewEnumValidator with error %v", err)
 	}
@@ -61,14 +61,14 @@ func TestEnumvalidator(t *testing.T) {
 	}
 	cases := []Case{
 		{
-			Message: "a value exists in Enumerate",
+			Message: "a value exists in Enum",
 			Input:   true,
 			Error:   nil,
 		},
 		{
-			Message: "a value doesn't exist in Enumerate",
+			Message: "a value doesn't exist in Enum",
 			Input:   false,
-			Error: &bools.EnumValidationError{
+			Error: &booleans.EnumValidationError{
 				Input:      false,
 				Definition: def,
 			},

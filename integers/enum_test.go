@@ -1,44 +1,44 @@
-package ints_test
+package integers_test
 
 import (
 	"reflect"
 	"testing"
 
-	"github.com/go-jstmpl/go-jsvalidator/ints"
+	"github.com/go-jstmpl/go-jsvalidator/integers"
 )
 
 func TestNewEnumValidator(t *testing.T) {
 	type Case struct {
 		Message    string
-		Definition ints.EnumValidatorDefinition
+		Definition integers.EnumValidatorDefinition
 		Error      error
 	}
 
 	cases := []Case{
 		{
 			Message:    "empty slice",
-			Definition: ints.EnumValidatorDefinition{Enumerate: []int{}},
-			Error:      ints.EnumDefinitionEmptyError,
+			Definition: integers.EnumValidatorDefinition{Enum: []int{}},
+			Error:      integers.EnumDefinitionEmptyError,
 		},
 		{
 			Message:    "single element",
-			Definition: ints.EnumValidatorDefinition{Enumerate: []int{-10}},
+			Definition: integers.EnumValidatorDefinition{Enum: []int{-10}},
 			Error:      nil,
 		},
 		{
 			Message:    "multi elements",
-			Definition: ints.EnumValidatorDefinition{Enumerate: []int{-10, 0, 10}},
+			Definition: integers.EnumValidatorDefinition{Enum: []int{-10, 0, 10}},
 			Error:      nil,
 		},
 		{
 			Message:    "duplicated elements",
-			Definition: ints.EnumValidatorDefinition{Enumerate: []int{-10, 0, -10}},
-			Error:      ints.EnumDefinitionDuplicationError,
+			Definition: integers.EnumValidatorDefinition{Enum: []int{-10, 0, -10}},
+			Error:      integers.EnumDefinitionDuplicationError,
 		},
 	}
 
 	for _, c := range cases {
-		_, err := ints.NewEnumValidator(c.Definition)
+		_, err := integers.NewEnumValidator(c.Definition)
 		if !reflect.DeepEqual(err, c.Error) {
 			t.Errorf("Test with %s: fail to NewEnumValidator with error %v", c.Message, err)
 		}
@@ -46,10 +46,10 @@ func TestNewEnumValidator(t *testing.T) {
 }
 
 func TestEnumvalidator(t *testing.T) {
-	def := ints.EnumValidatorDefinition{
-		Enumerate: []int{-10, 0, 10},
+	def := integers.EnumValidatorDefinition{
+		Enum: []int{-10, 0, 10},
 	}
-	v, err := ints.NewEnumValidator(def)
+	v, err := integers.NewEnumValidator(def)
 	if err != nil {
 		t.Fatalf("Fail to NewEnumValidator with error %v", err)
 	}
@@ -61,24 +61,24 @@ func TestEnumvalidator(t *testing.T) {
 	}
 	cases := []Case{
 		{
-			Message: "a value exists at first in Enumerate",
+			Message: "a value exists at first in Enum",
 			Input:   -10,
 			Error:   nil,
 		},
 		{
-			Message: "a value exists at second in Enumerate",
+			Message: "a value exists at second in Enum",
 			Input:   0,
 			Error:   nil,
 		},
 		{
-			Message: "a value exists at end in Enumerate",
+			Message: "a value exists at end in Enum",
 			Input:   10,
 			Error:   nil,
 		},
 		{
-			Message: "a value doesn't exist in Enumerate",
+			Message: "a value doesn't exist in Enum",
 			Input:   -20,
-			Error: &ints.EnumValidationError{
+			Error: &integers.EnumValidationError{
 				Input:      -20,
 				Definition: def,
 			},

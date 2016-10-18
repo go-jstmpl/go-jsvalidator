@@ -1,4 +1,4 @@
-package ints
+package numbers
 
 import "fmt"
 
@@ -7,13 +7,13 @@ type MaximumValidator struct {
 }
 
 type MaximumValidatorDefinition struct {
-	Maximum   int  `json:"maximum"`
-	Exclusive bool `json:"exclusive"`
+	Maximum   float64 `json:"maximum"`
+	Exclusive bool    `json:"exclusive"`
 }
 
 type MaximumValidationError struct {
 	Definition MaximumValidatorDefinition `json:"definition"`
-	Input      int                        `json:"input"`
+	Input      float64                    `json:"input"`
 }
 
 func (err MaximumValidationError) Error() string {
@@ -27,7 +27,7 @@ func NewMaximumValidator(definition MaximumValidatorDefinition) (MaximumValidato
 	return MaximumValidator{definition}, nil
 }
 
-func (m MaximumValidator) Validate(input int) error {
+func (m MaximumValidator) Validate(input float64) error {
 	if !m.definition.Exclusive {
 		if input <= m.definition.Maximum {
 			return nil

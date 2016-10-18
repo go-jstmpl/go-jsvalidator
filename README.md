@@ -13,7 +13,7 @@ Or, clone this repository.
 ## Test
 
 ```
-go test -v -race . ./bools ./float64s ./ints ./slices ./strings
+go test -v -race . ./arrays ./booleans ./integers ./numbers ./strings
 ```
 
 # Contoribution
@@ -22,5 +22,5 @@ go test -v -race . ./bools ./float64s ./ints ./slices ./strings
 1. Create a feature branch
 1. Commit your changes
 1. Rebase your local changes against the master branch
-1. Run test suite with the `go test -v -race . ./bools ./float64s ./ints ./slices ./strings` command and confirm that it passes
+1. Run test suite with the `go test -v -race . ./arrays ./booleans ./integers ./numbers ./strings` command and confirm that it passes
 1. Create a new Pull Request
