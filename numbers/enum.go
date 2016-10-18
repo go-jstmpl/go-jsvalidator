@@ -1,4 +1,4 @@
-package bools
+package numbers
 
 import (
 	"errors"
@@ -15,16 +15,16 @@ type EnumValidator struct {
 }
 
 type EnumValidatorDefinition struct {
-	Enum []bool `json:"enum"`
+	Enum []float64 `json:"enum"`
 }
 
 type EnumValidationError struct {
 	Definition EnumValidatorDefinition `json:"definition"`
-	Input      bool                    `json:"input"`
+	Input      float64                 `json:"input"`
 }
 
 func (err EnumValidationError) Error() string {
-	return fmt.Sprintf("input value %b doesn't exist in %v", err.Input, err.Definition.Enum)
+	return fmt.Sprintf("input value %f doesn't exist in %v", err.Input, err.Definition.Enum)
 }
 
 func NewEnumValidator(def EnumValidatorDefinition) (EnumValidator, error) {
@@ -45,7 +45,7 @@ func NewEnumValidator(def EnumValidatorDefinition) (EnumValidator, error) {
 	return EnumValidator{def}, nil
 }
 
-func (v EnumValidator) Validate(input bool) error {
+func (v EnumValidator) Validate(input float64) error {
 	for _, e := range v.definition.Enum {
 		if input == e {
 			return nil

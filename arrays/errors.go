@@ -1,4 +1,4 @@
-package slices
+package arrays
 
 type NoLengthError struct{}
 

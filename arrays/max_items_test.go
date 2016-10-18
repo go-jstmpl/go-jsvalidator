@@ -1,48 +1,48 @@
-package slices_test
+package arrays_test
 
 import (
 	"reflect"
 	"testing"
 
-	"github.com/go-jstmpl/go-jsvalidator/slices"
+	"github.com/go-jstmpl/go-jsvalidator/arrays"
 )
 
-func TestNewMinItemsValidator(t *testing.T) {
+func TestNewMaxItemsValidator(t *testing.T) {
 	type Case struct {
 		Message    string
-		Definition slices.MinItemsValidatorDefinition
+		Definition arrays.MaxItemsValidatorDefinition
 		Error      error
 	}
 	cases := []Case{
 		{
 			Message:    "positive length",
-			Definition: slices.MinItemsValidatorDefinition{MinItems: 1},
+			Definition: arrays.MaxItemsValidatorDefinition{MaxItems: 1},
 			Error:      nil,
 		},
 		{
 			Message:    "zero length",
-			Definition: slices.MinItemsValidatorDefinition{MinItems: 0},
+			Definition: arrays.MaxItemsValidatorDefinition{MaxItems: 0},
 			Error:      nil,
 		},
 		{
 			Message:    "negative length",
-			Definition: slices.MinItemsValidatorDefinition{MinItems: -1},
-			Error:      &slices.NoLengthError{},
+			Definition: arrays.MaxItemsValidatorDefinition{MaxItems: -1},
+			Error:      &arrays.NoLengthError{},
 		},
 	}
 
 	for _, c := range cases {
-		if _, err := slices.NewMinItemsValidator(c.Definition); !reflect.DeepEqual(err, c.Error) {
+		if _, err := arrays.NewMaxItemsValidator(c.Definition); !reflect.DeepEqual(err, c.Error) {
 			t.Errorf("%s: Error is expected '%v', but actual '%v'", c.Message, c.Error, err)
 		}
 	}
 }
 
-func TestValidateOfMinItemsValidator(t *testing.T) {
-	def := slices.MinItemsValidatorDefinition{
-		MinItems: 2,
+func TestValidateOfMaxItemsValidator(t *testing.T) {
+	def := arrays.MaxItemsValidatorDefinition{
+		MaxItems: 2,
 	}
-	v, err := slices.NewMinItemsValidator(def)
+	v, err := arrays.NewMaxItemsValidator(def)
 	if err != nil {
 		t.Fatalf("Fail to construct: %s", err)
 	}
@@ -57,18 +57,12 @@ func TestValidateOfMinItemsValidator(t *testing.T) {
 		{
 			Message: "zero length of int slice",
 			Input:   []int{},
-			Error: &slices.MinItemsValidationError{
-				Input:      []int{},
-				Definition: def,
-			},
+			Error:   nil,
 		},
 		{
 			Message: "less length of int slice",
 			Input:   []int{1},
-			Error: &slices.MinItemsValidationError{
-				Input:      []int{1},
-				Definition: def,
-			},
+			Error:   nil,
 		},
 		{
 			Message: "same length of int slice",
@@ -78,23 +72,20 @@ func TestValidateOfMinItemsValidator(t *testing.T) {
 		{
 			Message: "greater length of int slice",
 			Input:   []int{1, 2, 3},
-			Error:   nil,
+			Error: &arrays.MaxItemsValidationError{
+				Input:      []int{1, 2, 3},
+				Definition: def,
+			},
 		},
 		{
 			Message: "zero length of string slice",
 			Input:   []string{},
-			Error: &slices.MinItemsValidationError{
-				Input:      []string{},
-				Definition: def,
-			},
+			Error:   nil,
 		},
 		{
 			Message: "less length of string slice",
 			Input:   []string{"foo"},
-			Error: &slices.MinItemsValidationError{
-				Input:      []string{"foo"},
-				Definition: def,
-			},
+			Error:   nil,
 		},
 		{
 			Message: "same length of string slice",
@@ -104,23 +95,20 @@ func TestValidateOfMinItemsValidator(t *testing.T) {
 		{
 			Message: "greater length of string slice",
 			Input:   []string{"foo", "bar", "baz"},
-			Error:   nil,
+			Error: &arrays.MaxItemsValidationError{
+				Input:      []string{"foo", "bar", "baz"},
+				Definition: def,
+			},
 		},
 		{
 			Message: "zero length of float64 slice",
 			Input:   []float64{},
-			Error: &slices.MinItemsValidationError{
-				Input:      []float64{},
-				Definition: def,
-			},
+			Error:   nil,
 		},
 		{
 			Message: "less length of float64 slice",
 			Input:   []float64{1},
-			Error: &slices.MinItemsValidationError{
-				Input:      []float64{1},
-				Definition: def,
-			},
+			Error:   nil,
 		},
 		{
 			Message: "same length of float64 slice",
@@ -130,23 +118,20 @@ func TestValidateOfMinItemsValidator(t *testing.T) {
 		{
 			Message: "greater length of float64 slice",
 			Input:   []float64{1, 2, 3},
-			Error:   nil,
+			Error: &arrays.MaxItemsValidationError{
+				Input:      []float64{1, 2, 3},
+				Definition: def,
+			},
 		},
 		{
 			Message: "zero length of struct slice",
 			Input:   []Foo{},
-			Error: &slices.MinItemsValidationError{
-				Input:      []Foo{},
-				Definition: def,
-			},
+			Error:   nil,
 		},
 		{
 			Message: "less length of struct slice",
 			Input:   []Foo{{}},
-			Error: &slices.MinItemsValidationError{
-				Input:      []Foo{{}},
-				Definition: def,
-			},
+			Error:   nil,
 		},
 		{
 			Message: "same length of struct slice",
@@ -156,7 +141,10 @@ func TestValidateOfMinItemsValidator(t *testing.T) {
 		{
 			Message: "greater length of struct slice",
 			Input:   []Foo{{}, {}, {}},
-			Error:   nil,
+			Error: &arrays.MaxItemsValidationError{
+				Input:      []Foo{{}, {}, {}},
+				Definition: def,
+			},
 		},
 	}
 

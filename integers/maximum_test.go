@@ -1,63 +1,63 @@
-package float64s_test
+package integers_test
 
 import (
 	"reflect"
 	"testing"
 
-	"github.com/go-jstmpl/go-jsvalidator/float64s"
+	"github.com/go-jstmpl/go-jsvalidator/integers"
 )
 
 func TestNewMaximumValidator(t *testing.T) {
 	type Case struct {
 		Message    string
-		Definition float64s.MaximumValidatorDefinition
+		Definition integers.MaximumValidatorDefinition
 	}
 	cases := []Case{
 		{
 			Message: "positive number and positive exclusive",
-			Definition: float64s.MaximumValidatorDefinition{
-				Maximum:   1.0,
+			Definition: integers.MaximumValidatorDefinition{
+				Maximum:   10,
 				Exclusive: true,
 			},
 		},
 		{
 			Message: "positive number and negative exclusive",
-			Definition: float64s.MaximumValidatorDefinition{
-				Maximum:   1.0,
+			Definition: integers.MaximumValidatorDefinition{
+				Maximum:   10,
 				Exclusive: false,
 			},
 		},
 		{
 			Message: "zero and positive exclusive",
-			Definition: float64s.MaximumValidatorDefinition{
-				Maximum:   0.0,
+			Definition: integers.MaximumValidatorDefinition{
+				Maximum:   0,
 				Exclusive: true,
 			},
 		},
 		{
 			Message: "zero number and negative exclusive",
-			Definition: float64s.MaximumValidatorDefinition{
-				Maximum:   0.0,
+			Definition: integers.MaximumValidatorDefinition{
+				Maximum:   0,
 				Exclusive: false,
 			},
 		},
 		{
 			Message: "negative number and positive exclusive",
-			Definition: float64s.MaximumValidatorDefinition{
-				Maximum:   -1.0,
+			Definition: integers.MaximumValidatorDefinition{
+				Maximum:   -10,
 				Exclusive: true,
 			},
 		},
 		{
 			Message: "negative number and negative exclusive",
-			Definition: float64s.MaximumValidatorDefinition{
-				Maximum:   -1.0,
+			Definition: integers.MaximumValidatorDefinition{
+				Maximum:   -10,
 				Exclusive: false,
 			},
 		},
 	}
 	for _, c := range cases {
-		_, err := float64s.NewMaximumValidator(c.Definition)
+		_, err := integers.NewMaximumValidator(c.Definition)
 		if err != nil {
 			t.Errorf("Test with %s: fail to NewMaximumValidator with error %v", c.Message, err)
 		}
@@ -66,17 +66,17 @@ func TestNewMaximumValidator(t *testing.T) {
 
 type MaximumValidatorTestCase struct {
 	Message string
-	Input   float64
+	Input   int
 	Error   error
 }
 
 func TestValidateOfMaximumValidatorWithPositiveNumberAndPositiveExclusive(t *testing.T) {
-	def := float64s.MaximumValidatorDefinition{
-		Maximum:   1.0,
+	def := integers.MaximumValidatorDefinition{
+		Maximum:   10,
 		Exclusive: true,
 	}
 
-	v, err := float64s.NewMaximumValidator(def)
+	v, err := integers.NewMaximumValidator(def)
 	if err != nil {
 		t.Fatalf("Fail to NewMaximumValidator: %s", err)
 	}
@@ -84,22 +84,22 @@ func TestValidateOfMaximumValidatorWithPositiveNumberAndPositiveExclusive(t *tes
 	cases := []MaximumValidatorTestCase{
 		{
 			Message: "less number",
-			Input:   0.9,
+			Input:   9,
 			Error:   nil,
 		},
 		{
 			Message: "same number",
-			Input:   1.0,
-			Error: &float64s.MaximumValidationError{
-				Input:      1.0,
+			Input:   10,
+			Error: &integers.MaximumValidationError{
+				Input:      10,
 				Definition: def,
 			},
 		},
 		{
 			Message: "greater number",
-			Input:   1.1,
-			Error: &float64s.MaximumValidationError{
-				Input:      1.1,
+			Input:   11,
+			Error: &integers.MaximumValidationError{
+				Input:      11,
 				Definition: def,
 			},
 		},
@@ -113,31 +113,31 @@ func TestValidateOfMaximumValidatorWithPositiveNumberAndPositiveExclusive(t *tes
 }
 
 func TestValidateOfMaximumValidatorWithPositiveNumberAndNegativeExclusive(t *testing.T) {
-	def := float64s.MaximumValidatorDefinition{
-		Maximum:   1.0,
+	def := integers.MaximumValidatorDefinition{
+		Maximum:   10,
 		Exclusive: false,
 	}
 
-	v, err := float64s.NewMaximumValidator(def)
+	v, err := integers.NewMaximumValidator(def)
 	if err != nil {
 		t.Error(err.Error())
 	}
 	cases := []MaximumValidatorTestCase{
 		{
 			Message: "less number",
-			Input:   0.9,
+			Input:   9,
 			Error:   nil,
 		},
 		{
 			Message: "same number",
-			Input:   1.0,
+			Input:   10,
 			Error:   nil,
 		},
 		{
 			Message: "greater number",
-			Input:   1.1,
-			Error: &float64s.MaximumValidationError{
-				Input:      1.1,
+			Input:   11,
+			Error: &integers.MaximumValidationError{
+				Input:      11,
 				Definition: def,
 			},
 		},
@@ -151,12 +151,12 @@ func TestValidateOfMaximumValidatorWithPositiveNumberAndNegativeExclusive(t *tes
 }
 
 func TestValidateOfMaximumValidatorWithZeroAndPositiveExclusive(t *testing.T) {
-	def := float64s.MaximumValidatorDefinition{
-		Maximum:   0.0,
+	def := integers.MaximumValidatorDefinition{
+		Maximum:   0,
 		Exclusive: true,
 	}
 
-	v, err := float64s.NewMaximumValidator(def)
+	v, err := integers.NewMaximumValidator(def)
 	if err != nil {
 		t.Fatalf("Fail to NewMaximumValidator: %s", err)
 	}
@@ -164,22 +164,22 @@ func TestValidateOfMaximumValidatorWithZeroAndPositiveExclusive(t *testing.T) {
 	cases := []MaximumValidatorTestCase{
 		{
 			Message: "less number",
-			Input:   -0.1,
+			Input:   -1,
 			Error:   nil,
 		},
 		{
 			Message: "same number",
-			Input:   0.0,
-			Error: &float64s.MaximumValidationError{
-				Input:      0.0,
+			Input:   0,
+			Error: &integers.MaximumValidationError{
+				Input:      0,
 				Definition: def,
 			},
 		},
 		{
 			Message: "greater number",
-			Input:   0.1,
-			Error: &float64s.MaximumValidationError{
-				Input:      0.1,
+			Input:   1,
+			Error: &integers.MaximumValidationError{
+				Input:      1,
 				Definition: def,
 			},
 		},
@@ -193,31 +193,31 @@ func TestValidateOfMaximumValidatorWithZeroAndPositiveExclusive(t *testing.T) {
 }
 
 func TestValidateOfMaximumValidatorWithZeroAndNegativeExclusive(t *testing.T) {
-	def := float64s.MaximumValidatorDefinition{
-		Maximum:   0.0,
+	def := integers.MaximumValidatorDefinition{
+		Maximum:   0,
 		Exclusive: false,
 	}
 
-	v, err := float64s.NewMaximumValidator(def)
+	v, err := integers.NewMaximumValidator(def)
 	if err != nil {
 		t.Error(err.Error())
 	}
 	cases := []MaximumValidatorTestCase{
 		{
 			Message: "less number",
-			Input:   -0.1,
+			Input:   -1,
 			Error:   nil,
 		},
 		{
 			Message: "same number",
-			Input:   0.0,
+			Input:   0,
 			Error:   nil,
 		},
 		{
 			Message: "greater number",
-			Input:   0.1,
-			Error: &float64s.MaximumValidationError{
-				Input:      0.1,
+			Input:   1,
+			Error: &integers.MaximumValidationError{
+				Input:      1,
 				Definition: def,
 			},
 		},
@@ -231,12 +231,12 @@ func TestValidateOfMaximumValidatorWithZeroAndNegativeExclusive(t *testing.T) {
 }
 
 func TestValidateOfMaximumValidatorWithNegativeNumberAndPositiveExclusive(t *testing.T) {
-	def := float64s.MaximumValidatorDefinition{
-		Maximum:   -1.0,
+	def := integers.MaximumValidatorDefinition{
+		Maximum:   -10,
 		Exclusive: true,
 	}
 
-	v, err := float64s.NewMaximumValidator(def)
+	v, err := integers.NewMaximumValidator(def)
 	if err != nil {
 		t.Fatalf("Fail to NewMaximumValidator: %s", err)
 	}
@@ -244,22 +244,22 @@ func TestValidateOfMaximumValidatorWithNegativeNumberAndPositiveExclusive(t *tes
 	cases := []MaximumValidatorTestCase{
 		{
 			Message: "less number",
-			Input:   -1.1,
+			Input:   -11,
 			Error:   nil,
 		},
 		{
 			Message: "same number",
-			Input:   -1.0,
-			Error: &float64s.MaximumValidationError{
-				Input:      -1.0,
+			Input:   -10,
+			Error: &integers.MaximumValidationError{
+				Input:      -10,
 				Definition: def,
 			},
 		},
 		{
 			Message: "greater number",
-			Input:   -0.9,
-			Error: &float64s.MaximumValidationError{
-				Input:      -0.9,
+			Input:   -9,
+			Error: &integers.MaximumValidationError{
+				Input:      -9,
 				Definition: def,
 			},
 		},
@@ -273,31 +273,31 @@ func TestValidateOfMaximumValidatorWithNegativeNumberAndPositiveExclusive(t *tes
 }
 
 func TestValidateOfMaximumValidatorWithNegativeNumberAndNegativeExclusive(t *testing.T) {
-	def := float64s.MaximumValidatorDefinition{
-		Maximum:   -1.0,
+	def := integers.MaximumValidatorDefinition{
+		Maximum:   -10,
 		Exclusive: false,
 	}
 
-	v, err := float64s.NewMaximumValidator(def)
+	v, err := integers.NewMaximumValidator(def)
 	if err != nil {
 		t.Error(err.Error())
 	}
 	cases := []MaximumValidatorTestCase{
 		{
 			Message: "less number",
-			Input:   -1.1,
+			Input:   -11,
 			Error:   nil,
 		},
 		{
 			Message: "same number",
-			Input:   -1.0,
+			Input:   -10,
 			Error:   nil,
 		},
 		{
 			Message: "greater number",
-			Input:   -0.9,
-			Error: &float64s.MaximumValidationError{
-				Input:      -0.9,
+			Input:   -9,
+			Error: &integers.MaximumValidationError{
+				Input:      -9,
 				Definition: def,
 			},
 		},

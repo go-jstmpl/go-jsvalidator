@@ -1,44 +1,44 @@
-package float64s_test
+package numbers_test
 
 import (
 	"reflect"
 	"testing"
 
-	"github.com/go-jstmpl/go-jsvalidator/float64s"
+	"github.com/go-jstmpl/go-jsvalidator/numbers"
 )
 
 func TestNewEnumValidator(t *testing.T) {
 	type Case struct {
 		Message    string
-		Definition float64s.EnumValidatorDefinition
+		Definition numbers.EnumValidatorDefinition
 		Error      error
 	}
 
 	cases := []Case{
 		{
 			Message:    "empty slice",
-			Definition: float64s.EnumValidatorDefinition{Enum: []float64{}},
-			Error:      float64s.EnumDefinitionEmptyError,
+			Definition: numbers.EnumValidatorDefinition{Enum: []float64{}},
+			Error:      numbers.EnumDefinitionEmptyError,
 		},
 		{
 			Message:    "single element",
-			Definition: float64s.EnumValidatorDefinition{Enum: []float64{1.1}},
+			Definition: numbers.EnumValidatorDefinition{Enum: []float64{1.1}},
 			Error:      nil,
 		},
 		{
 			Message:    "multi elements",
-			Definition: float64s.EnumValidatorDefinition{Enum: []float64{-1.1, 0, 1.1}},
+			Definition: numbers.EnumValidatorDefinition{Enum: []float64{-1.1, 0, 1.1}},
 			Error:      nil,
 		},
 		{
 			Message:    "duplicated elements",
-			Definition: float64s.EnumValidatorDefinition{Enum: []float64{-1.1, 0, -1.1}},
-			Error:      float64s.EnumDefinitionDuplicationError,
+			Definition: numbers.EnumValidatorDefinition{Enum: []float64{-1.1, 0, -1.1}},
+			Error:      numbers.EnumDefinitionDuplicationError,
 		},
 	}
 
 	for _, c := range cases {
-		_, err := float64s.NewEnumValidator(c.Definition)
+		_, err := numbers.NewEnumValidator(c.Definition)
 		if !reflect.DeepEqual(err, c.Error) {
 			t.Errorf("Test with %s: fail to NewEnumValidator with error %v", c.Message, err)
 		}
@@ -46,10 +46,10 @@ func TestNewEnumValidator(t *testing.T) {
 }
 
 func TestEnumvalidator(t *testing.T) {
-	def := float64s.EnumValidatorDefinition{
+	def := numbers.EnumValidatorDefinition{
 		Enum: []float64{-1.1, 0, 1.1},
 	}
-	v, err := float64s.NewEnumValidator(def)
+	v, err := numbers.NewEnumValidator(def)
 	if err != nil {
 		t.Fatalf("Fail to NewEnumValidator with error %v", err)
 	}
@@ -78,7 +78,7 @@ func TestEnumvalidator(t *testing.T) {
 		{
 			Message: "a value doesn't exist in Enum",
 			Input:   1.2,
-			Error: &float64s.EnumValidationError{
+			Error: &numbers.EnumValidationError{
 				Input:      1.2,
 				Definition: def,
 			},
