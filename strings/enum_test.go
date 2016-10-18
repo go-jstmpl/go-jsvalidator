@@ -40,7 +40,7 @@ func TestNewEnumValidator(t *testing.T) {
 	for _, c := range cases {
 		_, err := strings.NewEnumValidator(c.Definition)
 		if !reflect.DeepEqual(err, c.Error) {
-			t.Errorf("Test with %s: expected '%s', but actual '%s'", c.Message, c.Error, err)
+			t.Errorf("Test with %s: expected %v, but actual %v", c.Message, c.Error, err)
 		}
 	}
 }
@@ -51,7 +51,7 @@ func TestEnumvalidator(t *testing.T) {
 	}
 	v, err := strings.NewEnumValidator(def)
 	if err != nil {
-		t.Fatalf("Fail to NewEnumValidator: %s", err)
+		t.Fatalf("Fail to NewEnumValidator with error %v", err)
 	}
 
 	type Case struct {

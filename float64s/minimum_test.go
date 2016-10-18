@@ -13,43 +13,43 @@ func TestNewMinimumValidator(t *testing.T) {
 		Definition float64s.MinimumValidatorDefinition
 	}
 	cases := []Case{
-		Case{
-			Message: "With positive number and positive exclusive",
+		{
+			Message: "positive number and positive exclusive",
 			Definition: float64s.MinimumValidatorDefinition{
 				Minimum:   1.0,
 				Exclusive: true,
 			},
 		},
-		Case{
-			Message: "With positive number and negative exclusive",
+		{
+			Message: "positive number and negative exclusive",
 			Definition: float64s.MinimumValidatorDefinition{
 				Minimum:   1.0,
 				Exclusive: false,
 			},
 		},
-		Case{
-			Message: "With zero and positive exclusive",
+		{
+			Message: "zero and positive exclusive",
 			Definition: float64s.MinimumValidatorDefinition{
 				Minimum:   0.0,
 				Exclusive: true,
 			},
 		},
-		Case{
-			Message: "With zero number and negative exclusive",
+		{
+			Message: "zero number and negative exclusive",
 			Definition: float64s.MinimumValidatorDefinition{
 				Minimum:   0.0,
 				Exclusive: false,
 			},
 		},
-		Case{
-			Message: "With negative number and positive exclusive",
+		{
+			Message: "negative number and positive exclusive",
 			Definition: float64s.MinimumValidatorDefinition{
 				Minimum:   -1.0,
 				Exclusive: true,
 			},
 		},
-		Case{
-			Message: "With negative number and negative exclusive",
+		{
+			Message: "negative number and negative exclusive",
 			Definition: float64s.MinimumValidatorDefinition{
 				Minimum:   -1.0,
 				Exclusive: false,
@@ -59,7 +59,7 @@ func TestNewMinimumValidator(t *testing.T) {
 	for _, c := range cases {
 		_, err := float64s.NewMinimumValidator(c.Definition)
 		if err != nil {
-			t.Errorf("%s: %s", c.Message, err)
+			t.Errorf("Test with %s: fail to NewMinimumValidator with error %v", c.Message, err)
 		}
 	}
 }
@@ -145,7 +145,7 @@ func TestValidateOfMinimumValidatorWithPositiveNumberAndNegativeExclusive(t *tes
 
 	for _, c := range cases {
 		if err := v.Validate(c.Input); !reflect.DeepEqual(err, c.Error) {
-			t.Errorf("expected %v, but actual %v", c.Error, err)
+			t.Errorf("Test with %s: expected %v, but actual %v", c.Message, c.Error, err)
 		}
 	}
 }
@@ -225,7 +225,7 @@ func TestValidateOfMinimumValidatorWithZeroAndNegativeExclusive(t *testing.T) {
 
 	for _, c := range cases {
 		if err := v.Validate(c.Input); !reflect.DeepEqual(err, c.Error) {
-			t.Errorf("expected %v, but actual %v", c.Error, err)
+			t.Errorf("Test with %s: expected %v, but actual %v", c.Message, c.Error, err)
 		}
 	}
 }
@@ -305,7 +305,7 @@ func TestValidateOfMinimumValidatorWithNegativeNumberAndNegativeExclusive(t *tes
 
 	for _, c := range cases {
 		if err := v.Validate(c.Input); !reflect.DeepEqual(err, c.Error) {
-			t.Errorf("expected '%s', but actual '%s'", c.Error, err)
+			t.Errorf("Test with %s: expected %v, but actual %v", c.Message, c.Error, err)
 		}
 	}
 }
