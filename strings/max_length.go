@@ -1,4 +1,4 @@
-package validator
+package strings
 
 import (
 	"fmt"
@@ -23,11 +23,11 @@ func (m MaxLengthValidationError) Error() string {
 		m.Definition.MaxLength, utf8.RuneCountInString(m.Input))
 }
 
-func NewMaxLengthValidator(definition MaxLengthValidatorDefinition) (MaxLengthValidator, error) {
-	if definition.MaxLength < 0 {
+func NewMaxLengthValidator(def MaxLengthValidatorDefinition) (MaxLengthValidator, error) {
+	if def.MaxLength < 0 {
 		return MaxLengthValidator{}, NoLengthError{"the max length should be greater than, or equal to, 0"}
 	}
-	return MaxLengthValidator{definition}, nil
+	return MaxLengthValidator{def}, nil
 }
 
 func (m MaxLengthValidator) Validate(input string) error {

@@ -1,25 +1,25 @@
-package validator_test
+package strings_test
 
 import (
 	"reflect"
 	"testing"
 
-	"github.com/go-jstmpl/go-jsvalidator"
+	"github.com/go-jstmpl/go-jsvalidator/strings"
 )
 
 func TestFormat(t *testing.T) {
-	_, err := validator.NewFormatValidator(validator.FormatValidatorDefinition{Format: "password"})
-	_, ok := err.(validator.InvalidFormatError)
+	_, err := strings.NewFormatValidator(strings.FormatValidatorDefinition{Format: "password"})
+	_, ok := err.(strings.InvalidFormatError)
 	if !ok {
 		t.Errorf("Type of error expected %v, but not.", "InvalidFormatError")
 	}
 }
 
 func TestFormatValidator(t *testing.T) {
-	definition := validator.FormatValidatorDefinition{
+	definition := strings.FormatValidatorDefinition{
 		Format: "date-time",
 	}
-	va, err := validator.NewFormatValidator(definition)
+	va, err := strings.NewFormatValidator(definition)
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -67,7 +67,7 @@ func TestFormatValidator(t *testing.T) {
 		},
 		{
 			Input: "209385790284750",
-			Expected: &validator.FormatValidationError{
+			Expected: &strings.FormatValidationError{
 				Input:      "209385790284750",
 				Definition: definition,
 			},
@@ -80,10 +80,10 @@ func TestFormatValidator(t *testing.T) {
 			t.Errorf("expected:%v ,actual:%v", c.Expected, err)
 		}
 	}
-	definition = validator.FormatValidatorDefinition{
+	definition = strings.FormatValidatorDefinition{
 		Format: "email",
 	}
-	va, err = validator.NewFormatValidator(definition)
+	va, err = strings.NewFormatValidator(definition)
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -95,21 +95,21 @@ func TestFormatValidator(t *testing.T) {
 		},
 		{
 			Input: "foobar.com",
-			Expected: &validator.FormatValidationError{
+			Expected: &strings.FormatValidationError{
 				Input:      "foobar.com",
 				Definition: definition,
 			},
 		},
 		{
 			Input: "foo@bar",
-			Expected: &validator.FormatValidationError{
+			Expected: &strings.FormatValidationError{
 				Input:      "foo@bar",
 				Definition: definition,
 			},
 		},
 		{
 			Input: "foo@bar.",
-			Expected: &validator.FormatValidationError{
+			Expected: &strings.FormatValidationError{
 				Input:      "foo@bar.",
 				Definition: definition,
 			},
@@ -123,10 +123,10 @@ func TestFormatValidator(t *testing.T) {
 		}
 	}
 
-	definition = validator.FormatValidatorDefinition{
+	definition = strings.FormatValidatorDefinition{
 		Format: "hostname",
 	}
-	va, err = validator.NewFormatValidator(definition)
+	va, err = strings.NewFormatValidator(definition)
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -150,28 +150,28 @@ func TestFormatValidator(t *testing.T) {
 		},
 		{
 			Input: "example@example.com",
-			Expected: &validator.FormatValidationError{
+			Expected: &strings.FormatValidationError{
 				Input:      "example@example.com",
 				Definition: definition,
 			},
 		},
 		{
 			Input: "example,com",
-			Expected: &validator.FormatValidationError{
+			Expected: &strings.FormatValidationError{
 				Input:      "example,com",
 				Definition: definition,
 			},
 		},
 		{
 			Input: "example..com",
-			Expected: &validator.FormatValidationError{
+			Expected: &strings.FormatValidationError{
 				Input:      "example..com",
 				Definition: definition,
 			},
 		},
 		{
 			Input: ".example.com",
-			Expected: &validator.FormatValidationError{
+			Expected: &strings.FormatValidationError{
 				Input:      ".example.com",
 				Definition: definition,
 			},
@@ -185,10 +185,10 @@ func TestFormatValidator(t *testing.T) {
 		}
 	}
 
-	definition = validator.FormatValidatorDefinition{
+	definition = strings.FormatValidatorDefinition{
 		Format: "uri",
 	}
-	va, err = validator.NewFormatValidator(definition)
+	va, err = strings.NewFormatValidator(definition)
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -212,7 +212,7 @@ func TestFormatValidator(t *testing.T) {
 		},
 		{
 			Input: "foobar.com",
-			Expected: &validator.FormatValidationError{
+			Expected: &strings.FormatValidationError{
 				Input:      "foobar.com",
 				Definition: definition,
 			},
@@ -226,10 +226,10 @@ func TestFormatValidator(t *testing.T) {
 		}
 	}
 
-	definition = validator.FormatValidatorDefinition{
+	definition = strings.FormatValidatorDefinition{
 		Format: "password-0Aa",
 	}
-	va, err = validator.NewFormatValidator(definition)
+	va, err = strings.NewFormatValidator(definition)
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -361,49 +361,49 @@ func TestFormatValidator(t *testing.T) {
 		},
 		{
 			Input: "aA0!あ",
-			Expected: &validator.FormatValidationError{
+			Expected: &strings.FormatValidationError{
 				Input:      "aA0!あ",
 				Definition: definition,
 			},
 		},
 		{
 			Input: "12345678",
-			Expected: &validator.FormatValidationError{
+			Expected: &strings.FormatValidationError{
 				Input:      "12345678",
 				Definition: definition,
 			},
 		},
 		{
 			Input: "password",
-			Expected: &validator.FormatValidationError{
+			Expected: &strings.FormatValidationError{
 				Input:      "password",
 				Definition: definition,
 			},
 		},
 		{
 			Input: "PASSWORD",
-			Expected: &validator.FormatValidationError{
+			Expected: &strings.FormatValidationError{
 				Input:      "PASSWORD",
 				Definition: definition,
 			},
 		},
 		{
 			Input: "Password",
-			Expected: &validator.FormatValidationError{
+			Expected: &strings.FormatValidationError{
 				Input:      "Password",
 				Definition: definition,
 			},
 		},
 		{
 			Input: "password123",
-			Expected: &validator.FormatValidationError{
+			Expected: &strings.FormatValidationError{
 				Input:      "password123",
 				Definition: definition,
 			},
 		},
 		{
 			Input: "PASSWORD123",
-			Expected: &validator.FormatValidationError{
+			Expected: &strings.FormatValidationError{
 				Input:      "PASSWORD123",
 				Definition: definition,
 			},

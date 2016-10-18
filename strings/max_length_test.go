@@ -1,25 +1,25 @@
-package validator_test
+package strings_test
 
 import (
 	"reflect"
 	"testing"
 
-	"github.com/go-jstmpl/go-jsvalidator"
+	"github.com/go-jstmpl/go-jsvalidator/strings"
 )
 
 func TestMaxLength(t *testing.T) {
-	_, err := validator.NewMaxLengthValidator(validator.MaxLengthValidatorDefinition{MaxLength: -1})
-	_, ok := err.(validator.NoLengthError)
+	_, err := strings.NewMaxLengthValidator(strings.MaxLengthValidatorDefinition{MaxLength: -1})
+	_, ok := err.(strings.NoLengthError)
 	if !ok {
 		t.Errorf("Type of error expected %v, but not.", "NoLengthError")
 	}
 }
 
 func TestMaxLengthValidator(t *testing.T) {
-	definition := validator.MaxLengthValidatorDefinition{
+	definition := strings.MaxLengthValidatorDefinition{
 		MaxLength: 5,
 	}
-	va, err := validator.NewMaxLengthValidator(definition)
+	va, err := strings.NewMaxLengthValidator(definition)
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -40,7 +40,7 @@ func TestMaxLengthValidator(t *testing.T) {
 		},
 		{
 			Input: "あいうえおか",
-			Expected: &validator.MaxLengthValidationError{
+			Expected: &strings.MaxLengthValidationError{
 				Input:      "あいうえおか",
 				Definition: definition,
 			},
