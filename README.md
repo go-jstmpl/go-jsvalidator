@@ -4,7 +4,11 @@ Validators based on JSON Schema in Go.
 
 ## Installation
 
-Clone this repository
+```
+go get -u github.com/go-jstmpl/go-jsvalidator
+```
+
+Or, clone this repository.
 
 ## Test
 
