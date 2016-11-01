@@ -24,17 +24,21 @@ func TestNewPatternValidator(t *testing.T) {
 			Definition: strings.PatternValidatorDefinition{Pattern: ""},
 			Error:      strings.PatternDefinitionEmptyError,
 		},
-		{
-			Message:    "invalid pattern",
-			Definition: strings.PatternValidatorDefinition{Pattern: "[a-z"},
-			Error:      strings.PatternDefinitionInvalidPatternError,
-		},
 	}
 	for _, c := range cases {
 		_, err := strings.NewPatternValidator(c.Definition)
 		if err != c.Error {
 			t.Errorf("Test with %s: fail to NewPatternValidator with error %v", c.Message, err)
 		}
+	}
+}
+
+func TestNewPatternValidatorWithInvalidPattern(t *testing.T) {
+	_, err := strings.NewPatternValidator(strings.PatternValidatorDefinition{
+		Pattern: "[a-z",
+	})
+	if _, ok := err.(strings.InvalidPatternError); !ok {
+		t.Errorf("Type of error expected %v, but not.", "EmptyError")
 	}
 }
 

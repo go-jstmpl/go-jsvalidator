@@ -7,8 +7,7 @@ import (
 )
 
 var (
-	PatternDefinitionEmptyError          = errors.New("the pattern should not be empty")
-	PatternDefinitionInvalidPatternError = errors.New("the pattern should not be invalid")
+	PatternDefinitionEmptyError = errors.New("the pattern should not be empty")
 )
 
 type PatternValidator struct {
@@ -34,7 +33,8 @@ func NewPatternValidator(definition PatternValidatorDefinition) (PatternValidato
 	}
 	_, err := regexp.Compile(definition.Pattern)
 	if err != nil {
-		return PatternValidator{}, PatternDefinitionInvalidPatternError
+		return PatternValidator{},
+			InvalidPatternError{fmt.Sprintf("invalid pattern %s: %s", definition.Pattern, err)}
 	}
 	return PatternValidator{definition}, nil
 }
