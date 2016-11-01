@@ -7,21 +7,44 @@ import (
 	"github.com/go-jstmpl/go-jsvalidator/strings"
 )
 
-func TestMaxLength(t *testing.T) {
-	_, err := strings.NewMaxLengthValidator(strings.MaxLengthValidatorDefinition{MaxLength: -1})
-	_, ok := err.(strings.NoLengthError)
-	if !ok {
-		t.Errorf("Type of error expected %v, but not.", "NoLengthError")
+func TestNewMaxLengthValidator(t *testing.T) {
+	type Case struct {
+		Message    string
+		Definition strings.MaxLengthValidatorDefinition
+		Error      error
+	}
+	cases := []Case{
+		{
+			Message:    "negative numver",
+			Definition: strings.MaxLengthValidatorDefinition{MaxLength: -1},
+			Error:      strings.MaxLengthDefinitionNoLengthError,
+		},
+		{
+			Message:    "zero",
+			Definition: strings.MaxLengthValidatorDefinition{MaxLength: 0},
+			Error:      nil,
+		},
+		{
+			Message:    "positive numver",
+			Definition: strings.MaxLengthValidatorDefinition{MaxLength: 1},
+			Error:      nil,
+		},
+	}
+	for _, c := range cases {
+		_, err := strings.NewMaxLengthValidator(c.Definition)
+		if err != c.Error {
+			t.Errorf("Test with %s: fail to NewMaxLengthValidator with error %v", c.Message, err)
+		}
 	}
 }
 
-func TestMaxLengthValidator(t *testing.T) {
+func TestValidateOfMaxLengthValidator(t *testing.T) {
 	definition := strings.MaxLengthValidatorDefinition{
 		MaxLength: 5,
 	}
 	va, err := strings.NewMaxLengthValidator(definition)
 	if err != nil {
-		t.Error(err.Error())
+		t.Error(&err)
 	}
 
 	type MaxLengthValidatorTestCase struct {
@@ -52,8 +75,7 @@ func TestMaxLengthValidator(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		err := va.Validate(c.Input)
-		if !reflect.DeepEqual(err, c.Expected) {
+		if err := va.Validate(c.Input); !reflect.DeepEqual(err, c.Expected) {
 			t.Errorf("expected %v, but actual %v", c.Expected, err)
 		}
 	}

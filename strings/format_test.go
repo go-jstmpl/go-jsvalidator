@@ -7,11 +7,54 @@ import (
 	"github.com/go-jstmpl/go-jsvalidator/strings"
 )
 
-func TestFormat(t *testing.T) {
-	_, err := strings.NewFormatValidator(strings.FormatValidatorDefinition{Format: "password"})
-	_, ok := err.(strings.InvalidFormatError)
-	if !ok {
-		t.Errorf("Type of error expected %v, but not.", "InvalidFormatError")
+func TestNewFormatValidator(t *testing.T) {
+	type Case struct {
+		Message    string
+		Definition strings.FormatValidatorDefinition
+		Error      error
+	}
+	cases := []Case{
+		{
+			Message:    "date-time format",
+			Definition: strings.FormatValidatorDefinition{Format: "date-time"},
+			Error:      nil,
+		},
+		{
+			Message:    "email format",
+			Definition: strings.FormatValidatorDefinition{Format: "email"},
+			Error:      nil,
+		},
+		{
+			Message:    "hostname format",
+			Definition: strings.FormatValidatorDefinition{Format: "hostname"},
+			Error:      nil,
+		},
+		{
+			Message:    "uri format",
+			Definition: strings.FormatValidatorDefinition{Format: "uri"},
+			Error:      nil,
+		},
+		{
+			Message:    "password-0Aa format",
+			Definition: strings.FormatValidatorDefinition{Format: "password-0Aa"},
+			Error:      nil,
+		},
+		{
+			Message:    "empty string",
+			Definition: strings.FormatValidatorDefinition{Format: ""},
+			Error:      strings.FormatDefinitionInvalidFormatError,
+		},
+		{
+			Message:    "unsupported format",
+			Definition: strings.FormatValidatorDefinition{Format: "fax-number"},
+			Error:      strings.FormatDefinitionInvalidFormatError,
+		},
+	}
+	for _, c := range cases {
+		_, err := strings.NewFormatValidator(c.Definition)
+		if err != c.Error {
+			t.Errorf("Test with %s: fail to NewFormatValidator with error %v", c.Message, err)
+		}
 	}
 }
 
