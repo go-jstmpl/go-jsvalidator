@@ -1,8 +1,14 @@
 package strings
 
 import (
+	"errors"
 	"fmt"
 	"regexp"
+)
+
+var (
+	PatternDefinitionEmptyError          = errors.New("the pattern should not be empty")
+	PatternDefinitionInvalidPatternError = errors.New("the pattern should not be invalid")
 )
 
 type PatternValidator struct {
@@ -19,16 +25,16 @@ type PatternValidationError struct {
 }
 
 func (p PatternValidationError) Error() string {
-	return fmt.Sprintf("input value '%s' does not match the regex pattern '%s'\n", p.Input, p.Definition.Pattern)
+	return fmt.Sprintf("input value '%s' does not match the regex pattern '%s'", p.Input, p.Definition.Pattern)
 }
 
 func NewPatternValidator(definition PatternValidatorDefinition) (PatternValidator, error) {
 	if definition.Pattern == "" {
-		return PatternValidator{}, EmptyError{"the pattern should not be empty"}
+		return PatternValidator{}, PatternDefinitionEmptyError
 	}
 	_, err := regexp.Compile(definition.Pattern)
 	if err != nil {
-		return PatternValidator{}, InvalidPatternError{fmt.Sprintf("invalid pattern: %s", definition.Pattern)}
+		return PatternValidator{}, PatternDefinitionInvalidPatternError
 	}
 	return PatternValidator{definition}, nil
 }
