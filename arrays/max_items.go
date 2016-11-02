@@ -1,6 +1,11 @@
 package arrays
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+)
+
+var MaxItemsDefinitionNoLengthError = errors.New("the value of MaxItems should be greater than or equal to 0")
 
 type MaxItemsValidator struct {
 	definition MaxItemsValidatorDefinition
@@ -22,7 +27,7 @@ func (err MaxItemsValidationError) Error() string {
 
 func NewMaxItemsValidator(definition MaxItemsValidatorDefinition) (MaxItemsValidator, error) {
 	if definition.MaxItems < 0 {
-		return MaxItemsValidator{}, &NoLengthError{}
+		return MaxItemsValidator{}, MaxItemsDefinitionNoLengthError
 	}
 	return MaxItemsValidator{definition}, nil
 }
