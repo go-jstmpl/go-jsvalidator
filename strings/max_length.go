@@ -1,9 +1,12 @@
 package strings
 
 import (
+	"errors"
 	"fmt"
 	"unicode/utf8"
 )
+
+var MaxLengthDefinitionNoLengthError = errors.New("the max length should be greater than, or equal to, 0")
 
 type MaxLengthValidator struct {
 	definition MaxLengthValidatorDefinition
@@ -19,15 +22,15 @@ type MaxLengthValidationError struct {
 }
 
 func (m MaxLengthValidationError) Error() string {
-	return fmt.Sprintf("should be less than, or equal to, %d charactors but actual value has %d charactors\n",
+	return fmt.Sprintf("should be less than, or equal to, %d charactors but actual value has %d charactors",
 		m.Definition.MaxLength, utf8.RuneCountInString(m.Input))
 }
 
-func NewMaxLengthValidator(def MaxLengthValidatorDefinition) (MaxLengthValidator, error) {
-	if def.MaxLength < 0 {
-		return MaxLengthValidator{}, NoLengthError{"the max length should be greater than, or equal to, 0"}
+func NewMaxLengthValidator(definition MaxLengthValidatorDefinition) (MaxLengthValidator, error) {
+	if definition.MaxLength < 0 {
+		return MaxLengthValidator{}, MaxLengthDefinitionNoLengthError
 	}
-	return MaxLengthValidator{def}, nil
+	return MaxLengthValidator{definition}, nil
 }
 
 func (m MaxLengthValidator) Validate(input string) error {

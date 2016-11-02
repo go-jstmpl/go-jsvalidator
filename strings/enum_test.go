@@ -39,7 +39,7 @@ func TestNewEnumValidator(t *testing.T) {
 
 	for _, c := range cases {
 		_, err := strings.NewEnumValidator(c.Definition)
-		if !reflect.DeepEqual(err, c.Error) {
+		if err != c.Error {
 			t.Errorf("Test with %s: expected %v, but actual %v", c.Message, c.Error, err)
 		}
 	}

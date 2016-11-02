@@ -1,6 +1,7 @@
 package strings
 
 import (
+	"errors"
 	"fmt"
 	"regexp"
 )
@@ -9,6 +10,8 @@ var (
 	rDateTime = regexp.MustCompile("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?(?:[+-]\\d{2}:\\d{2}|Z)$")
 	rEmail    = regexp.MustCompile("^.+@.+\\..+$")
 	rURI      = regexp.MustCompile("^[0-9a-zA-Z]+:\\/\\/.+$")
+
+	FormatDefinitionInvalidFormatError = errors.New("the format is not found")
 )
 
 type FormatValidator struct {
@@ -25,7 +28,7 @@ type FormatValidationError struct {
 }
 
 func (f FormatValidationError) Error() string {
-	return fmt.Sprintf("input value '%s' does not match the pattern for '%s'\n",
+	return fmt.Sprintf("input value '%s' does not match the pattern for '%s'",
 		f.Input, f.Definition.Format)
 }
 
@@ -34,7 +37,7 @@ func NewFormatValidator(definition FormatValidatorDefinition) (FormatValidator, 
 	case "date-time", "email", "hostname", "uri", "password-0Aa":
 		return FormatValidator{definition}, nil
 	}
-	return FormatValidator{}, InvalidFormatError{"the format is not found"}
+	return FormatValidator{}, FormatDefinitionInvalidFormatError
 }
 
 func (f FormatValidator) Validate(input string) error {

@@ -1,6 +1,11 @@
 package arrays
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+)
+
+var MinItemsDefinitionNoLengthError = errors.New("the value of MinItems should be greater than or equal to 0")
 
 type MinItemsValidator struct {
 	definition MinItemsValidatorDefinition
@@ -22,7 +27,7 @@ func (err MinItemsValidationError) Error() string {
 
 func NewMinItemsValidator(definition MinItemsValidatorDefinition) (MinItemsValidator, error) {
 	if definition.MinItems < 0 {
-		return MinItemsValidator{}, &NoLengthError{}
+		return MinItemsValidator{}, MinItemsDefinitionNoLengthError
 	}
 	return MinItemsValidator{definition}, nil
 }

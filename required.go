@@ -2,8 +2,14 @@ package validator
 
 import (
 	"database/sql/driver"
+	"errors"
 	"fmt"
 	"reflect"
+)
+
+var (
+	RequiredDefinitionEmptyError       = errors.New("the required value should have at least one element")
+	RequiredDefinitionDuplicationError = errors.New("the required value should not be duplicated")
 )
 
 type RequiredValidator struct {
@@ -27,14 +33,14 @@ func NewRequiredValidator(definition RequiredValidatorDefinition) (RequiredValid
 	required := definition.Required
 	len := len(required)
 	if len == 0 {
-		return RequiredValidator{}, EmptyError{"the required value should have at least one element"}
+		return RequiredValidator{}, RequiredDefinitionEmptyError
 	}
 
 	for i := 0; i < len-1; i++ {
 		key := required[i]
 		for j := i + 1; j < len; j++ {
 			if required[j] == key {
-				return RequiredValidator{}, DuplicationError{"the required value should not be duplicated"}
+				return RequiredValidator{}, RequiredDefinitionDuplicationError
 			}
 		}
 	}

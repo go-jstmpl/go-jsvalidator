@@ -7,11 +7,34 @@ import (
 	"github.com/go-jstmpl/go-jsvalidator/strings"
 )
 
-func TestMinLength(t *testing.T) {
-	_, err := strings.NewMinLengthValidator(strings.MinLengthValidatorDefinition{MinLength: -1})
-	_, ok := err.(strings.NoLengthError)
-	if !ok {
-		t.Errorf("Type of error expected %v, but not.", "NoLengthError")
+func TestNewMinLengthValidator(t *testing.T) {
+	type Case struct {
+		Message    string
+		Definition strings.MinLengthValidatorDefinition
+		Error      error
+	}
+	cases := []Case{
+		{
+			Message:    "negative numver",
+			Definition: strings.MinLengthValidatorDefinition{MinLength: -1},
+			Error:      strings.MinLengthDefinitionNoLengthError,
+		},
+		{
+			Message:    "zero",
+			Definition: strings.MinLengthValidatorDefinition{MinLength: 0},
+			Error:      nil,
+		},
+		{
+			Message:    "positive numver",
+			Definition: strings.MinLengthValidatorDefinition{MinLength: 1},
+			Error:      nil,
+		},
+	}
+	for _, c := range cases {
+		_, err := strings.NewMinLengthValidator(c.Definition)
+		if err != c.Error {
+			t.Errorf("Test with %s: fail to NewMinLengthValidator with error %v", c.Message, err)
+		}
 	}
 }
 

@@ -27,7 +27,7 @@ func TestNewMinItemsValidator(t *testing.T) {
 		{
 			Message:    "negative length",
 			Definition: arrays.MinItemsValidatorDefinition{MinItems: -1},
-			Error:      &arrays.NoLengthError{},
+			Error:      arrays.MinItemsDefinitionNoLengthError,
 		},
 	}
 

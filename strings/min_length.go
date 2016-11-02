@@ -1,9 +1,12 @@
 package strings
 
 import (
+	"errors"
 	"fmt"
 	"unicode/utf8"
 )
+
+var MinLengthDefinitionNoLengthError = errors.New("the min length should be greater than, or equal to, 0")
 
 type MinLengthValidator struct {
 	definition MinLengthValidatorDefinition
@@ -19,15 +22,14 @@ type MinLengthValidationError struct {
 }
 
 func (m MinLengthValidationError) Error() string {
-	return fmt.Sprintf("should be greater than, or equal to, %d charactors but actual value has %d charactors\n",
+	return fmt.Sprintf("should be greater than, or equal to, %d charactors but actual value has %d charactors",
 		m.Definition.MinLength, utf8.RuneCountInString(m.Input))
 }
 
 func NewMinLengthValidator(definition MinLengthValidatorDefinition) (MinLengthValidator, error) {
 	if definition.MinLength < 0 {
-		return MinLengthValidator{}, NoLengthError{"the minlength should be greater than, or equal to, 0"}
+		return MinLengthValidator{}, MinLengthDefinitionNoLengthError
 	}
-
 	return MinLengthValidator{definition}, nil
 }
 
