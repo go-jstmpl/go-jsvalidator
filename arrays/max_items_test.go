@@ -27,7 +27,7 @@ func TestNewMaxItemsValidator(t *testing.T) {
 		{
 			Message:    "negative length",
 			Definition: arrays.MaxItemsValidatorDefinition{MaxItems: -1},
-			Error:      &arrays.NoLengthError{},
+			Error:      arrays.MaxItemsDefinitionNoLengthError,
 		},
 	}
 

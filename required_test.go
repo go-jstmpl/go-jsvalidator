@@ -8,39 +8,63 @@ import (
 	"github.com/gocraft/dbr"
 )
 
-func TestRequired(t *testing.T) {
-	_, err := validator.NewRequiredValidator(validator.RequiredValidatorDefinition{Required: []string{}})
-	_, ok := err.(validator.EmptyError)
-	if !ok {
-		t.Errorf("Type of error expected %v, but not.", "EmptyError")
+func TestNewRequiredValidator(t *testing.T) {
+	type Case struct {
+		Message    string
+		Definition validator.RequiredValidatorDefinition
+		Error      error
 	}
-
-	_, err = validator.NewRequiredValidator(validator.RequiredValidatorDefinition{Required: []string{"foo", "foo", "bar"}})
-	_, ok = err.(validator.DuplicationError)
-	if !ok {
-		t.Errorf("Type of error expected %v, but not.", "DuplicationError")
+	cases := []Case{
+		{
+			Message:    "single element",
+			Definition: validator.RequiredValidatorDefinition{Required: []string{"foo"}},
+			Error:      nil,
+		},
+		{
+			Message:    "multi elements",
+			Definition: validator.RequiredValidatorDefinition{Required: []string{"foo", "bar"}},
+			Error:      nil,
+		},
+		{
+			Message:    "empty slice",
+			Definition: validator.RequiredValidatorDefinition{Required: []string{}},
+			Error:      validator.RequiredDefinitionEmptyError,
+		},
+		{
+			Message:    "duplicated elements",
+			Definition: validator.RequiredValidatorDefinition{Required: []string{"foo", "foo"}},
+			Error:      validator.RequiredDefinitionDuplicationError,
+		},
+		{
+			Message:    "duplicated elements at first and second",
+			Definition: validator.RequiredValidatorDefinition{Required: []string{"foo", "foo", "bar"}},
+			Error:      validator.RequiredDefinitionDuplicationError,
+		},
+		{
+			Message:    "duplicated elements at first and end",
+			Definition: validator.RequiredValidatorDefinition{Required: []string{"foo", "bar", "foo"}},
+			Error:      validator.RequiredDefinitionDuplicationError,
+		},
+		{
+			Message:    "duplicated elements at second end end",
+			Definition: validator.RequiredValidatorDefinition{Required: []string{"bar", "foo", "foo"}},
+			Error:      validator.RequiredDefinitionDuplicationError,
+		},
+		{
+			Message:    "duplicated all elements",
+			Definition: validator.RequiredValidatorDefinition{Required: []string{"foo", "foo", "foo"}},
+			Error:      validator.RequiredDefinitionDuplicationError,
+		},
 	}
-
-	_, err = validator.NewRequiredValidator(validator.RequiredValidatorDefinition{Required: []string{"foo", "bar", "foo"}})
-	_, ok = err.(validator.DuplicationError)
-	if !ok {
-		t.Errorf("Type of error expected %v, but not.", "DuplicationError")
-	}
-
-	_, err = validator.NewRequiredValidator(validator.RequiredValidatorDefinition{Required: []string{"bar", "foo", "foo"}})
-	_, ok = err.(validator.DuplicationError)
-	if !ok {
-		t.Errorf("Type of error expected %v, but not.", "DuplicationError")
-	}
-
-	_, err = validator.NewRequiredValidator(validator.RequiredValidatorDefinition{Required: []string{"foo", "foo", "foo"}})
-	_, ok = err.(validator.DuplicationError)
-	if !ok {
-		t.Errorf("Type of error expected %v, but not.", "DuplicationError")
+	for _, c := range cases {
+		_, err := validator.NewRequiredValidator(c.Definition)
+		if err != c.Error {
+			t.Errorf("Test with %s: fail to NewPatternValidator with error %v", c.Message, err)
+		}
 	}
 }
 
-func TestRequiredValidator(t *testing.T) {
+func TestValidateOfRequiredValidator(t *testing.T) {
 	definition := validator.RequiredValidatorDefinition{
 		Required: []string{"ID", "Addr"},
 	}
