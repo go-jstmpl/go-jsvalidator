@@ -69,24 +69,28 @@ func TestValidateOfRequiredValidator(t *testing.T) {
 	type Native struct {
 		StringValue string
 		IntValue    int
+		FloatValue  float64
 		BoolValue   bool
 	}
 
 	type PtrNative struct {
 		StringValue *string
 		IntValue    *int
+		FloatValue  *float64
 		BoolValue   *bool
 	}
 
 	type Null struct {
 		StringValue dbr.NullString
 		IntValue    dbr.NullInt64
+		FloatValue  dbr.NullFloat64
 		BoolValue   dbr.NullBool
 	}
 
 	type PtrNull struct {
 		StringValue *dbr.NullString
 		IntValue    *dbr.NullInt64
+		FloatValue  *dbr.NullFloat64
 		BoolValue   *dbr.NullBool
 	}
 
@@ -98,10 +102,12 @@ func TestValidateOfRequiredValidator(t *testing.T) {
 
 	stringValue := "string value"
 	intValue := 1
+	floatValue := 1.1
 	boolValue := true
 
 	falsyStringValue := ""
 	falsyIntValue := 0
+	falsyFloatValue := 0.0
 	falsyBoolValue := false
 
 	definition := validator.RequiredValidatorDefinition{
@@ -130,6 +136,7 @@ func TestValidateOfRequiredValidator(t *testing.T) {
 			Input: Native{
 				StringValue: "value",
 				IntValue:    1,
+				FloatValue:  1.1,
 				BoolValue:   true,
 			},
 			Expected: nil,
@@ -139,6 +146,7 @@ func TestValidateOfRequiredValidator(t *testing.T) {
 			Input: Native{
 				StringValue: "",
 				IntValue:    0,
+				FloatValue:  0.0,
 				BoolValue:   false,
 			},
 			Expected: nil,
@@ -148,6 +156,7 @@ func TestValidateOfRequiredValidator(t *testing.T) {
 			Input: PtrNative{
 				StringValue: &stringValue,
 				IntValue:    &intValue,
+				FloatValue:  &floatValue,
 				BoolValue:   &boolValue,
 			},
 			Expected: nil,
@@ -157,6 +166,7 @@ func TestValidateOfRequiredValidator(t *testing.T) {
 			Input: PtrNative{
 				StringValue: &falsyStringValue,
 				IntValue:    &falsyIntValue,
+				FloatValue:  &falsyFloatValue,
 				BoolValue:   &falsyBoolValue,
 			},
 			Expected: nil,
@@ -166,12 +176,14 @@ func TestValidateOfRequiredValidator(t *testing.T) {
 			Input: PtrNative{
 				StringValue: nil,
 				IntValue:    nil,
+				FloatValue:  nil,
 				BoolValue:   nil,
 			},
 			Expected: &validator.RequiredValidationError{
 				Input: PtrNative{
 					StringValue: nil,
 					IntValue:    nil,
+					FloatValue:  nil,
 					BoolValue:   nil,
 				},
 				Definition: definition,
@@ -190,6 +202,12 @@ func TestValidateOfRequiredValidator(t *testing.T) {
 					NullInt64: sql.NullInt64{
 						Int64: 1,
 						Valid: true,
+					},
+				},
+				FloatValue: dbr.NullFloat64{
+					NullFloat64: sql.NullFloat64{
+						Float64: 1,
+						Valid:   true,
 					},
 				},
 				BoolValue: dbr.NullBool{
@@ -216,6 +234,12 @@ func TestValidateOfRequiredValidator(t *testing.T) {
 						Valid: true,
 					},
 				},
+				FloatValue: dbr.NullFloat64{
+					NullFloat64: sql.NullFloat64{
+						Float64: 0,
+						Valid:   true,
+					},
+				},
 				BoolValue: dbr.NullBool{
 					NullBool: sql.NullBool{
 						Bool:  false,
@@ -240,6 +264,12 @@ func TestValidateOfRequiredValidator(t *testing.T) {
 						Valid: false,
 					},
 				},
+				FloatValue: dbr.NullFloat64{
+					NullFloat64: sql.NullFloat64{
+						Float64: 0,
+						Valid:   false,
+					},
+				},
 				BoolValue: dbr.NullBool{
 					NullBool: sql.NullBool{
 						Bool:  false,
@@ -259,6 +289,12 @@ func TestValidateOfRequiredValidator(t *testing.T) {
 						NullInt64: sql.NullInt64{
 							Int64: 0,
 							Valid: false,
+						},
+					},
+					FloatValue: dbr.NullFloat64{
+						NullFloat64: sql.NullFloat64{
+							Float64: 0,
+							Valid:   false,
 						},
 					},
 					BoolValue: dbr.NullBool{
@@ -286,6 +322,12 @@ func TestValidateOfRequiredValidator(t *testing.T) {
 						Valid: true,
 					},
 				},
+				FloatValue: &dbr.NullFloat64{
+					NullFloat64: sql.NullFloat64{
+						Float64: 1.0,
+						Valid:   true,
+					},
+				},
 				BoolValue: &dbr.NullBool{
 					NullBool: sql.NullBool{
 						Bool:  true,
@@ -308,6 +350,12 @@ func TestValidateOfRequiredValidator(t *testing.T) {
 					NullInt64: sql.NullInt64{
 						Int64: 0,
 						Valid: true,
+					},
+				},
+				FloatValue: &dbr.NullFloat64{
+					NullFloat64: sql.NullFloat64{
+						Float64: 0.0,
+						Valid:   true,
 					},
 				},
 				BoolValue: &dbr.NullBool{
@@ -334,6 +382,12 @@ func TestValidateOfRequiredValidator(t *testing.T) {
 						Valid: false,
 					},
 				},
+				FloatValue: &dbr.NullFloat64{
+					NullFloat64: sql.NullFloat64{
+						Float64: 0,
+						Valid:   false,
+					},
+				},
 				BoolValue: &dbr.NullBool{
 					NullBool: sql.NullBool{
 						Bool:  false,
@@ -355,6 +409,12 @@ func TestValidateOfRequiredValidator(t *testing.T) {
 							Valid: false,
 						},
 					},
+					FloatValue: &dbr.NullFloat64{
+						NullFloat64: sql.NullFloat64{
+							Float64: 0,
+							Valid:   false,
+						},
+					},
 					BoolValue: &dbr.NullBool{
 						NullBool: sql.NullBool{
 							Bool:  false,
@@ -370,12 +430,14 @@ func TestValidateOfRequiredValidator(t *testing.T) {
 			Input: PtrNull{
 				StringValue: nil,
 				IntValue:    nil,
+				FloatValue:  nil,
 				BoolValue:   nil,
 			},
 			Expected: &validator.RequiredValidationError{
 				Input: PtrNull{
 					StringValue: nil,
 					IntValue:    nil,
+					FloatValue:  nil,
 					BoolValue:   nil,
 				},
 				Definition: definition,
@@ -387,6 +449,7 @@ func TestValidateOfRequiredValidator(t *testing.T) {
 			Input: &Native{
 				StringValue: "value",
 				IntValue:    1,
+				FloatValue:  1.1,
 				BoolValue:   true,
 			},
 			Expected: nil,
@@ -396,6 +459,7 @@ func TestValidateOfRequiredValidator(t *testing.T) {
 			Input: &Native{
 				StringValue: "",
 				IntValue:    0,
+				FloatValue:  0.0,
 				BoolValue:   false,
 			},
 			Expected: nil,
@@ -405,6 +469,7 @@ func TestValidateOfRequiredValidator(t *testing.T) {
 			Input: &PtrNative{
 				StringValue: &stringValue,
 				IntValue:    &intValue,
+				FloatValue:  &floatValue,
 				BoolValue:   &boolValue,
 			},
 			Expected: nil,
@@ -414,6 +479,7 @@ func TestValidateOfRequiredValidator(t *testing.T) {
 			Input: &PtrNative{
 				StringValue: &falsyStringValue,
 				IntValue:    &falsyIntValue,
+				FloatValue:  &falsyFloatValue,
 				BoolValue:   &falsyBoolValue,
 			},
 			Expected: nil,
@@ -423,12 +489,14 @@ func TestValidateOfRequiredValidator(t *testing.T) {
 			Input: &PtrNative{
 				StringValue: nil,
 				IntValue:    nil,
+				FloatValue:  nil,
 				BoolValue:   nil,
 			},
 			Expected: &validator.RequiredValidationError{
 				Input: &PtrNative{
 					StringValue: nil,
 					IntValue:    nil,
+					FloatValue:  nil,
 					BoolValue:   nil,
 				},
 				Definition: definition,
@@ -448,6 +516,12 @@ func TestValidateOfRequiredValidator(t *testing.T) {
 					NullInt64: sql.NullInt64{
 						Int64: 1,
 						Valid: true,
+					},
+				},
+				FloatValue: dbr.NullFloat64{
+					NullFloat64: sql.NullFloat64{
+						Float64: 1,
+						Valid:   true,
 					},
 				},
 				BoolValue: dbr.NullBool{
@@ -474,6 +548,12 @@ func TestValidateOfRequiredValidator(t *testing.T) {
 						Valid: true,
 					},
 				},
+				FloatValue: dbr.NullFloat64{
+					NullFloat64: sql.NullFloat64{
+						Float64: 0,
+						Valid:   true,
+					},
+				},
 				BoolValue: dbr.NullBool{
 					NullBool: sql.NullBool{
 						Bool:  false,
@@ -498,6 +578,12 @@ func TestValidateOfRequiredValidator(t *testing.T) {
 						Valid: false,
 					},
 				},
+				FloatValue: dbr.NullFloat64{
+					NullFloat64: sql.NullFloat64{
+						Float64: 0,
+						Valid:   false,
+					},
+				},
 				BoolValue: dbr.NullBool{
 					NullBool: sql.NullBool{
 						Bool:  false,
@@ -517,6 +603,12 @@ func TestValidateOfRequiredValidator(t *testing.T) {
 						NullInt64: sql.NullInt64{
 							Int64: 0,
 							Valid: false,
+						},
+					},
+					FloatValue: dbr.NullFloat64{
+						NullFloat64: sql.NullFloat64{
+							Float64: 0,
+							Valid:   false,
 						},
 					},
 					BoolValue: dbr.NullBool{
@@ -544,6 +636,12 @@ func TestValidateOfRequiredValidator(t *testing.T) {
 						Valid: true,
 					},
 				},
+				FloatValue: &dbr.NullFloat64{
+					NullFloat64: sql.NullFloat64{
+						Float64: 1,
+						Valid:   true,
+					},
+				},
 				BoolValue: &dbr.NullBool{
 					NullBool: sql.NullBool{
 						Bool:  true,
@@ -566,6 +664,12 @@ func TestValidateOfRequiredValidator(t *testing.T) {
 					NullInt64: sql.NullInt64{
 						Int64: 0,
 						Valid: true,
+					},
+				},
+				FloatValue: &dbr.NullFloat64{
+					NullFloat64: sql.NullFloat64{
+						Float64: 0,
+						Valid:   true,
 					},
 				},
 				BoolValue: &dbr.NullBool{
@@ -592,6 +696,12 @@ func TestValidateOfRequiredValidator(t *testing.T) {
 						Valid: false,
 					},
 				},
+				FloatValue: &dbr.NullFloat64{
+					NullFloat64: sql.NullFloat64{
+						Float64: 0,
+						Valid:   false,
+					},
+				},
 				BoolValue: &dbr.NullBool{
 					NullBool: sql.NullBool{
 						Bool:  false,
@@ -613,6 +723,12 @@ func TestValidateOfRequiredValidator(t *testing.T) {
 							Valid: false,
 						},
 					},
+					FloatValue: &dbr.NullFloat64{
+						NullFloat64: sql.NullFloat64{
+							Float64: 0,
+							Valid:   false,
+						},
+					},
 					BoolValue: &dbr.NullBool{
 						NullBool: sql.NullBool{
 							Bool:  false,
@@ -628,12 +744,14 @@ func TestValidateOfRequiredValidator(t *testing.T) {
 			Input: &PtrNull{
 				StringValue: nil,
 				IntValue:    nil,
+				FloatValue:  nil,
 				BoolValue:   nil,
 			},
 			Expected: &validator.RequiredValidationError{
 				Input: &PtrNull{
 					StringValue: nil,
 					IntValue:    nil,
+					FloatValue:  nil,
 					BoolValue:   nil,
 				},
 				Definition: definition,
