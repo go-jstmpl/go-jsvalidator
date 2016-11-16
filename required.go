@@ -51,7 +51,7 @@ func NewRequiredValidator(definition RequiredValidatorDefinition) (RequiredValid
 
 func (r RequiredValidator) Validate(input interface{}) error {
 	if input == nil {
-		return &InvalidFieldTypeError{
+		return &InvalidTypeError{
 			Definition: r.definition,
 			Input:      input,
 		}
@@ -64,7 +64,7 @@ func (r RequiredValidator) Validate(input interface{}) error {
 		v = reflect.ValueOf(input).Elem()
 	}
 	if v.Kind() != reflect.Struct {
-		return &InvalidFieldTypeError{
+		return &InvalidTypeError{
 			Definition: r.definition,
 			Input:      input,
 		}
@@ -73,43 +73,19 @@ func (r RequiredValidator) Validate(input interface{}) error {
 	for _, key := range r.definition.Required {
 		e := v.FieldByName(key)
 		if e.Kind() == reflect.Ptr {
-			e = v.FieldByName(key).Elem()
-		}
-		if (e == reflect.Value{}) {
-			return &RequiredValidationError{
-				Definition: r.definition,
-				Input:      input,
+			if e.IsNil() {
+				return &RequiredValidationError{
+					Definition: r.definition,
+					Input:      input,
+				}
 			}
+			e = v.FieldByName(key).Elem()
 		}
 
 		i := e.Interface()
-		switch i := i.(type) {
+		switch j := i.(type) {
 		case dbr.NullString:
-			if !i.Valid {
-				return &RequiredValidationError{
-					Definition: r.definition,
-					Input:      input,
-				}
-			}
-			continue
-		case dbr.NullInt64:
-			if !i.Valid {
-				return &RequiredValidationError{
-					Definition: r.definition,
-					Input:      input,
-				}
-			}
-			continue
-		case dbr.NullFloat64:
-			if !i.Valid {
-				return &RequiredValidationError{
-					Definition: r.definition,
-					Input:      input,
-				}
-			}
-			continue
-		case dbr.NullBool:
-			if !i.Valid {
+			if !j.Valid {
 				return &RequiredValidationError{
 					Definition: r.definition,
 					Input:      input,
@@ -117,7 +93,31 @@ func (r RequiredValidator) Validate(input interface{}) error {
 			}
 			continue
 		case dbr.NullTime:
-			if !i.Valid {
+			if !j.Valid {
+				return &RequiredValidationError{
+					Definition: r.definition,
+					Input:      input,
+				}
+			}
+			continue
+		case dbr.NullInt64:
+			if !j.Valid {
+				return &RequiredValidationError{
+					Definition: r.definition,
+					Input:      input,
+				}
+			}
+			continue
+		case dbr.NullFloat64:
+			if !j.Valid {
+				return &RequiredValidationError{
+					Definition: r.definition,
+					Input:      input,
+				}
+			}
+			continue
+		case dbr.NullBool:
+			if !j.Valid {
 				return &RequiredValidationError{
 					Definition: r.definition,
 					Input:      input,
