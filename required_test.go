@@ -1,6 +1,7 @@
 package validator_test
 
 import (
+	"database/sql"
 	"reflect"
 	"testing"
 
@@ -66,32 +67,31 @@ func TestNewRequiredValidator(t *testing.T) {
 
 func TestValidateOfRequiredValidator(t *testing.T) {
 	definition := validator.RequiredValidatorDefinition{
-		Required: []string{"ID", "Addr"},
-	}
-	va, err := validator.NewRequiredValidator(definition)
-	if err != nil {
-		t.Error(err.Error())
+		Required: []string{"StringValue", "IntValue", "BoolValue"},
 	}
 
-	type Sample struct {
-		ID   dbr.NullInt64
-		Name dbr.NullString
-		Addr dbr.NullString
+	type Native struct {
+		StringValue string
+		IntValue    int
+		BoolValue   bool
 	}
-	sample1 := Sample{
-		ID:   dbr.NewNullInt64(1),
-		Name: dbr.NewNullString("MyName"),
-		Addr: dbr.NewNullString("foo@bar.com"),
+
+	type PtrNative struct {
+		StringValue *string
+		IntValue    *int
+		BoolValue   *bool
 	}
-	sample2 := Sample{
-		ID:   dbr.NewNullInt64(2),
-		Name: dbr.NewNullString(nil),
-		Addr: dbr.NewNullString("foo@bar.com"),
+
+	type Null struct {
+		StringValue dbr.NullString
+		IntValue    dbr.NullInt64
+		BoolValue   dbr.NullBool
 	}
-	sample3 := Sample{
-		ID:   dbr.NewNullInt64(nil),
-		Name: dbr.NewNullString("hi"),
-		Addr: dbr.NewNullString("foo@bar.com"),
+
+	type PtrNull struct {
+		StringValue *dbr.NullString
+		IntValue    *dbr.NullInt64
+		BoolValue   *dbr.NullBool
 	}
 
 	type RequiredValidatorTestCase struct {
@@ -99,7 +99,24 @@ func TestValidateOfRequiredValidator(t *testing.T) {
 		Input    interface{}
 		Expected error
 	}
+
+	stringValue := "string value"
+	intValue := 1
+	boolValue := true
+
+	falsyStringValue := ""
+	falsyIntValue := 0
+	falsyBoolValue := false
+
 	cases := []RequiredValidatorTestCase{
+		{
+			Message: "nil",
+			Input:   nil,
+			Expected: &validator.InvalidFieldTypeError{
+				Input:      nil,
+				Definition: definition,
+			},
+		},
 		{
 			Message: "non-struct",
 			Input:   "foo",
@@ -109,47 +126,530 @@ func TestValidateOfRequiredValidator(t *testing.T) {
 			},
 		},
 		{
-			Message:  "non-pointer of sample1",
-			Input:    sample1,
+			Message: "non-pointer struct of non-pointer native type of value",
+			Input: Native{
+				StringValue: "value",
+				IntValue:    1,
+				BoolValue:   true,
+			},
 			Expected: nil,
 		},
 		{
-			Message:  "non-pointer of sample2",
-			Input:    sample2,
+			Message: "non-pointer struct of non-pointer native type of falsy value",
+			Input: Native{
+				StringValue: "",
+				IntValue:    0,
+				BoolValue:   false,
+			},
 			Expected: nil,
 		},
 		{
-			Message: "non-pointer of sample3",
-			Input:   sample3,
+			Message: "non-pointer struct of pointer native type of value",
+			Input: PtrNative{
+				StringValue: &stringValue,
+				IntValue:    &intValue,
+				BoolValue:   &boolValue,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "non-pointer struct of pointer native type of falsy value",
+			Input: PtrNative{
+				StringValue: &falsyStringValue,
+				IntValue:    &falsyIntValue,
+				BoolValue:   &falsyBoolValue,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "non-pointer struct of pointer native type of nil",
+			Input: PtrNative{
+				StringValue: nil,
+				IntValue:    nil,
+				BoolValue:   nil,
+			},
 			Expected: &validator.RequiredValidationError{
-				Input:      sample3,
+				Input: PtrNative{
+					StringValue: nil,
+					IntValue:    nil,
+					BoolValue:   nil,
+				},
 				Definition: definition,
 			},
 		},
 		{
-			Message:  "pointer of sample1",
-			Input:    &sample1,
+			Message: "non-pointer struct of non-pointer nullable type of value",
+			Input: Null{
+				StringValue: dbr.NullString{
+					NullString: sql.NullString{
+						String: "value",
+						Valid:  true,
+					},
+				},
+				IntValue: dbr.NullInt64{
+					NullInt64: sql.NullInt64{
+						Int64: 1,
+						Valid: true,
+					},
+				},
+				BoolValue: dbr.NullBool{
+					NullBool: sql.NullBool{
+						Bool:  true,
+						Valid: true,
+					},
+				},
+			},
 			Expected: nil,
 		},
 		{
-			Message:  "pointer of sample2",
-			Input:    &sample2,
+			Message: "non-pointer struct of non-pointer nullable type of falsy value",
+			Input: Null{
+				StringValue: dbr.NullString{
+					NullString: sql.NullString{
+						String: "",
+						Valid:  true,
+					},
+				},
+				IntValue: dbr.NullInt64{
+					NullInt64: sql.NullInt64{
+						Int64: 0,
+						Valid: true,
+					},
+				},
+				BoolValue: dbr.NullBool{
+					NullBool: sql.NullBool{
+						Bool:  false,
+						Valid: true,
+					},
+				},
+			},
 			Expected: nil,
 		},
 		{
-			Message: "pointer of sample3",
-			Input:   &sample3,
+			Message: "non-pointer struct of non-pointer nullable type of null value",
+			Input: Null{
+				StringValue: dbr.NullString{
+					NullString: sql.NullString{
+						String: "",
+						Valid:  false,
+					},
+				},
+				IntValue: dbr.NullInt64{
+					NullInt64: sql.NullInt64{
+						Int64: 0,
+						Valid: false,
+					},
+				},
+				BoolValue: dbr.NullBool{
+					NullBool: sql.NullBool{
+						Bool:  false,
+						Valid: false,
+					},
+				},
+			},
 			Expected: &validator.RequiredValidationError{
-				Input:      &sample3,
+				Input: Null{
+					StringValue: dbr.NullString{
+						NullString: sql.NullString{
+							String: "",
+							Valid:  false,
+						},
+					},
+					IntValue: dbr.NullInt64{
+						NullInt64: sql.NullInt64{
+							Int64: 0,
+							Valid: false,
+						},
+					},
+					BoolValue: dbr.NullBool{
+						NullBool: sql.NullBool{
+							Bool:  false,
+							Valid: false,
+						},
+					},
+				},
+				Definition: definition,
+			},
+		},
+		{
+			Message: "non-pointer struct of pointer nullable type of value",
+			Input: PtrNull{
+				StringValue: &dbr.NullString{
+					NullString: sql.NullString{
+						String: "value",
+						Valid:  true,
+					},
+				},
+				IntValue: &dbr.NullInt64{
+					NullInt64: sql.NullInt64{
+						Int64: 1,
+						Valid: true,
+					},
+				},
+				BoolValue: &dbr.NullBool{
+					NullBool: sql.NullBool{
+						Bool:  true,
+						Valid: true,
+					},
+				},
+			},
+			Expected: nil,
+		},
+		{
+			Message: "non-pointer struct of pointer nullable type of falsy value",
+			Input: PtrNull{
+				StringValue: &dbr.NullString{
+					NullString: sql.NullString{
+						String: "",
+						Valid:  true,
+					},
+				},
+				IntValue: &dbr.NullInt64{
+					NullInt64: sql.NullInt64{
+						Int64: 0,
+						Valid: true,
+					},
+				},
+				BoolValue: &dbr.NullBool{
+					NullBool: sql.NullBool{
+						Bool:  false,
+						Valid: true,
+					},
+				},
+			},
+			Expected: nil,
+		},
+		{
+			Message: "non-pointer struct of pointer nullable type of null value",
+			Input: PtrNull{
+				StringValue: &dbr.NullString{
+					NullString: sql.NullString{
+						String: "",
+						Valid:  false,
+					},
+				},
+				IntValue: &dbr.NullInt64{
+					NullInt64: sql.NullInt64{
+						Int64: 0,
+						Valid: false,
+					},
+				},
+				BoolValue: &dbr.NullBool{
+					NullBool: sql.NullBool{
+						Bool:  false,
+						Valid: false,
+					},
+				},
+			},
+			Expected: &validator.RequiredValidationError{
+				Input: PtrNull{
+					StringValue: &dbr.NullString{
+						NullString: sql.NullString{
+							String: "",
+							Valid:  false,
+						},
+					},
+					IntValue: &dbr.NullInt64{
+						NullInt64: sql.NullInt64{
+							Int64: 0,
+							Valid: false,
+						},
+					},
+					BoolValue: &dbr.NullBool{
+						NullBool: sql.NullBool{
+							Bool:  false,
+							Valid: false,
+						},
+					},
+				},
+				Definition: definition,
+			},
+		},
+		{
+			Message: "non-pointer struct of pointer nullable type of nil",
+			Input: PtrNull{
+				StringValue: nil,
+				IntValue:    nil,
+				BoolValue:   nil,
+			},
+			Expected: &validator.RequiredValidationError{
+				Input: PtrNull{
+					StringValue: nil,
+					IntValue:    nil,
+					BoolValue:   nil,
+				},
+				Definition: definition,
+			},
+		},
+
+		{
+			Message: "pointer struct of non-pointer native type of value",
+			Input: &Native{
+				StringValue: "value",
+				IntValue:    1,
+				BoolValue:   true,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "pointer struct of non-pointer native type of falsy value",
+			Input: &Native{
+				StringValue: "",
+				IntValue:    0,
+				BoolValue:   false,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "pointer struct of pointer native type of value",
+			Input: &PtrNative{
+				StringValue: &stringValue,
+				IntValue:    &intValue,
+				BoolValue:   &boolValue,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "pointer struct of pointer native type of falsy value",
+			Input: &PtrNative{
+				StringValue: &falsyStringValue,
+				IntValue:    &falsyIntValue,
+				BoolValue:   &falsyBoolValue,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "pointer struct of pointer native type of nil",
+			Input: &PtrNative{
+				StringValue: nil,
+				IntValue:    nil,
+				BoolValue:   nil,
+			},
+			Expected: &validator.RequiredValidationError{
+				Input: &PtrNative{
+					StringValue: nil,
+					IntValue:    nil,
+					BoolValue:   nil,
+				},
+				Definition: definition,
+			},
+		},
+
+		{
+			Message: "pointer struct of non-pointer nullable type of value",
+			Input: &Null{
+				StringValue: dbr.NullString{
+					NullString: sql.NullString{
+						String: "value",
+						Valid:  true,
+					},
+				},
+				IntValue: dbr.NullInt64{
+					NullInt64: sql.NullInt64{
+						Int64: 1,
+						Valid: true,
+					},
+				},
+				BoolValue: dbr.NullBool{
+					NullBool: sql.NullBool{
+						Bool:  true,
+						Valid: true,
+					},
+				},
+			},
+			Expected: nil,
+		},
+		{
+			Message: "pointer struct of non-pointer nullable type of falsy value",
+			Input: &Null{
+				StringValue: dbr.NullString{
+					NullString: sql.NullString{
+						String: "",
+						Valid:  true,
+					},
+				},
+				IntValue: dbr.NullInt64{
+					NullInt64: sql.NullInt64{
+						Int64: 0,
+						Valid: true,
+					},
+				},
+				BoolValue: dbr.NullBool{
+					NullBool: sql.NullBool{
+						Bool:  false,
+						Valid: true,
+					},
+				},
+			},
+			Expected: nil,
+		},
+		{
+			Message: "pointer struct of non-pointer nullable type of null value",
+			Input: &Null{
+				StringValue: dbr.NullString{
+					NullString: sql.NullString{
+						String: "",
+						Valid:  false,
+					},
+				},
+				IntValue: dbr.NullInt64{
+					NullInt64: sql.NullInt64{
+						Int64: 0,
+						Valid: false,
+					},
+				},
+				BoolValue: dbr.NullBool{
+					NullBool: sql.NullBool{
+						Bool:  false,
+						Valid: false,
+					},
+				},
+			},
+			Expected: &validator.RequiredValidationError{
+				Input: &Null{
+					StringValue: dbr.NullString{
+						NullString: sql.NullString{
+							String: "",
+							Valid:  false,
+						},
+					},
+					IntValue: dbr.NullInt64{
+						NullInt64: sql.NullInt64{
+							Int64: 0,
+							Valid: false,
+						},
+					},
+					BoolValue: dbr.NullBool{
+						NullBool: sql.NullBool{
+							Bool:  false,
+							Valid: false,
+						},
+					},
+				},
+				Definition: definition,
+			},
+		},
+		{
+			Message: "pointer struct of pointer nullable type of value",
+			Input: &PtrNull{
+				StringValue: &dbr.NullString{
+					NullString: sql.NullString{
+						String: "value",
+						Valid:  true,
+					},
+				},
+				IntValue: &dbr.NullInt64{
+					NullInt64: sql.NullInt64{
+						Int64: 1,
+						Valid: true,
+					},
+				},
+				BoolValue: &dbr.NullBool{
+					NullBool: sql.NullBool{
+						Bool:  true,
+						Valid: true,
+					},
+				},
+			},
+			Expected: nil,
+		},
+		{
+			Message: "pointer struct of pointer nullable type of falsy value",
+			Input: &PtrNull{
+				StringValue: &dbr.NullString{
+					NullString: sql.NullString{
+						String: "",
+						Valid:  true,
+					},
+				},
+				IntValue: &dbr.NullInt64{
+					NullInt64: sql.NullInt64{
+						Int64: 0,
+						Valid: true,
+					},
+				},
+				BoolValue: &dbr.NullBool{
+					NullBool: sql.NullBool{
+						Bool:  false,
+						Valid: true,
+					},
+				},
+			},
+			Expected: nil,
+		},
+		{
+			Message: "pointer struct of pointer nullable type of null value",
+			Input: &PtrNull{
+				StringValue: &dbr.NullString{
+					NullString: sql.NullString{
+						String: "",
+						Valid:  false,
+					},
+				},
+				IntValue: &dbr.NullInt64{
+					NullInt64: sql.NullInt64{
+						Int64: 0,
+						Valid: false,
+					},
+				},
+				BoolValue: &dbr.NullBool{
+					NullBool: sql.NullBool{
+						Bool:  false,
+						Valid: false,
+					},
+				},
+			},
+			Expected: &validator.RequiredValidationError{
+				Input: &PtrNull{
+					StringValue: &dbr.NullString{
+						NullString: sql.NullString{
+							String: "",
+							Valid:  false,
+						},
+					},
+					IntValue: &dbr.NullInt64{
+						NullInt64: sql.NullInt64{
+							Int64: 0,
+							Valid: false,
+						},
+					},
+					BoolValue: &dbr.NullBool{
+						NullBool: sql.NullBool{
+							Bool:  false,
+							Valid: false,
+						},
+					},
+				},
+				Definition: definition,
+			},
+		},
+		{
+			Message: "pointer struct of pointer nullable type of nil",
+			Input: &PtrNull{
+				StringValue: nil,
+				IntValue:    nil,
+				BoolValue:   nil,
+			},
+			Expected: &validator.RequiredValidationError{
+				Input: &PtrNull{
+					StringValue: nil,
+					IntValue:    nil,
+					BoolValue:   nil,
+				},
 				Definition: definition,
 			},
 		},
 	}
 
+	va, err := validator.NewRequiredValidator(definition)
+	if err != nil {
+		t.Error(err.Error())
+	}
+
 	for _, c := range cases {
 		err := va.Validate(c.Input)
 		if !reflect.DeepEqual(err, c.Expected) {
-			t.Errorf("%s: expected %+v, but actual %+v", c.Message, c.Expected, err)
+			t.Errorf("Test with %s: expected %+v, but actual %+v", c.Message, c.Expected, err)
 		}
 	}
 }
