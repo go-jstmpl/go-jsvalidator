@@ -66,10 +66,6 @@ func TestNewRequiredValidator(t *testing.T) {
 }
 
 func TestValidateOfRequiredValidator(t *testing.T) {
-	definition := validator.RequiredValidatorDefinition{
-		Required: []string{"StringValue", "IntValue", "BoolValue"},
-	}
-
 	type Native struct {
 		StringValue string
 		IntValue    int
@@ -107,6 +103,10 @@ func TestValidateOfRequiredValidator(t *testing.T) {
 	falsyStringValue := ""
 	falsyIntValue := 0
 	falsyBoolValue := false
+
+	definition := validator.RequiredValidatorDefinition{
+		Required: []string{"StringValue", "IntValue", "BoolValue"},
+	}
 
 	cases := []RequiredValidatorTestCase{
 		{
@@ -643,7 +643,7 @@ func TestValidateOfRequiredValidator(t *testing.T) {
 
 	va, err := validator.NewRequiredValidator(definition)
 	if err != nil {
-		t.Error(err.Error())
+		t.Fatal("Fail to create new required validator:", err)
 	}
 
 	for _, c := range cases {

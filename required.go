@@ -1,10 +1,11 @@
 package validator
 
 import (
-	"database/sql/driver"
 	"errors"
 	"fmt"
 	"reflect"
+
+	"github.com/gocraft/dbr"
 )
 
 var (
@@ -49,6 +50,13 @@ func NewRequiredValidator(definition RequiredValidatorDefinition) (RequiredValid
 }
 
 func (r RequiredValidator) Validate(input interface{}) error {
+	if input == nil {
+		return &InvalidFieldTypeError{
+			Definition: r.definition,
+			Input:      input,
+		}
+	}
+
 	var v reflect.Value
 	if reflect.TypeOf(input).Kind() != reflect.Ptr {
 		v = reflect.ValueOf(input)
@@ -64,33 +72,61 @@ func (r RequiredValidator) Validate(input interface{}) error {
 
 	for _, key := range r.definition.Required {
 		e := v.FieldByName(key)
-		if !e.IsValid() {
-			return &InvalidFieldTypeError{
-				Definition: r.definition,
-				Input:      input,
-			}
+		if e.Kind() == reflect.Ptr {
+			e = v.FieldByName(key).Elem()
 		}
-		n, ok := e.Interface().(driver.Valuer)
-		if !ok {
-			return &InvalidFieldTypeError{
-				Definition: r.definition,
-				Input:      input,
-			}
-		}
-		v, err := n.Value()
-		if err != nil {
-			return &InvalidFieldTypeError{
-				Definition: r.definition,
-				Input:      input,
-			}
-		}
-		if v == nil {
+		if (e == reflect.Value{}) {
 			return &RequiredValidationError{
 				Definition: r.definition,
 				Input:      input,
 			}
 		}
-	}
 
+		i := e.Interface()
+		switch i := i.(type) {
+		case dbr.NullString:
+			if !i.Valid {
+				return &RequiredValidationError{
+					Definition: r.definition,
+					Input:      input,
+				}
+			}
+			continue
+		case dbr.NullInt64:
+			if !i.Valid {
+				return &RequiredValidationError{
+					Definition: r.definition,
+					Input:      input,
+				}
+			}
+			continue
+		case dbr.NullFloat64:
+			if !i.Valid {
+				return &RequiredValidationError{
+					Definition: r.definition,
+					Input:      input,
+				}
+			}
+			continue
+		case dbr.NullBool:
+			if !i.Valid {
+				return &RequiredValidationError{
+					Definition: r.definition,
+					Input:      input,
+				}
+			}
+			continue
+		case dbr.NullTime:
+			if !i.Valid {
+				return &RequiredValidationError{
+					Definition: r.definition,
+					Input:      input,
+				}
+			}
+			continue
+		default:
+			continue
+		}
+	}
 	return nil
 }
