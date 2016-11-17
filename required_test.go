@@ -1724,3 +1724,148 @@ func TestValidateOfRequiredValidatorWithPtrNullableTime(t *testing.T) {
 		}
 	}
 }
+
+func TestValidateOfRequiredValidatorWithMultiField(t *testing.T) {
+	type Nullable struct {
+		StringValue dbr.NullString
+		IntValue    dbr.NullInt64
+		FloatValue  dbr.NullFloat64
+		BoolValue   dbr.NullBool
+		TimeValue   dbr.NullTime
+	}
+	type RequiredValidatorTestCase struct {
+		Message  string
+		Input    interface{}
+		Expected error
+	}
+
+	definition := validator.RequiredValidatorDefinition{
+		Required: []string{"StringValue", "IntValue", "FloatValue", "BoolValue", "TimeValue"},
+	}
+
+	cases := []RequiredValidatorTestCase{
+		{
+			Message: "complete struct against required",
+			Input: Nullable{
+				StringValue: nullableString,
+				IntValue:    nullableInt,
+				FloatValue:  nullableFloat,
+				BoolValue:   nullableBool,
+				TimeValue:   nullableTime,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "StringValue is missing",
+			Input: Nullable{
+				StringValue: nullNullableString,
+				IntValue:    nullableInt,
+				FloatValue:  nullableFloat,
+				BoolValue:   nullableBool,
+				TimeValue:   nullableTime,
+			},
+			Expected: &validator.RequiredValidationError{
+				Input: Nullable{
+					StringValue: nullNullableString,
+					IntValue:    nullableInt,
+					FloatValue:  nullableFloat,
+					BoolValue:   nullableBool,
+					TimeValue:   nullableTime,
+				},
+				Definition: definition,
+			},
+		},
+		{
+			Message: "InvValue is missing",
+			Input: Nullable{
+				StringValue: nullableString,
+				IntValue:    nullNullableInt,
+				FloatValue:  nullableFloat,
+				BoolValue:   nullableBool,
+				TimeValue:   nullableTime,
+			},
+			Expected: &validator.RequiredValidationError{
+				Input: Nullable{
+					StringValue: nullableString,
+					IntValue:    nullNullableInt,
+					FloatValue:  nullableFloat,
+					BoolValue:   nullableBool,
+					TimeValue:   nullableTime,
+				},
+				Definition: definition,
+			},
+		},
+		{
+			Message: "FloatValue is missing",
+			Input: Nullable{
+				StringValue: nullableString,
+				IntValue:    nullableInt,
+				FloatValue:  nullNullableFloat,
+				BoolValue:   nullableBool,
+				TimeValue:   nullableTime,
+			},
+			Expected: &validator.RequiredValidationError{
+				Input: Nullable{
+					StringValue: nullableString,
+					IntValue:    nullableInt,
+					FloatValue:  nullNullableFloat,
+					BoolValue:   nullableBool,
+					TimeValue:   nullableTime,
+				},
+				Definition: definition,
+			},
+		},
+		{
+			Message: "BoolValue is missing",
+			Input: Nullable{
+				StringValue: nullableString,
+				IntValue:    nullableInt,
+				FloatValue:  nullableFloat,
+				BoolValue:   nullNullableBool,
+				TimeValue:   nullableTime,
+			},
+			Expected: &validator.RequiredValidationError{
+				Input: Nullable{
+					StringValue: nullableString,
+					IntValue:    nullableInt,
+					FloatValue:  nullableFloat,
+					BoolValue:   nullNullableBool,
+					TimeValue:   nullableTime,
+				},
+				Definition: definition,
+			},
+		},
+		{
+			Message: "TimeValue is missing",
+			Input: Nullable{
+				StringValue: nullNullableString,
+				IntValue:    nullableInt,
+				FloatValue:  nullableFloat,
+				BoolValue:   nullableBool,
+				TimeValue:   nullNullableTime,
+			},
+			Expected: &validator.RequiredValidationError{
+				Input: Nullable{
+					StringValue: nullNullableString,
+					IntValue:    nullableInt,
+					FloatValue:  nullableFloat,
+					BoolValue:   nullableBool,
+					TimeValue:   nullNullableTime,
+				},
+				Definition: definition,
+			},
+		},
+	}
+	va, err := validator.NewRequiredValidator(definition)
+	if err != nil {
+		t.Fatal("Fail to create new required validator:", err)
+	}
+
+	for _, c := range cases {
+		err := va.Validate(c.Input)
+		if !reflect.DeepEqual(err, c.Expected) {
+			t.Errorf("Test with %s: expected %+v, but actual %+v", c.Message, c.Expected, err)
+		}
+	}
+
+}
