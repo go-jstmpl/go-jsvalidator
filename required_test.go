@@ -1,9 +1,9 @@
 package validator_test
 
 import (
-	"database/sql"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/go-jstmpl/go-jsvalidator"
 	"github.com/gocraft/dbr"
@@ -65,60 +65,86 @@ func TestNewRequiredValidator(t *testing.T) {
 	}
 }
 
-func TestValidateOfRequiredValidator(t *testing.T) {
-	type Native struct {
-		StringValue string
-		IntValue    int
-		FloatValue  float64
-		BoolValue   bool
-	}
+var (
+	stringValue = "string value"
+	intValue    = 1
+	floatValue  = 1.1
+	boolValue   = true
+	timeValue   = time.Now()
 
-	type PtrNative struct {
-		StringValue *string
-		IntValue    *int
-		FloatValue  *float64
-		BoolValue   *bool
-	}
+	falsyStringValue = ""
+	falsyIntValue    = 0
+	falsyFloatValue  = 0.0
+	falsyBoolValue   = false
+	falsyTimeValue   = time.Time{}
 
-	type Null struct {
-		StringValue dbr.NullString
-		IntValue    dbr.NullInt64
-		FloatValue  dbr.NullFloat64
-		BoolValue   dbr.NullBool
-	}
+	nullableString = dbr.NewNullString(stringValue)
+	nullableInt    = dbr.NewNullInt64(intValue)
+	nullableFloat  = dbr.NewNullFloat64(floatValue)
+	nullableBool   = dbr.NewNullBool(boolValue)
+	nullableTime   = dbr.NewNullTime(timeValue)
 
-	type PtrNull struct {
-		StringValue *dbr.NullString
-		IntValue    *dbr.NullInt64
-		FloatValue  *dbr.NullFloat64
-		BoolValue   *dbr.NullBool
-	}
+	falsyNullableString = dbr.NewNullString(falsyStringValue)
+	falsyNullableInt    = dbr.NewNullInt64(falsyIntValue)
+	falsyNullableFloat  = dbr.NewNullFloat64(falsyFloatValue)
+	falsyNullableBool   = dbr.NewNullBool(falsyBoolValue)
+	falsyNullableTime   = dbr.NewNullTime(falsyTimeValue)
 
-	type RequiredValidatorTestCase struct {
-		Message  string
-		Input    interface{}
-		Expected error
-	}
+	nullNullableString = dbr.NewNullString(nil)
+	nullNullableInt    = dbr.NewNullInt64(nil)
+	nullNullableFloat  = dbr.NewNullFloat64(nil)
+	nullNullableBool   = dbr.NewNullBool(nil)
+	nullNullableTime   = dbr.NewNullTime(nil)
+)
 
-	stringValue := "string value"
-	intValue := 1
-	floatValue := 1.1
-	boolValue := true
+type Native struct {
+	StringValue string
+	IntValue    int
+	FloatValue  float64
+	BoolValue   bool
+	TimeValue   time.Time
+}
 
-	falsyStringValue := ""
-	falsyIntValue := 0
-	falsyFloatValue := 0.0
-	falsyBoolValue := false
+type PtrNative struct {
+	StringValue *string
+	IntValue    *int
+	FloatValue  *float64
+	BoolValue   *bool
+	TimeValue   *time.Time
+}
 
+type Null struct {
+	StringValue dbr.NullString
+	IntValue    dbr.NullInt64
+	FloatValue  dbr.NullFloat64
+	BoolValue   dbr.NullBool
+	TimeValue   dbr.NullTime
+}
+
+type PtrNull struct {
+	StringValue *dbr.NullString
+	IntValue    *dbr.NullInt64
+	FloatValue  *dbr.NullFloat64
+	BoolValue   *dbr.NullBool
+	TimeValue   *dbr.NullTime
+}
+
+type RequiredValidatorTestCase struct {
+	Message  string
+	Input    interface{}
+	Expected error
+}
+
+func TestValidateOfRequiredValidatorWithString(t *testing.T) {
 	definition := validator.RequiredValidatorDefinition{
-		Required: []string{"StringValue", "IntValue", "BoolValue"},
+		Required: []string{"StringValue"},
 	}
 
 	cases := []RequiredValidatorTestCase{
 		{
 			Message: "nil",
 			Input:   nil,
-			Expected: &validator.InvalidFieldTypeError{
+			Expected: &validator.InvalidTypeError{
 				Input:      nil,
 				Definition: definition,
 			},
@@ -126,7 +152,7 @@ func TestValidateOfRequiredValidator(t *testing.T) {
 		{
 			Message: "non-struct",
 			Input:   "foo",
-			Expected: &validator.InvalidFieldTypeError{
+			Expected: &validator.InvalidTypeError{
 				Input:      "foo",
 				Definition: definition,
 			},
@@ -138,6 +164,7 @@ func TestValidateOfRequiredValidator(t *testing.T) {
 				IntValue:    1,
 				FloatValue:  1.1,
 				BoolValue:   true,
+				TimeValue:   timeValue,
 			},
 			Expected: nil,
 		},
@@ -148,6 +175,7 @@ func TestValidateOfRequiredValidator(t *testing.T) {
 				IntValue:    0,
 				FloatValue:  0.0,
 				BoolValue:   false,
+				TimeValue:   timeValue,
 			},
 			Expected: nil,
 		},
@@ -158,6 +186,7 @@ func TestValidateOfRequiredValidator(t *testing.T) {
 				IntValue:    &intValue,
 				FloatValue:  &floatValue,
 				BoolValue:   &boolValue,
+				TimeValue:   &timeValue,
 			},
 			Expected: nil,
 		},
@@ -168,6 +197,7 @@ func TestValidateOfRequiredValidator(t *testing.T) {
 				IntValue:    &falsyIntValue,
 				FloatValue:  &falsyFloatValue,
 				BoolValue:   &falsyBoolValue,
+				TimeValue:   &falsyTimeValue,
 			},
 			Expected: nil,
 		},
@@ -192,117 +222,41 @@ func TestValidateOfRequiredValidator(t *testing.T) {
 		{
 			Message: "non-pointer struct of non-pointer nullable type of value",
 			Input: Null{
-				StringValue: dbr.NullString{
-					NullString: sql.NullString{
-						String: "value",
-						Valid:  true,
-					},
-				},
-				IntValue: dbr.NullInt64{
-					NullInt64: sql.NullInt64{
-						Int64: 1,
-						Valid: true,
-					},
-				},
-				FloatValue: dbr.NullFloat64{
-					NullFloat64: sql.NullFloat64{
-						Float64: 1,
-						Valid:   true,
-					},
-				},
-				BoolValue: dbr.NullBool{
-					NullBool: sql.NullBool{
-						Bool:  true,
-						Valid: true,
-					},
-				},
+				StringValue: nullableString,
+				IntValue:    nullableInt,
+				FloatValue:  nullableFloat,
+				BoolValue:   nullableBool,
+				TimeValue:   nullableTime,
 			},
 			Expected: nil,
 		},
 		{
 			Message: "non-pointer struct of non-pointer nullable type of falsy value",
 			Input: Null{
-				StringValue: dbr.NullString{
-					NullString: sql.NullString{
-						String: "",
-						Valid:  true,
-					},
-				},
-				IntValue: dbr.NullInt64{
-					NullInt64: sql.NullInt64{
-						Int64: 0,
-						Valid: true,
-					},
-				},
-				FloatValue: dbr.NullFloat64{
-					NullFloat64: sql.NullFloat64{
-						Float64: 0,
-						Valid:   true,
-					},
-				},
-				BoolValue: dbr.NullBool{
-					NullBool: sql.NullBool{
-						Bool:  false,
-						Valid: true,
-					},
-				},
+				StringValue: falsyNullableString,
+				IntValue:    falsyNullableInt,
+				FloatValue:  falsyNullableFloat,
+				BoolValue:   falsyNullableBool,
+				TimeValue:   falsyNullableTime,
 			},
 			Expected: nil,
 		},
 		{
 			Message: "non-pointer struct of non-pointer nullable type of null value",
 			Input: Null{
-				StringValue: dbr.NullString{
-					NullString: sql.NullString{
-						String: "",
-						Valid:  false,
-					},
-				},
-				IntValue: dbr.NullInt64{
-					NullInt64: sql.NullInt64{
-						Int64: 0,
-						Valid: false,
-					},
-				},
-				FloatValue: dbr.NullFloat64{
-					NullFloat64: sql.NullFloat64{
-						Float64: 0,
-						Valid:   false,
-					},
-				},
-				BoolValue: dbr.NullBool{
-					NullBool: sql.NullBool{
-						Bool:  false,
-						Valid: false,
-					},
-				},
+				StringValue: nullNullableString,
+				IntValue:    nullNullableInt,
+				FloatValue:  nullNullableFloat,
+				BoolValue:   nullNullableBool,
+				TimeValue:   nullNullableTime,
 			},
 			Expected: &validator.RequiredValidationError{
 				Input: Null{
-					StringValue: dbr.NullString{
-						NullString: sql.NullString{
-							String: "",
-							Valid:  false,
-						},
-					},
-					IntValue: dbr.NullInt64{
-						NullInt64: sql.NullInt64{
-							Int64: 0,
-							Valid: false,
-						},
-					},
-					FloatValue: dbr.NullFloat64{
-						NullFloat64: sql.NullFloat64{
-							Float64: 0,
-							Valid:   false,
-						},
-					},
-					BoolValue: dbr.NullBool{
-						NullBool: sql.NullBool{
-							Bool:  false,
-							Valid: false,
-						},
-					},
+					StringValue: nullNullableString,
+					IntValue:    nullNullableInt,
+					FloatValue:  nullNullableFloat,
+					BoolValue:   nullNullableBool,
+					TimeValue:   nullNullableTime,
 				},
 				Definition: definition,
 			},
@@ -310,117 +264,41 @@ func TestValidateOfRequiredValidator(t *testing.T) {
 		{
 			Message: "non-pointer struct of pointer nullable type of value",
 			Input: PtrNull{
-				StringValue: &dbr.NullString{
-					NullString: sql.NullString{
-						String: "value",
-						Valid:  true,
-					},
-				},
-				IntValue: &dbr.NullInt64{
-					NullInt64: sql.NullInt64{
-						Int64: 1,
-						Valid: true,
-					},
-				},
-				FloatValue: &dbr.NullFloat64{
-					NullFloat64: sql.NullFloat64{
-						Float64: 1.0,
-						Valid:   true,
-					},
-				},
-				BoolValue: &dbr.NullBool{
-					NullBool: sql.NullBool{
-						Bool:  true,
-						Valid: true,
-					},
-				},
+				StringValue: &nullableString,
+				IntValue:    &nullableInt,
+				FloatValue:  &nullableFloat,
+				BoolValue:   &nullableBool,
+				TimeValue:   &nullableTime,
 			},
 			Expected: nil,
 		},
 		{
 			Message: "non-pointer struct of pointer nullable type of falsy value",
 			Input: PtrNull{
-				StringValue: &dbr.NullString{
-					NullString: sql.NullString{
-						String: "",
-						Valid:  true,
-					},
-				},
-				IntValue: &dbr.NullInt64{
-					NullInt64: sql.NullInt64{
-						Int64: 0,
-						Valid: true,
-					},
-				},
-				FloatValue: &dbr.NullFloat64{
-					NullFloat64: sql.NullFloat64{
-						Float64: 0.0,
-						Valid:   true,
-					},
-				},
-				BoolValue: &dbr.NullBool{
-					NullBool: sql.NullBool{
-						Bool:  false,
-						Valid: true,
-					},
-				},
+				StringValue: &falsyNullableString,
+				IntValue:    &falsyNullableInt,
+				FloatValue:  &falsyNullableFloat,
+				BoolValue:   &falsyNullableBool,
+				TimeValue:   &falsyNullableTime,
 			},
 			Expected: nil,
 		},
 		{
 			Message: "non-pointer struct of pointer nullable type of null value",
 			Input: PtrNull{
-				StringValue: &dbr.NullString{
-					NullString: sql.NullString{
-						String: "",
-						Valid:  false,
-					},
-				},
-				IntValue: &dbr.NullInt64{
-					NullInt64: sql.NullInt64{
-						Int64: 0,
-						Valid: false,
-					},
-				},
-				FloatValue: &dbr.NullFloat64{
-					NullFloat64: sql.NullFloat64{
-						Float64: 0,
-						Valid:   false,
-					},
-				},
-				BoolValue: &dbr.NullBool{
-					NullBool: sql.NullBool{
-						Bool:  false,
-						Valid: false,
-					},
-				},
+				StringValue: &nullNullableString,
+				IntValue:    &nullNullableInt,
+				FloatValue:  &nullNullableFloat,
+				BoolValue:   &nullNullableBool,
+				TimeValue:   &nullNullableTime,
 			},
 			Expected: &validator.RequiredValidationError{
 				Input: PtrNull{
-					StringValue: &dbr.NullString{
-						NullString: sql.NullString{
-							String: "",
-							Valid:  false,
-						},
-					},
-					IntValue: &dbr.NullInt64{
-						NullInt64: sql.NullInt64{
-							Int64: 0,
-							Valid: false,
-						},
-					},
-					FloatValue: &dbr.NullFloat64{
-						NullFloat64: sql.NullFloat64{
-							Float64: 0,
-							Valid:   false,
-						},
-					},
-					BoolValue: &dbr.NullBool{
-						NullBool: sql.NullBool{
-							Bool:  false,
-							Valid: false,
-						},
-					},
+					StringValue: &nullNullableString,
+					IntValue:    &nullNullableInt,
+					FloatValue:  &nullNullableFloat,
+					BoolValue:   &nullNullableBool,
+					TimeValue:   &nullNullableTime,
 				},
 				Definition: definition,
 			},
@@ -432,6 +310,7 @@ func TestValidateOfRequiredValidator(t *testing.T) {
 				IntValue:    nil,
 				FloatValue:  nil,
 				BoolValue:   nil,
+				TimeValue:   nil,
 			},
 			Expected: &validator.RequiredValidationError{
 				Input: PtrNull{
@@ -439,6 +318,7 @@ func TestValidateOfRequiredValidator(t *testing.T) {
 					IntValue:    nil,
 					FloatValue:  nil,
 					BoolValue:   nil,
+					TimeValue:   nil,
 				},
 				Definition: definition,
 			},
@@ -451,6 +331,7 @@ func TestValidateOfRequiredValidator(t *testing.T) {
 				IntValue:    1,
 				FloatValue:  1.1,
 				BoolValue:   true,
+				TimeValue:   timeValue,
 			},
 			Expected: nil,
 		},
@@ -461,6 +342,7 @@ func TestValidateOfRequiredValidator(t *testing.T) {
 				IntValue:    0,
 				FloatValue:  0.0,
 				BoolValue:   false,
+				TimeValue:   timeValue,
 			},
 			Expected: nil,
 		},
@@ -471,6 +353,7 @@ func TestValidateOfRequiredValidator(t *testing.T) {
 				IntValue:    &intValue,
 				FloatValue:  &floatValue,
 				BoolValue:   &boolValue,
+				TimeValue:   &timeValue,
 			},
 			Expected: nil,
 		},
@@ -481,6 +364,7 @@ func TestValidateOfRequiredValidator(t *testing.T) {
 				IntValue:    &falsyIntValue,
 				FloatValue:  &falsyFloatValue,
 				BoolValue:   &falsyBoolValue,
+				TimeValue:   &falsyTimeValue,
 			},
 			Expected: nil,
 		},
@@ -491,6 +375,7 @@ func TestValidateOfRequiredValidator(t *testing.T) {
 				IntValue:    nil,
 				FloatValue:  nil,
 				BoolValue:   nil,
+				TimeValue:   nil,
 			},
 			Expected: &validator.RequiredValidationError{
 				Input: &PtrNative{
@@ -498,6 +383,7 @@ func TestValidateOfRequiredValidator(t *testing.T) {
 					IntValue:    nil,
 					FloatValue:  nil,
 					BoolValue:   nil,
+					TimeValue:   nil,
 				},
 				Definition: definition,
 			},
@@ -506,117 +392,41 @@ func TestValidateOfRequiredValidator(t *testing.T) {
 		{
 			Message: "pointer struct of non-pointer nullable type of value",
 			Input: &Null{
-				StringValue: dbr.NullString{
-					NullString: sql.NullString{
-						String: "value",
-						Valid:  true,
-					},
-				},
-				IntValue: dbr.NullInt64{
-					NullInt64: sql.NullInt64{
-						Int64: 1,
-						Valid: true,
-					},
-				},
-				FloatValue: dbr.NullFloat64{
-					NullFloat64: sql.NullFloat64{
-						Float64: 1,
-						Valid:   true,
-					},
-				},
-				BoolValue: dbr.NullBool{
-					NullBool: sql.NullBool{
-						Bool:  true,
-						Valid: true,
-					},
-				},
+				StringValue: nullableString,
+				IntValue:    nullableInt,
+				FloatValue:  nullableFloat,
+				BoolValue:   nullableBool,
+				TimeValue:   nullableTime,
 			},
 			Expected: nil,
 		},
 		{
 			Message: "pointer struct of non-pointer nullable type of falsy value",
 			Input: &Null{
-				StringValue: dbr.NullString{
-					NullString: sql.NullString{
-						String: "",
-						Valid:  true,
-					},
-				},
-				IntValue: dbr.NullInt64{
-					NullInt64: sql.NullInt64{
-						Int64: 0,
-						Valid: true,
-					},
-				},
-				FloatValue: dbr.NullFloat64{
-					NullFloat64: sql.NullFloat64{
-						Float64: 0,
-						Valid:   true,
-					},
-				},
-				BoolValue: dbr.NullBool{
-					NullBool: sql.NullBool{
-						Bool:  false,
-						Valid: true,
-					},
-				},
+				StringValue: falsyNullableString,
+				IntValue:    falsyNullableInt,
+				FloatValue:  falsyNullableFloat,
+				BoolValue:   falsyNullableBool,
+				TimeValue:   falsyNullableTime,
 			},
 			Expected: nil,
 		},
 		{
 			Message: "pointer struct of non-pointer nullable type of null value",
 			Input: &Null{
-				StringValue: dbr.NullString{
-					NullString: sql.NullString{
-						String: "",
-						Valid:  false,
-					},
-				},
-				IntValue: dbr.NullInt64{
-					NullInt64: sql.NullInt64{
-						Int64: 0,
-						Valid: false,
-					},
-				},
-				FloatValue: dbr.NullFloat64{
-					NullFloat64: sql.NullFloat64{
-						Float64: 0,
-						Valid:   false,
-					},
-				},
-				BoolValue: dbr.NullBool{
-					NullBool: sql.NullBool{
-						Bool:  false,
-						Valid: false,
-					},
-				},
+				StringValue: nullNullableString,
+				IntValue:    nullNullableInt,
+				FloatValue:  nullNullableFloat,
+				BoolValue:   nullNullableBool,
+				TimeValue:   nullNullableTime,
 			},
 			Expected: &validator.RequiredValidationError{
 				Input: &Null{
-					StringValue: dbr.NullString{
-						NullString: sql.NullString{
-							String: "",
-							Valid:  false,
-						},
-					},
-					IntValue: dbr.NullInt64{
-						NullInt64: sql.NullInt64{
-							Int64: 0,
-							Valid: false,
-						},
-					},
-					FloatValue: dbr.NullFloat64{
-						NullFloat64: sql.NullFloat64{
-							Float64: 0,
-							Valid:   false,
-						},
-					},
-					BoolValue: dbr.NullBool{
-						NullBool: sql.NullBool{
-							Bool:  false,
-							Valid: false,
-						},
-					},
+					StringValue: nullNullableString,
+					IntValue:    nullNullableInt,
+					FloatValue:  nullNullableFloat,
+					BoolValue:   nullNullableBool,
+					TimeValue:   nullNullableTime,
 				},
 				Definition: definition,
 			},
@@ -624,117 +434,41 @@ func TestValidateOfRequiredValidator(t *testing.T) {
 		{
 			Message: "pointer struct of pointer nullable type of value",
 			Input: &PtrNull{
-				StringValue: &dbr.NullString{
-					NullString: sql.NullString{
-						String: "value",
-						Valid:  true,
-					},
-				},
-				IntValue: &dbr.NullInt64{
-					NullInt64: sql.NullInt64{
-						Int64: 1,
-						Valid: true,
-					},
-				},
-				FloatValue: &dbr.NullFloat64{
-					NullFloat64: sql.NullFloat64{
-						Float64: 1,
-						Valid:   true,
-					},
-				},
-				BoolValue: &dbr.NullBool{
-					NullBool: sql.NullBool{
-						Bool:  true,
-						Valid: true,
-					},
-				},
+				StringValue: &nullableString,
+				IntValue:    &nullableInt,
+				FloatValue:  &nullableFloat,
+				BoolValue:   &nullableBool,
+				TimeValue:   &nullableTime,
 			},
 			Expected: nil,
 		},
 		{
 			Message: "pointer struct of pointer nullable type of falsy value",
 			Input: &PtrNull{
-				StringValue: &dbr.NullString{
-					NullString: sql.NullString{
-						String: "",
-						Valid:  true,
-					},
-				},
-				IntValue: &dbr.NullInt64{
-					NullInt64: sql.NullInt64{
-						Int64: 0,
-						Valid: true,
-					},
-				},
-				FloatValue: &dbr.NullFloat64{
-					NullFloat64: sql.NullFloat64{
-						Float64: 0,
-						Valid:   true,
-					},
-				},
-				BoolValue: &dbr.NullBool{
-					NullBool: sql.NullBool{
-						Bool:  false,
-						Valid: true,
-					},
-				},
+				StringValue: &falsyNullableString,
+				IntValue:    &falsyNullableInt,
+				FloatValue:  &falsyNullableFloat,
+				BoolValue:   &falsyNullableBool,
+				TimeValue:   &falsyNullableTime,
 			},
 			Expected: nil,
 		},
 		{
 			Message: "pointer struct of pointer nullable type of null value",
 			Input: &PtrNull{
-				StringValue: &dbr.NullString{
-					NullString: sql.NullString{
-						String: "",
-						Valid:  false,
-					},
-				},
-				IntValue: &dbr.NullInt64{
-					NullInt64: sql.NullInt64{
-						Int64: 0,
-						Valid: false,
-					},
-				},
-				FloatValue: &dbr.NullFloat64{
-					NullFloat64: sql.NullFloat64{
-						Float64: 0,
-						Valid:   false,
-					},
-				},
-				BoolValue: &dbr.NullBool{
-					NullBool: sql.NullBool{
-						Bool:  false,
-						Valid: false,
-					},
-				},
+				StringValue: &nullNullableString,
+				IntValue:    &nullNullableInt,
+				FloatValue:  &nullNullableFloat,
+				BoolValue:   &nullNullableBool,
+				TimeValue:   &nullNullableTime,
 			},
 			Expected: &validator.RequiredValidationError{
 				Input: &PtrNull{
-					StringValue: &dbr.NullString{
-						NullString: sql.NullString{
-							String: "",
-							Valid:  false,
-						},
-					},
-					IntValue: &dbr.NullInt64{
-						NullInt64: sql.NullInt64{
-							Int64: 0,
-							Valid: false,
-						},
-					},
-					FloatValue: &dbr.NullFloat64{
-						NullFloat64: sql.NullFloat64{
-							Float64: 0,
-							Valid:   false,
-						},
-					},
-					BoolValue: &dbr.NullBool{
-						NullBool: sql.NullBool{
-							Bool:  false,
-							Valid: false,
-						},
-					},
+					StringValue: &nullNullableString,
+					IntValue:    &nullNullableInt,
+					FloatValue:  &nullNullableFloat,
+					BoolValue:   &nullNullableBool,
+					TimeValue:   &nullNullableTime,
 				},
 				Definition: definition,
 			},
@@ -746,6 +480,7 @@ func TestValidateOfRequiredValidator(t *testing.T) {
 				IntValue:    nil,
 				FloatValue:  nil,
 				BoolValue:   nil,
+				TimeValue:   nil,
 			},
 			Expected: &validator.RequiredValidationError{
 				Input: &PtrNull{
@@ -753,6 +488,1495 @@ func TestValidateOfRequiredValidator(t *testing.T) {
 					IntValue:    nil,
 					FloatValue:  nil,
 					BoolValue:   nil,
+					TimeValue:   nil,
+				},
+				Definition: definition,
+			},
+		},
+	}
+
+	va, err := validator.NewRequiredValidator(definition)
+	if err != nil {
+		t.Fatal("Fail to create new required validator:", err)
+	}
+
+	for _, c := range cases {
+		err := va.Validate(c.Input)
+		if !reflect.DeepEqual(err, c.Expected) {
+			t.Errorf("Test with %s: expected %+v, but actual %+v", c.Message, c.Expected, err)
+		}
+	}
+}
+func TestValidateOfRequiredValidatorWithInt(t *testing.T) {
+	definition := validator.RequiredValidatorDefinition{
+		Required: []string{"IntValue"},
+	}
+
+	cases := []RequiredValidatorTestCase{
+		{
+			Message: "nil",
+			Input:   nil,
+			Expected: &validator.InvalidTypeError{
+				Input:      nil,
+				Definition: definition,
+			},
+		},
+		{
+			Message: "non-struct",
+			Input:   "foo",
+			Expected: &validator.InvalidTypeError{
+				Input:      "foo",
+				Definition: definition,
+			},
+		},
+		{
+			Message: "non-pointer struct of non-pointer native type of value",
+			Input: Native{
+				StringValue: "value",
+				IntValue:    1,
+				FloatValue:  1.1,
+				BoolValue:   true,
+				TimeValue:   timeValue,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "non-pointer struct of non-pointer native type of falsy value",
+			Input: Native{
+				StringValue: "",
+				IntValue:    0,
+				FloatValue:  0.0,
+				BoolValue:   false,
+				TimeValue:   timeValue,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "non-pointer struct of pointer native type of value",
+			Input: PtrNative{
+				StringValue: &stringValue,
+				IntValue:    &intValue,
+				FloatValue:  &floatValue,
+				BoolValue:   &boolValue,
+				TimeValue:   &timeValue,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "non-pointer struct of pointer native type of falsy value",
+			Input: PtrNative{
+				StringValue: &falsyStringValue,
+				IntValue:    &falsyIntValue,
+				FloatValue:  &falsyFloatValue,
+				BoolValue:   &falsyBoolValue,
+				TimeValue:   &falsyTimeValue,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "non-pointer struct of pointer native type of nil",
+			Input: PtrNative{
+				StringValue: nil,
+				IntValue:    nil,
+				FloatValue:  nil,
+				BoolValue:   nil,
+			},
+			Expected: &validator.RequiredValidationError{
+				Input: PtrNative{
+					StringValue: nil,
+					IntValue:    nil,
+					FloatValue:  nil,
+					BoolValue:   nil,
+				},
+				Definition: definition,
+			},
+		},
+		{
+			Message: "non-pointer struct of non-pointer nullable type of value",
+			Input: Null{
+				StringValue: nullableString,
+				IntValue:    nullableInt,
+				FloatValue:  nullableFloat,
+				BoolValue:   nullableBool,
+				TimeValue:   nullableTime,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "non-pointer struct of non-pointer nullable type of falsy value",
+			Input: Null{
+				StringValue: falsyNullableString,
+				IntValue:    falsyNullableInt,
+				FloatValue:  falsyNullableFloat,
+				BoolValue:   falsyNullableBool,
+				TimeValue:   falsyNullableTime,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "non-pointer struct of non-pointer nullable type of null value",
+			Input: Null{
+				StringValue: nullNullableString,
+				IntValue:    nullNullableInt,
+				FloatValue:  nullNullableFloat,
+				BoolValue:   nullNullableBool,
+				TimeValue:   nullNullableTime,
+			},
+			Expected: &validator.RequiredValidationError{
+				Input: Null{
+					StringValue: nullNullableString,
+					IntValue:    nullNullableInt,
+					FloatValue:  nullNullableFloat,
+					BoolValue:   nullNullableBool,
+					TimeValue:   nullNullableTime,
+				},
+				Definition: definition,
+			},
+		},
+		{
+			Message: "non-pointer struct of pointer nullable type of value",
+			Input: PtrNull{
+				StringValue: &nullableString,
+				IntValue:    &nullableInt,
+				FloatValue:  &nullableFloat,
+				BoolValue:   &nullableBool,
+				TimeValue:   &nullableTime,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "non-pointer struct of pointer nullable type of falsy value",
+			Input: PtrNull{
+				StringValue: &falsyNullableString,
+				IntValue:    &falsyNullableInt,
+				FloatValue:  &falsyNullableFloat,
+				BoolValue:   &falsyNullableBool,
+				TimeValue:   &falsyNullableTime,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "non-pointer struct of pointer nullable type of null value",
+			Input: PtrNull{
+				StringValue: &nullNullableString,
+				IntValue:    &nullNullableInt,
+				FloatValue:  &nullNullableFloat,
+				BoolValue:   &nullNullableBool,
+				TimeValue:   &nullNullableTime,
+			},
+			Expected: &validator.RequiredValidationError{
+				Input: PtrNull{
+					StringValue: &nullNullableString,
+					IntValue:    &nullNullableInt,
+					FloatValue:  &nullNullableFloat,
+					BoolValue:   &nullNullableBool,
+					TimeValue:   &nullNullableTime,
+				},
+				Definition: definition,
+			},
+		},
+		{
+			Message: "non-pointer struct of pointer nullable type of nil",
+			Input: PtrNull{
+				StringValue: nil,
+				IntValue:    nil,
+				FloatValue:  nil,
+				BoolValue:   nil,
+				TimeValue:   nil,
+			},
+			Expected: &validator.RequiredValidationError{
+				Input: PtrNull{
+					StringValue: nil,
+					IntValue:    nil,
+					FloatValue:  nil,
+					BoolValue:   nil,
+					TimeValue:   nil,
+				},
+				Definition: definition,
+			},
+		},
+
+		{
+			Message: "pointer struct of non-pointer native type of value",
+			Input: &Native{
+				StringValue: "value",
+				IntValue:    1,
+				FloatValue:  1.1,
+				BoolValue:   true,
+				TimeValue:   timeValue,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "pointer struct of non-pointer native type of falsy value",
+			Input: &Native{
+				StringValue: "",
+				IntValue:    0,
+				FloatValue:  0.0,
+				BoolValue:   false,
+				TimeValue:   timeValue,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "pointer struct of pointer native type of value",
+			Input: &PtrNative{
+				StringValue: &stringValue,
+				IntValue:    &intValue,
+				FloatValue:  &floatValue,
+				BoolValue:   &boolValue,
+				TimeValue:   &timeValue,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "pointer struct of pointer native type of falsy value",
+			Input: &PtrNative{
+				StringValue: &falsyStringValue,
+				IntValue:    &falsyIntValue,
+				FloatValue:  &falsyFloatValue,
+				BoolValue:   &falsyBoolValue,
+				TimeValue:   &falsyTimeValue,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "pointer struct of pointer native type of nil",
+			Input: &PtrNative{
+				StringValue: nil,
+				IntValue:    nil,
+				FloatValue:  nil,
+				BoolValue:   nil,
+				TimeValue:   nil,
+			},
+			Expected: &validator.RequiredValidationError{
+				Input: &PtrNative{
+					StringValue: nil,
+					IntValue:    nil,
+					FloatValue:  nil,
+					BoolValue:   nil,
+					TimeValue:   nil,
+				},
+				Definition: definition,
+			},
+		},
+
+		{
+			Message: "pointer struct of non-pointer nullable type of value",
+			Input: &Null{
+				StringValue: nullableString,
+				IntValue:    nullableInt,
+				FloatValue:  nullableFloat,
+				BoolValue:   nullableBool,
+				TimeValue:   nullableTime,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "pointer struct of non-pointer nullable type of falsy value",
+			Input: &Null{
+				StringValue: falsyNullableString,
+				IntValue:    falsyNullableInt,
+				FloatValue:  falsyNullableFloat,
+				BoolValue:   falsyNullableBool,
+				TimeValue:   falsyNullableTime,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "pointer struct of non-pointer nullable type of null value",
+			Input: &Null{
+				StringValue: nullNullableString,
+				IntValue:    nullNullableInt,
+				FloatValue:  nullNullableFloat,
+				BoolValue:   nullNullableBool,
+				TimeValue:   nullNullableTime,
+			},
+			Expected: &validator.RequiredValidationError{
+				Input: &Null{
+					StringValue: nullNullableString,
+					IntValue:    nullNullableInt,
+					FloatValue:  nullNullableFloat,
+					BoolValue:   nullNullableBool,
+					TimeValue:   nullNullableTime,
+				},
+				Definition: definition,
+			},
+		},
+		{
+			Message: "pointer struct of pointer nullable type of value",
+			Input: &PtrNull{
+				StringValue: &nullableString,
+				IntValue:    &nullableInt,
+				FloatValue:  &nullableFloat,
+				BoolValue:   &nullableBool,
+				TimeValue:   &nullableTime,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "pointer struct of pointer nullable type of falsy value",
+			Input: &PtrNull{
+				StringValue: &falsyNullableString,
+				IntValue:    &falsyNullableInt,
+				FloatValue:  &falsyNullableFloat,
+				BoolValue:   &falsyNullableBool,
+				TimeValue:   &falsyNullableTime,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "pointer struct of pointer nullable type of null value",
+			Input: &PtrNull{
+				StringValue: &nullNullableString,
+				IntValue:    &nullNullableInt,
+				FloatValue:  &nullNullableFloat,
+				BoolValue:   &nullNullableBool,
+				TimeValue:   &nullNullableTime,
+			},
+			Expected: &validator.RequiredValidationError{
+				Input: &PtrNull{
+					StringValue: &nullNullableString,
+					IntValue:    &nullNullableInt,
+					FloatValue:  &nullNullableFloat,
+					BoolValue:   &nullNullableBool,
+					TimeValue:   &nullNullableTime,
+				},
+				Definition: definition,
+			},
+		},
+		{
+			Message: "pointer struct of pointer nullable type of nil",
+			Input: &PtrNull{
+				StringValue: nil,
+				IntValue:    nil,
+				FloatValue:  nil,
+				BoolValue:   nil,
+				TimeValue:   nil,
+			},
+			Expected: &validator.RequiredValidationError{
+				Input: &PtrNull{
+					StringValue: nil,
+					IntValue:    nil,
+					FloatValue:  nil,
+					BoolValue:   nil,
+					TimeValue:   nil,
+				},
+				Definition: definition,
+			},
+		},
+	}
+
+	va, err := validator.NewRequiredValidator(definition)
+	if err != nil {
+		t.Fatal("Fail to create new required validator:", err)
+	}
+
+	for _, c := range cases {
+		err := va.Validate(c.Input)
+		if !reflect.DeepEqual(err, c.Expected) {
+			t.Errorf("Test with %s: expected %+v, but actual %+v", c.Message, c.Expected, err)
+		}
+	}
+}
+func TestValidateOfRequiredValidatorWithFloat(t *testing.T) {
+	definition := validator.RequiredValidatorDefinition{
+		Required: []string{"FloatValue"},
+	}
+
+	cases := []RequiredValidatorTestCase{
+		{
+			Message: "nil",
+			Input:   nil,
+			Expected: &validator.InvalidTypeError{
+				Input:      nil,
+				Definition: definition,
+			},
+		},
+		{
+			Message: "non-struct",
+			Input:   "foo",
+			Expected: &validator.InvalidTypeError{
+				Input:      "foo",
+				Definition: definition,
+			},
+		},
+		{
+			Message: "non-pointer struct of non-pointer native type of value",
+			Input: Native{
+				StringValue: "value",
+				IntValue:    1,
+				FloatValue:  1.1,
+				BoolValue:   true,
+				TimeValue:   timeValue,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "non-pointer struct of non-pointer native type of falsy value",
+			Input: Native{
+				StringValue: "",
+				IntValue:    0,
+				FloatValue:  0.0,
+				BoolValue:   false,
+				TimeValue:   timeValue,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "non-pointer struct of pointer native type of value",
+			Input: PtrNative{
+				StringValue: &stringValue,
+				IntValue:    &intValue,
+				FloatValue:  &floatValue,
+				BoolValue:   &boolValue,
+				TimeValue:   &timeValue,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "non-pointer struct of pointer native type of falsy value",
+			Input: PtrNative{
+				StringValue: &falsyStringValue,
+				IntValue:    &falsyIntValue,
+				FloatValue:  &falsyFloatValue,
+				BoolValue:   &falsyBoolValue,
+				TimeValue:   &falsyTimeValue,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "non-pointer struct of pointer native type of nil",
+			Input: PtrNative{
+				StringValue: nil,
+				IntValue:    nil,
+				FloatValue:  nil,
+				BoolValue:   nil,
+			},
+			Expected: &validator.RequiredValidationError{
+				Input: PtrNative{
+					StringValue: nil,
+					IntValue:    nil,
+					FloatValue:  nil,
+					BoolValue:   nil,
+				},
+				Definition: definition,
+			},
+		},
+		{
+			Message: "non-pointer struct of non-pointer nullable type of value",
+			Input: Null{
+				StringValue: nullableString,
+				IntValue:    nullableInt,
+				FloatValue:  nullableFloat,
+				BoolValue:   nullableBool,
+				TimeValue:   nullableTime,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "non-pointer struct of non-pointer nullable type of falsy value",
+			Input: Null{
+				StringValue: falsyNullableString,
+				IntValue:    falsyNullableInt,
+				FloatValue:  falsyNullableFloat,
+				BoolValue:   falsyNullableBool,
+				TimeValue:   falsyNullableTime,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "non-pointer struct of non-pointer nullable type of null value",
+			Input: Null{
+				StringValue: nullNullableString,
+				IntValue:    nullNullableInt,
+				FloatValue:  nullNullableFloat,
+				BoolValue:   nullNullableBool,
+				TimeValue:   nullNullableTime,
+			},
+			Expected: &validator.RequiredValidationError{
+				Input: Null{
+					StringValue: nullNullableString,
+					IntValue:    nullNullableInt,
+					FloatValue:  nullNullableFloat,
+					BoolValue:   nullNullableBool,
+					TimeValue:   nullNullableTime,
+				},
+				Definition: definition,
+			},
+		},
+		{
+			Message: "non-pointer struct of pointer nullable type of value",
+			Input: PtrNull{
+				StringValue: &nullableString,
+				IntValue:    &nullableInt,
+				FloatValue:  &nullableFloat,
+				BoolValue:   &nullableBool,
+				TimeValue:   &nullableTime,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "non-pointer struct of pointer nullable type of falsy value",
+			Input: PtrNull{
+				StringValue: &falsyNullableString,
+				IntValue:    &falsyNullableInt,
+				FloatValue:  &falsyNullableFloat,
+				BoolValue:   &falsyNullableBool,
+				TimeValue:   &falsyNullableTime,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "non-pointer struct of pointer nullable type of null value",
+			Input: PtrNull{
+				StringValue: &nullNullableString,
+				IntValue:    &nullNullableInt,
+				FloatValue:  &nullNullableFloat,
+				BoolValue:   &nullNullableBool,
+				TimeValue:   &nullNullableTime,
+			},
+			Expected: &validator.RequiredValidationError{
+				Input: PtrNull{
+					StringValue: &nullNullableString,
+					IntValue:    &nullNullableInt,
+					FloatValue:  &nullNullableFloat,
+					BoolValue:   &nullNullableBool,
+					TimeValue:   &nullNullableTime,
+				},
+				Definition: definition,
+			},
+		},
+		{
+			Message: "non-pointer struct of pointer nullable type of nil",
+			Input: PtrNull{
+				StringValue: nil,
+				IntValue:    nil,
+				FloatValue:  nil,
+				BoolValue:   nil,
+				TimeValue:   nil,
+			},
+			Expected: &validator.RequiredValidationError{
+				Input: PtrNull{
+					StringValue: nil,
+					IntValue:    nil,
+					FloatValue:  nil,
+					BoolValue:   nil,
+					TimeValue:   nil,
+				},
+				Definition: definition,
+			},
+		},
+
+		{
+			Message: "pointer struct of non-pointer native type of value",
+			Input: &Native{
+				StringValue: "value",
+				IntValue:    1,
+				FloatValue:  1.1,
+				BoolValue:   true,
+				TimeValue:   timeValue,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "pointer struct of non-pointer native type of falsy value",
+			Input: &Native{
+				StringValue: "",
+				IntValue:    0,
+				FloatValue:  0.0,
+				BoolValue:   false,
+				TimeValue:   timeValue,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "pointer struct of pointer native type of value",
+			Input: &PtrNative{
+				StringValue: &stringValue,
+				IntValue:    &intValue,
+				FloatValue:  &floatValue,
+				BoolValue:   &boolValue,
+				TimeValue:   &timeValue,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "pointer struct of pointer native type of falsy value",
+			Input: &PtrNative{
+				StringValue: &falsyStringValue,
+				IntValue:    &falsyIntValue,
+				FloatValue:  &falsyFloatValue,
+				BoolValue:   &falsyBoolValue,
+				TimeValue:   &falsyTimeValue,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "pointer struct of pointer native type of nil",
+			Input: &PtrNative{
+				StringValue: nil,
+				IntValue:    nil,
+				FloatValue:  nil,
+				BoolValue:   nil,
+				TimeValue:   nil,
+			},
+			Expected: &validator.RequiredValidationError{
+				Input: &PtrNative{
+					StringValue: nil,
+					IntValue:    nil,
+					FloatValue:  nil,
+					BoolValue:   nil,
+					TimeValue:   nil,
+				},
+				Definition: definition,
+			},
+		},
+
+		{
+			Message: "pointer struct of non-pointer nullable type of value",
+			Input: &Null{
+				StringValue: nullableString,
+				IntValue:    nullableInt,
+				FloatValue:  nullableFloat,
+				BoolValue:   nullableBool,
+				TimeValue:   nullableTime,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "pointer struct of non-pointer nullable type of falsy value",
+			Input: &Null{
+				StringValue: falsyNullableString,
+				IntValue:    falsyNullableInt,
+				FloatValue:  falsyNullableFloat,
+				BoolValue:   falsyNullableBool,
+				TimeValue:   falsyNullableTime,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "pointer struct of non-pointer nullable type of null value",
+			Input: &Null{
+				StringValue: nullNullableString,
+				IntValue:    nullNullableInt,
+				FloatValue:  nullNullableFloat,
+				BoolValue:   nullNullableBool,
+				TimeValue:   nullNullableTime,
+			},
+			Expected: &validator.RequiredValidationError{
+				Input: &Null{
+					StringValue: nullNullableString,
+					IntValue:    nullNullableInt,
+					FloatValue:  nullNullableFloat,
+					BoolValue:   nullNullableBool,
+					TimeValue:   nullNullableTime,
+				},
+				Definition: definition,
+			},
+		},
+		{
+			Message: "pointer struct of pointer nullable type of value",
+			Input: &PtrNull{
+				StringValue: &nullableString,
+				IntValue:    &nullableInt,
+				FloatValue:  &nullableFloat,
+				BoolValue:   &nullableBool,
+				TimeValue:   &nullableTime,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "pointer struct of pointer nullable type of falsy value",
+			Input: &PtrNull{
+				StringValue: &falsyNullableString,
+				IntValue:    &falsyNullableInt,
+				FloatValue:  &falsyNullableFloat,
+				BoolValue:   &falsyNullableBool,
+				TimeValue:   &falsyNullableTime,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "pointer struct of pointer nullable type of null value",
+			Input: &PtrNull{
+				StringValue: &nullNullableString,
+				IntValue:    &nullNullableInt,
+				FloatValue:  &nullNullableFloat,
+				BoolValue:   &nullNullableBool,
+				TimeValue:   &nullNullableTime,
+			},
+			Expected: &validator.RequiredValidationError{
+				Input: &PtrNull{
+					StringValue: &nullNullableString,
+					IntValue:    &nullNullableInt,
+					FloatValue:  &nullNullableFloat,
+					BoolValue:   &nullNullableBool,
+					TimeValue:   &nullNullableTime,
+				},
+				Definition: definition,
+			},
+		},
+		{
+			Message: "pointer struct of pointer nullable type of nil",
+			Input: &PtrNull{
+				StringValue: nil,
+				IntValue:    nil,
+				FloatValue:  nil,
+				BoolValue:   nil,
+				TimeValue:   nil,
+			},
+			Expected: &validator.RequiredValidationError{
+				Input: &PtrNull{
+					StringValue: nil,
+					IntValue:    nil,
+					FloatValue:  nil,
+					BoolValue:   nil,
+					TimeValue:   nil,
+				},
+				Definition: definition,
+			},
+		},
+	}
+
+	va, err := validator.NewRequiredValidator(definition)
+	if err != nil {
+		t.Fatal("Fail to create new required validator:", err)
+	}
+
+	for _, c := range cases {
+		err := va.Validate(c.Input)
+		if !reflect.DeepEqual(err, c.Expected) {
+			t.Errorf("Test with %s: expected %+v, but actual %+v", c.Message, c.Expected, err)
+		}
+	}
+}
+func TestValidateOfRequiredValidatorWithBool(t *testing.T) {
+	definition := validator.RequiredValidatorDefinition{
+		Required: []string{"BoolValue"},
+	}
+
+	cases := []RequiredValidatorTestCase{
+		{
+			Message: "nil",
+			Input:   nil,
+			Expected: &validator.InvalidTypeError{
+				Input:      nil,
+				Definition: definition,
+			},
+		},
+		{
+			Message: "non-struct",
+			Input:   "foo",
+			Expected: &validator.InvalidTypeError{
+				Input:      "foo",
+				Definition: definition,
+			},
+		},
+		{
+			Message: "non-pointer struct of non-pointer native type of value",
+			Input: Native{
+				StringValue: "value",
+				IntValue:    1,
+				FloatValue:  1.1,
+				BoolValue:   true,
+				TimeValue:   timeValue,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "non-pointer struct of non-pointer native type of falsy value",
+			Input: Native{
+				StringValue: "",
+				IntValue:    0,
+				FloatValue:  0.0,
+				BoolValue:   false,
+				TimeValue:   timeValue,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "non-pointer struct of pointer native type of value",
+			Input: PtrNative{
+				StringValue: &stringValue,
+				IntValue:    &intValue,
+				FloatValue:  &floatValue,
+				BoolValue:   &boolValue,
+				TimeValue:   &timeValue,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "non-pointer struct of pointer native type of falsy value",
+			Input: PtrNative{
+				StringValue: &falsyStringValue,
+				IntValue:    &falsyIntValue,
+				FloatValue:  &falsyFloatValue,
+				BoolValue:   &falsyBoolValue,
+				TimeValue:   &falsyTimeValue,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "non-pointer struct of pointer native type of nil",
+			Input: PtrNative{
+				StringValue: nil,
+				IntValue:    nil,
+				FloatValue:  nil,
+				BoolValue:   nil,
+			},
+			Expected: &validator.RequiredValidationError{
+				Input: PtrNative{
+					StringValue: nil,
+					IntValue:    nil,
+					FloatValue:  nil,
+					BoolValue:   nil,
+				},
+				Definition: definition,
+			},
+		},
+		{
+			Message: "non-pointer struct of non-pointer nullable type of value",
+			Input: Null{
+				StringValue: nullableString,
+				IntValue:    nullableInt,
+				FloatValue:  nullableFloat,
+				BoolValue:   nullableBool,
+				TimeValue:   nullableTime,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "non-pointer struct of non-pointer nullable type of falsy value",
+			Input: Null{
+				StringValue: falsyNullableString,
+				IntValue:    falsyNullableInt,
+				FloatValue:  falsyNullableFloat,
+				BoolValue:   falsyNullableBool,
+				TimeValue:   falsyNullableTime,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "non-pointer struct of non-pointer nullable type of null value",
+			Input: Null{
+				StringValue: nullNullableString,
+				IntValue:    nullNullableInt,
+				FloatValue:  nullNullableFloat,
+				BoolValue:   nullNullableBool,
+				TimeValue:   nullNullableTime,
+			},
+			Expected: &validator.RequiredValidationError{
+				Input: Null{
+					StringValue: nullNullableString,
+					IntValue:    nullNullableInt,
+					FloatValue:  nullNullableFloat,
+					BoolValue:   nullNullableBool,
+					TimeValue:   nullNullableTime,
+				},
+				Definition: definition,
+			},
+		},
+		{
+			Message: "non-pointer struct of pointer nullable type of value",
+			Input: PtrNull{
+				StringValue: &nullableString,
+				IntValue:    &nullableInt,
+				FloatValue:  &nullableFloat,
+				BoolValue:   &nullableBool,
+				TimeValue:   &nullableTime,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "non-pointer struct of pointer nullable type of falsy value",
+			Input: PtrNull{
+				StringValue: &falsyNullableString,
+				IntValue:    &falsyNullableInt,
+				FloatValue:  &falsyNullableFloat,
+				BoolValue:   &falsyNullableBool,
+				TimeValue:   &falsyNullableTime,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "non-pointer struct of pointer nullable type of null value",
+			Input: PtrNull{
+				StringValue: &nullNullableString,
+				IntValue:    &nullNullableInt,
+				FloatValue:  &nullNullableFloat,
+				BoolValue:   &nullNullableBool,
+				TimeValue:   &nullNullableTime,
+			},
+			Expected: &validator.RequiredValidationError{
+				Input: PtrNull{
+					StringValue: &nullNullableString,
+					IntValue:    &nullNullableInt,
+					FloatValue:  &nullNullableFloat,
+					BoolValue:   &nullNullableBool,
+					TimeValue:   &nullNullableTime,
+				},
+				Definition: definition,
+			},
+		},
+		{
+			Message: "non-pointer struct of pointer nullable type of nil",
+			Input: PtrNull{
+				StringValue: nil,
+				IntValue:    nil,
+				FloatValue:  nil,
+				BoolValue:   nil,
+				TimeValue:   nil,
+			},
+			Expected: &validator.RequiredValidationError{
+				Input: PtrNull{
+					StringValue: nil,
+					IntValue:    nil,
+					FloatValue:  nil,
+					BoolValue:   nil,
+					TimeValue:   nil,
+				},
+				Definition: definition,
+			},
+		},
+
+		{
+			Message: "pointer struct of non-pointer native type of value",
+			Input: &Native{
+				StringValue: "value",
+				IntValue:    1,
+				FloatValue:  1.1,
+				BoolValue:   true,
+				TimeValue:   timeValue,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "pointer struct of non-pointer native type of falsy value",
+			Input: &Native{
+				StringValue: "",
+				IntValue:    0,
+				FloatValue:  0.0,
+				BoolValue:   false,
+				TimeValue:   timeValue,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "pointer struct of pointer native type of value",
+			Input: &PtrNative{
+				StringValue: &stringValue,
+				IntValue:    &intValue,
+				FloatValue:  &floatValue,
+				BoolValue:   &boolValue,
+				TimeValue:   &timeValue,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "pointer struct of pointer native type of falsy value",
+			Input: &PtrNative{
+				StringValue: &falsyStringValue,
+				IntValue:    &falsyIntValue,
+				FloatValue:  &falsyFloatValue,
+				BoolValue:   &falsyBoolValue,
+				TimeValue:   &falsyTimeValue,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "pointer struct of pointer native type of nil",
+			Input: &PtrNative{
+				StringValue: nil,
+				IntValue:    nil,
+				FloatValue:  nil,
+				BoolValue:   nil,
+				TimeValue:   nil,
+			},
+			Expected: &validator.RequiredValidationError{
+				Input: &PtrNative{
+					StringValue: nil,
+					IntValue:    nil,
+					FloatValue:  nil,
+					BoolValue:   nil,
+					TimeValue:   nil,
+				},
+				Definition: definition,
+			},
+		},
+
+		{
+			Message: "pointer struct of non-pointer nullable type of value",
+			Input: &Null{
+				StringValue: nullableString,
+				IntValue:    nullableInt,
+				FloatValue:  nullableFloat,
+				BoolValue:   nullableBool,
+				TimeValue:   nullableTime,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "pointer struct of non-pointer nullable type of falsy value",
+			Input: &Null{
+				StringValue: falsyNullableString,
+				IntValue:    falsyNullableInt,
+				FloatValue:  falsyNullableFloat,
+				BoolValue:   falsyNullableBool,
+				TimeValue:   falsyNullableTime,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "pointer struct of non-pointer nullable type of null value",
+			Input: &Null{
+				StringValue: nullNullableString,
+				IntValue:    nullNullableInt,
+				FloatValue:  nullNullableFloat,
+				BoolValue:   nullNullableBool,
+				TimeValue:   nullNullableTime,
+			},
+			Expected: &validator.RequiredValidationError{
+				Input: &Null{
+					StringValue: nullNullableString,
+					IntValue:    nullNullableInt,
+					FloatValue:  nullNullableFloat,
+					BoolValue:   nullNullableBool,
+					TimeValue:   nullNullableTime,
+				},
+				Definition: definition,
+			},
+		},
+		{
+			Message: "pointer struct of pointer nullable type of value",
+			Input: &PtrNull{
+				StringValue: &nullableString,
+				IntValue:    &nullableInt,
+				FloatValue:  &nullableFloat,
+				BoolValue:   &nullableBool,
+				TimeValue:   &nullableTime,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "pointer struct of pointer nullable type of falsy value",
+			Input: &PtrNull{
+				StringValue: &falsyNullableString,
+				IntValue:    &falsyNullableInt,
+				FloatValue:  &falsyNullableFloat,
+				BoolValue:   &falsyNullableBool,
+				TimeValue:   &falsyNullableTime,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "pointer struct of pointer nullable type of null value",
+			Input: &PtrNull{
+				StringValue: &nullNullableString,
+				IntValue:    &nullNullableInt,
+				FloatValue:  &nullNullableFloat,
+				BoolValue:   &nullNullableBool,
+				TimeValue:   &nullNullableTime,
+			},
+			Expected: &validator.RequiredValidationError{
+				Input: &PtrNull{
+					StringValue: &nullNullableString,
+					IntValue:    &nullNullableInt,
+					FloatValue:  &nullNullableFloat,
+					BoolValue:   &nullNullableBool,
+					TimeValue:   &nullNullableTime,
+				},
+				Definition: definition,
+			},
+		},
+		{
+			Message: "pointer struct of pointer nullable type of nil",
+			Input: &PtrNull{
+				StringValue: nil,
+				IntValue:    nil,
+				FloatValue:  nil,
+				BoolValue:   nil,
+				TimeValue:   nil,
+			},
+			Expected: &validator.RequiredValidationError{
+				Input: &PtrNull{
+					StringValue: nil,
+					IntValue:    nil,
+					FloatValue:  nil,
+					BoolValue:   nil,
+					TimeValue:   nil,
+				},
+				Definition: definition,
+			},
+		},
+	}
+
+	va, err := validator.NewRequiredValidator(definition)
+	if err != nil {
+		t.Fatal("Fail to create new required validator:", err)
+	}
+
+	for _, c := range cases {
+		err := va.Validate(c.Input)
+		if !reflect.DeepEqual(err, c.Expected) {
+			t.Errorf("Test with %s: expected %+v, but actual %+v", c.Message, c.Expected, err)
+		}
+	}
+}
+func TestValidateOfRequiredValidatorWithTime(t *testing.T) {
+	definition := validator.RequiredValidatorDefinition{
+		Required: []string{"TimeValue"},
+	}
+
+	cases := []RequiredValidatorTestCase{
+		{
+			Message: "nil",
+			Input:   nil,
+			Expected: &validator.InvalidTypeError{
+				Input:      nil,
+				Definition: definition,
+			},
+		},
+		{
+			Message: "non-struct",
+			Input:   "foo",
+			Expected: &validator.InvalidTypeError{
+				Input:      "foo",
+				Definition: definition,
+			},
+		},
+		{
+			Message: "non-pointer struct of non-pointer native type of value",
+			Input: Native{
+				StringValue: "value",
+				IntValue:    1,
+				FloatValue:  1.1,
+				BoolValue:   true,
+				TimeValue:   timeValue,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "non-pointer struct of non-pointer native type of falsy value",
+			Input: Native{
+				StringValue: "",
+				IntValue:    0,
+				FloatValue:  0.0,
+				BoolValue:   false,
+				TimeValue:   timeValue,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "non-pointer struct of pointer native type of value",
+			Input: PtrNative{
+				StringValue: &stringValue,
+				IntValue:    &intValue,
+				FloatValue:  &floatValue,
+				BoolValue:   &boolValue,
+				TimeValue:   &timeValue,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "non-pointer struct of pointer native type of falsy value",
+			Input: PtrNative{
+				StringValue: &falsyStringValue,
+				IntValue:    &falsyIntValue,
+				FloatValue:  &falsyFloatValue,
+				BoolValue:   &falsyBoolValue,
+				TimeValue:   &falsyTimeValue,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "non-pointer struct of pointer native type of nil",
+			Input: PtrNative{
+				StringValue: nil,
+				IntValue:    nil,
+				FloatValue:  nil,
+				BoolValue:   nil,
+			},
+			Expected: &validator.RequiredValidationError{
+				Input: PtrNative{
+					StringValue: nil,
+					IntValue:    nil,
+					FloatValue:  nil,
+					BoolValue:   nil,
+				},
+				Definition: definition,
+			},
+		},
+		{
+			Message: "non-pointer struct of non-pointer nullable type of value",
+			Input: Null{
+				StringValue: nullableString,
+				IntValue:    nullableInt,
+				FloatValue:  nullableFloat,
+				BoolValue:   nullableBool,
+				TimeValue:   nullableTime,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "non-pointer struct of non-pointer nullable type of falsy value",
+			Input: Null{
+				StringValue: falsyNullableString,
+				IntValue:    falsyNullableInt,
+				FloatValue:  falsyNullableFloat,
+				BoolValue:   falsyNullableBool,
+				TimeValue:   falsyNullableTime,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "non-pointer struct of non-pointer nullable type of null value",
+			Input: Null{
+				StringValue: nullNullableString,
+				IntValue:    nullNullableInt,
+				FloatValue:  nullNullableFloat,
+				BoolValue:   nullNullableBool,
+				TimeValue:   nullNullableTime,
+			},
+			Expected: &validator.RequiredValidationError{
+				Input: Null{
+					StringValue: nullNullableString,
+					IntValue:    nullNullableInt,
+					FloatValue:  nullNullableFloat,
+					BoolValue:   nullNullableBool,
+					TimeValue:   nullNullableTime,
+				},
+				Definition: definition,
+			},
+		},
+		{
+			Message: "non-pointer struct of pointer nullable type of value",
+			Input: PtrNull{
+				StringValue: &nullableString,
+				IntValue:    &nullableInt,
+				FloatValue:  &nullableFloat,
+				BoolValue:   &nullableBool,
+				TimeValue:   &nullableTime,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "non-pointer struct of pointer nullable type of falsy value",
+			Input: PtrNull{
+				StringValue: &falsyNullableString,
+				IntValue:    &falsyNullableInt,
+				FloatValue:  &falsyNullableFloat,
+				BoolValue:   &falsyNullableBool,
+				TimeValue:   &falsyNullableTime,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "non-pointer struct of pointer nullable type of null value",
+			Input: PtrNull{
+				StringValue: &nullNullableString,
+				IntValue:    &nullNullableInt,
+				FloatValue:  &nullNullableFloat,
+				BoolValue:   &nullNullableBool,
+				TimeValue:   &nullNullableTime,
+			},
+			Expected: &validator.RequiredValidationError{
+				Input: PtrNull{
+					StringValue: &nullNullableString,
+					IntValue:    &nullNullableInt,
+					FloatValue:  &nullNullableFloat,
+					BoolValue:   &nullNullableBool,
+					TimeValue:   &nullNullableTime,
+				},
+				Definition: definition,
+			},
+		},
+		{
+			Message: "non-pointer struct of pointer nullable type of nil",
+			Input: PtrNull{
+				StringValue: nil,
+				IntValue:    nil,
+				FloatValue:  nil,
+				BoolValue:   nil,
+				TimeValue:   nil,
+			},
+			Expected: &validator.RequiredValidationError{
+				Input: PtrNull{
+					StringValue: nil,
+					IntValue:    nil,
+					FloatValue:  nil,
+					BoolValue:   nil,
+					TimeValue:   nil,
+				},
+				Definition: definition,
+			},
+		},
+
+		{
+			Message: "pointer struct of non-pointer native type of value",
+			Input: &Native{
+				StringValue: "value",
+				IntValue:    1,
+				FloatValue:  1.1,
+				BoolValue:   true,
+				TimeValue:   timeValue,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "pointer struct of non-pointer native type of falsy value",
+			Input: &Native{
+				StringValue: "",
+				IntValue:    0,
+				FloatValue:  0.0,
+				BoolValue:   false,
+				TimeValue:   timeValue,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "pointer struct of pointer native type of value",
+			Input: &PtrNative{
+				StringValue: &stringValue,
+				IntValue:    &intValue,
+				FloatValue:  &floatValue,
+				BoolValue:   &boolValue,
+				TimeValue:   &timeValue,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "pointer struct of pointer native type of falsy value",
+			Input: &PtrNative{
+				StringValue: &falsyStringValue,
+				IntValue:    &falsyIntValue,
+				FloatValue:  &falsyFloatValue,
+				BoolValue:   &falsyBoolValue,
+				TimeValue:   &falsyTimeValue,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "pointer struct of pointer native type of nil",
+			Input: &PtrNative{
+				StringValue: nil,
+				IntValue:    nil,
+				FloatValue:  nil,
+				BoolValue:   nil,
+				TimeValue:   nil,
+			},
+			Expected: &validator.RequiredValidationError{
+				Input: &PtrNative{
+					StringValue: nil,
+					IntValue:    nil,
+					FloatValue:  nil,
+					BoolValue:   nil,
+					TimeValue:   nil,
+				},
+				Definition: definition,
+			},
+		},
+
+		{
+			Message: "pointer struct of non-pointer nullable type of value",
+			Input: &Null{
+				StringValue: nullableString,
+				IntValue:    nullableInt,
+				FloatValue:  nullableFloat,
+				BoolValue:   nullableBool,
+				TimeValue:   nullableTime,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "pointer struct of non-pointer nullable type of falsy value",
+			Input: &Null{
+				StringValue: falsyNullableString,
+				IntValue:    falsyNullableInt,
+				FloatValue:  falsyNullableFloat,
+				BoolValue:   falsyNullableBool,
+				TimeValue:   falsyNullableTime,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "pointer struct of non-pointer nullable type of null value",
+			Input: &Null{
+				StringValue: nullNullableString,
+				IntValue:    nullNullableInt,
+				FloatValue:  nullNullableFloat,
+				BoolValue:   nullNullableBool,
+				TimeValue:   nullNullableTime,
+			},
+			Expected: &validator.RequiredValidationError{
+				Input: &Null{
+					StringValue: nullNullableString,
+					IntValue:    nullNullableInt,
+					FloatValue:  nullNullableFloat,
+					BoolValue:   nullNullableBool,
+					TimeValue:   nullNullableTime,
+				},
+				Definition: definition,
+			},
+		},
+		{
+			Message: "pointer struct of pointer nullable type of value",
+			Input: &PtrNull{
+				StringValue: &nullableString,
+				IntValue:    &nullableInt,
+				FloatValue:  &nullableFloat,
+				BoolValue:   &nullableBool,
+				TimeValue:   &nullableTime,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "pointer struct of pointer nullable type of falsy value",
+			Input: &PtrNull{
+				StringValue: &falsyNullableString,
+				IntValue:    &falsyNullableInt,
+				FloatValue:  &falsyNullableFloat,
+				BoolValue:   &falsyNullableBool,
+				TimeValue:   &falsyNullableTime,
+			},
+			Expected: nil,
+		},
+		{
+			Message: "pointer struct of pointer nullable type of null value",
+			Input: &PtrNull{
+				StringValue: &nullNullableString,
+				IntValue:    &nullNullableInt,
+				FloatValue:  &nullNullableFloat,
+				BoolValue:   &nullNullableBool,
+				TimeValue:   &nullNullableTime,
+			},
+			Expected: &validator.RequiredValidationError{
+				Input: &PtrNull{
+					StringValue: &nullNullableString,
+					IntValue:    &nullNullableInt,
+					FloatValue:  &nullNullableFloat,
+					BoolValue:   &nullNullableBool,
+					TimeValue:   &nullNullableTime,
+				},
+				Definition: definition,
+			},
+		},
+		{
+			Message: "pointer struct of pointer nullable type of nil",
+			Input: &PtrNull{
+				StringValue: nil,
+				IntValue:    nil,
+				FloatValue:  nil,
+				BoolValue:   nil,
+				TimeValue:   nil,
+			},
+			Expected: &validator.RequiredValidationError{
+				Input: &PtrNull{
+					StringValue: nil,
+					IntValue:    nil,
+					FloatValue:  nil,
+					BoolValue:   nil,
+					TimeValue:   nil,
 				},
 				Definition: definition,
 			},
