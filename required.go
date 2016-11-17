@@ -27,7 +27,7 @@ type RequiredValidationError struct {
 }
 
 func (r RequiredValidationError) Error() string {
-	return fmt.Sprintf("input sturct does not satisfy required values '%v'\n", r.Definition.Required)
+	return fmt.Sprintf("input struct does not satisfy required values '%v'\n", r.Definition.Required)
 }
 
 func NewRequiredValidator(definition RequiredValidatorDefinition) (RequiredValidator, error) {
