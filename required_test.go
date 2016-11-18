@@ -97,6 +97,72 @@ var (
 	nullNullableTime   = dbr.NewNullTime(nil)
 )
 
+func TestValidateOfRequiredValidatorWithNonStruct(t *testing.T) {
+	type RequiredValidatorTestCase struct {
+		Message  string
+		Input    interface{}
+		Expected error
+	}
+
+	definition := validator.RequiredValidatorDefinition{
+		Required: []string{"StringValue", "IntValue", "FloatValue", "BoolValue", "TimeValue"},
+	}
+
+	cases := []RequiredValidatorTestCase{
+		{
+			Message: "nil",
+			Input:   nil,
+			Expected: &validator.InvalidTypeError{
+				Input:      nil,
+				Definition: definition,
+			},
+		},
+		{
+			Message: "string type",
+			Input:   stringValue,
+			Expected: &validator.InvalidTypeError{
+				Input:      stringValue,
+				Definition: definition,
+			},
+		},
+		{
+			Message: "int type",
+			Input:   intValue,
+			Expected: &validator.InvalidTypeError{
+				Input:      intValue,
+				Definition: definition,
+			},
+		},
+		{
+			Message: "float type",
+			Input:   floatValue,
+			Expected: &validator.InvalidTypeError{
+				Input:      floatValue,
+				Definition: definition,
+			},
+		},
+		{
+			Message: "bool type",
+			Input:   boolValue,
+			Expected: &validator.InvalidTypeError{
+				Input:      boolValue,
+				Definition: definition,
+			},
+		},
+	}
+	va, err := validator.NewRequiredValidator(definition)
+	if err != nil {
+		t.Fatal("Fail to create new required validator:", err)
+	}
+
+	for _, c := range cases {
+		err := va.Validate(c.Input)
+		if !reflect.DeepEqual(err, c.Expected) {
+			t.Errorf("Test with %s: expected %+v, but actual %+v", c.Message, c.Expected, err)
+		}
+	}
+}
+
 func TestValidateOfRequiredValidatorWithPrimitiveString(t *testing.T) {
 	type Primitive struct {
 		StringValue string
