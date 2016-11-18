@@ -163,6 +163,50 @@ func TestValidateOfRequiredValidatorWithNonStruct(t *testing.T) {
 	}
 }
 
+func TestValidateOfRequiredValidatorWithInvalidStructAgainstRequired(t *testing.T) {
+	type Hoge struct {
+		Foo string
+		Bar int
+	}
+	type RequiredValidatorTestCase struct {
+		Message  string
+		Input    interface{}
+		Expected error
+	}
+
+	definition := validator.RequiredValidatorDefinition{
+		Required: []string{"StringValue", "IntValue", "FloatValue", "BoolValue", "TimeValue"},
+	}
+
+	cases := []RequiredValidatorTestCase{
+		{
+			Message: "invalid struct against required validator",
+			Input: Hoge{
+				Foo: "foo",
+				Bar: 1,
+			},
+			Expected: &validator.InvalidFieldTypeError{
+				Input: Hoge{
+					Foo: "foo",
+					Bar: 1,
+				},
+				Definition: definition,
+			},
+		},
+	}
+	va, err := validator.NewRequiredValidator(definition)
+	if err != nil {
+		t.Fatal("Fail to create new required validator:", err)
+	}
+
+	for _, c := range cases {
+		err := va.Validate(c.Input)
+		if !reflect.DeepEqual(err, c.Expected) {
+			t.Errorf("Test with %s: expected %+v, but actual %+v", c.Message, c.Expected, err)
+		}
+	}
+}
+
 func TestValidateOfRequiredValidatorWithPrimitiveString(t *testing.T) {
 	type Primitive struct {
 		StringValue string
