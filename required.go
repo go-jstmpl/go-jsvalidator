@@ -72,6 +72,13 @@ func (r RequiredValidator) Validate(input interface{}) error {
 
 	for _, key := range r.definition.Required {
 		e := v.FieldByName(key)
+		if (e == reflect.Value{}) {
+			return &InvalidFieldTypeError{
+				Definition: r.definition,
+				Input:      input,
+			}
+		}
+
 		if e.Kind() == reflect.Ptr {
 			if e.IsNil() {
 				return &RequiredValidationError{
