@@ -80,9 +80,7 @@ func (r RequiredValidator) Validate(input interface{}) error {
 				Input:      input,
 			}
 		}
-		i := c.Interface()
-		ok = isValid(i)
-		if !ok {
+		if ok = isValid(c.Interface()); !ok {
 			return &RequiredValidationError{
 				Definition: r.definition,
 				Input:      input,
