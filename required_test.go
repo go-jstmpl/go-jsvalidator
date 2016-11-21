@@ -362,3 +362,76 @@ func TestGetFieldByName(t *testing.T) {
 		t.Errorf("test with not existing field: expected false but not")
 	}
 }
+
+func TestIsValid(t *testing.T) {
+	type Case struct {
+		Description     string
+		Input           interface{}
+		ExpectedIsValid bool
+	}
+
+	cases := []Case{
+		{
+			Description:     "primitive value",
+			Input:           "value",
+			ExpectedIsValid: true,
+		},
+		{
+			Description:     "valid nullable string",
+			Input:           dbr.NewNullString("value"),
+			ExpectedIsValid: true,
+		},
+		{
+			Description:     "valid nullable int",
+			Input:           dbr.NewNullInt64(1),
+			ExpectedIsValid: true,
+		},
+		{
+			Description:     "valid nullable float",
+			Input:           dbr.NewNullFloat64(1.1),
+			ExpectedIsValid: true,
+		},
+		{
+			Description:     "valid nullable bool",
+			Input:           dbr.NewNullBool(true),
+			ExpectedIsValid: true,
+		},
+		{
+			Description:     "valid nullable time",
+			Input:           dbr.NewNullTime(time.Now()),
+			ExpectedIsValid: true,
+		},
+		{
+			Description:     "invalid nullable string",
+			Input:           dbr.NewNullString(nil),
+			ExpectedIsValid: false,
+		},
+		{
+			Description:     "invalid nullable int",
+			Input:           dbr.NewNullInt64(nil),
+			ExpectedIsValid: false,
+		},
+		{
+			Description:     "invalid nullable float",
+			Input:           dbr.NewNullFloat64(nil),
+			ExpectedIsValid: false,
+		},
+		{
+			Description:     "invalid nullable bool",
+			Input:           dbr.NewNullBool(nil),
+			ExpectedIsValid: false,
+		},
+		{
+			Description:     "invalid nullable time",
+			Input:           dbr.NewNullTime(nil),
+			ExpectedIsValid: false,
+		},
+	}
+
+	for _, c := range cases {
+		ok := validator.IsValid(c.Input)
+		if ok != c.ExpectedIsValid {
+			t.Errorf("test with %s: expected %t but not", c.Description, c.ExpectedIsValid)
+		}
+	}
+}
