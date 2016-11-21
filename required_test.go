@@ -244,13 +244,13 @@ func TestValidateOfRequiredValidator(t *testing.T) {
 		definition := c.Input.Definition
 		va, err := validator.NewRequiredValidator(definition)
 		if err != nil {
-			t.Errorf("Fail to create new required validator: %s", err)
+			t.Errorf("test with %s: fail to create new required validator: %s", c.Message, err)
 			continue
 		}
 
 		err = va.Validate(c.Input.Types)
 		if !reflect.DeepEqual(err, c.Expected) {
-			t.Errorf("Test with %s: expected %+v, but actual %+v", c.Message, c.Expected, err)
+			t.Errorf("test with %s: expected %+v, but actual %+v", c.Message, c.Expected, err)
 		}
 	}
 }
