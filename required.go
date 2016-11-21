@@ -49,8 +49,8 @@ func NewRequiredValidator(definition RequiredValidatorDefinition) (RequiredValid
 	return RequiredValidator{definition}, nil
 }
 
-// Validate reports whether input is valid against required keys.
-// Fields of Input struct must be exported.
+// Validate returns whether input is valid against required keys.
+// The fields of input must be public.
 func (r RequiredValidator) Validate(input interface{}) error {
 	v, ok := convertToConcreteValue(reflect.ValueOf(input))
 	if !ok {
@@ -91,7 +91,7 @@ func (r RequiredValidator) Validate(input interface{}) error {
 }
 
 // convertToConcreteValue returns a concrete value that stored in the pointer.
-// The ok return value reports whether conversion was successful.
+// The ok reports whether conversion was successful.
 func convertToConcreteValue(input reflect.Value) (value reflect.Value, ok bool) {
 	if input.Kind() != reflect.Ptr {
 		return input, true
@@ -103,13 +103,13 @@ func convertToConcreteValue(input reflect.Value) (value reflect.Value, ok bool) 
 }
 
 // getFieldByName returns the struct field with the given name.
-// The ok return value reports whether field with key was found in value.
-func getFieldByName(s reflect.Value, key string) (v reflect.Value, ok bool) {
-	v = s.FieldByName(key)
-	if (v == reflect.Value{}) {
-		return reflect.Value{}, false
+// The ok reports whether field with key was found in value.
+func getFieldByName(s reflect.Value, key string) (value reflect.Value, ok bool) {
+	value = s.FieldByName(key)
+	if (value == reflect.Value{}) {
+		return value, false
 	}
-	return v, true
+	return value, true
 }
 
 // isValid returns whether i is valid.
