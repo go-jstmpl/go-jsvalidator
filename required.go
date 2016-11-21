@@ -49,19 +49,15 @@ func NewRequiredValidator(definition RequiredValidatorDefinition) (RequiredValid
 	return RequiredValidator{definition}, nil
 }
 
+// Validate reports whether input is valid against required keys.
+// Fields of Input struct must be exported.
 func (r RequiredValidator) Validate(input interface{}) error {
-	if input == nil {
+	v, ok := convertToConcreteValue(reflect.ValueOf(input))
+	if !ok {
 		return &InvalidTypeError{
 			Definition: r.definition,
 			Input:      input,
 		}
-	}
-
-	var v reflect.Value
-	if reflect.TypeOf(input).Kind() != reflect.Ptr {
-		v = reflect.ValueOf(input)
-	} else {
-		v = reflect.ValueOf(input).Elem()
 	}
 	if v.Kind() != reflect.Struct {
 		return &InvalidTypeError{
@@ -69,71 +65,71 @@ func (r RequiredValidator) Validate(input interface{}) error {
 			Input:      input,
 		}
 	}
-
 	for _, key := range r.definition.Required {
-		e := v.FieldByName(key)
-		if (e == reflect.Value{}) {
+		e, ok := getFieldByName(v, key)
+		if !ok {
 			return &InvalidFieldTypeError{
 				Definition: r.definition,
 				Input:      input,
 			}
 		}
-
-		if e.Kind() == reflect.Ptr {
-			if e.IsNil() {
-				return &RequiredValidationError{
-					Definition: r.definition,
-					Input:      input,
-				}
+		c, ok := convertToConcreteValue(e)
+		if !ok {
+			return &InvalidFieldTypeError{
+				Definition: r.definition,
+				Input:      input,
 			}
-			e = v.FieldByName(key).Elem()
 		}
-
-		i := e.Interface()
-		switch j := i.(type) {
-		case dbr.NullString:
-			if !j.Valid {
-				return &RequiredValidationError{
-					Definition: r.definition,
-					Input:      input,
-				}
+		i := c.Interface()
+		ok = isValid(i)
+		if !ok {
+			return &RequiredValidationError{
+				Definition: r.definition,
+				Input:      input,
 			}
-			continue
-		case dbr.NullTime:
-			if !j.Valid {
-				return &RequiredValidationError{
-					Definition: r.definition,
-					Input:      input,
-				}
-			}
-			continue
-		case dbr.NullInt64:
-			if !j.Valid {
-				return &RequiredValidationError{
-					Definition: r.definition,
-					Input:      input,
-				}
-			}
-			continue
-		case dbr.NullFloat64:
-			if !j.Valid {
-				return &RequiredValidationError{
-					Definition: r.definition,
-					Input:      input,
-				}
-			}
-			continue
-		case dbr.NullBool:
-			if !j.Valid {
-				return &RequiredValidationError{
-					Definition: r.definition,
-					Input:      input,
-				}
-			}
-			continue
-		default:
-			continue
 		}
 	}
 	return nil
+}
+
+// convertToConcreteValue returns a concrete value that stored in the pointer.
+// The ok return value reports whether conversion was successful.
+func convertToConcreteValue(input reflect.Value) (value reflect.Value, ok bool) {
+	if input.Kind() != reflect.Ptr {
+		return input, true
+	}
+	if input.IsNil() {
+		return reflect.Value{}, false
+	}
+	return input.Elem(), true
+}
+
+// getFieldByName returns the struct field with the given name.
+// The ok return value reports whether field with key was found in value.
+func getFieldByName(v reflect.Value, key string) (f reflect.Value, ok bool) {
+	field := v.FieldByName(key)
+	if (field == reflect.Value{}) {
+		return reflect.Value{}, false
+	}
+	return field, true
+}
+
+// isValid reports whether i is valid.
+// The argument i will always convert to dbr.Null* type or primitive type
+// by type switch in Validate of RequiredValidator.
+func isValid(i interface{}) (ok bool) {
+	switch j := i.(type) {
+	case dbr.NullString:
+		return j.Valid
+	case dbr.NullInt64:
+		return j.Valid
+	case dbr.NullFloat64:
+		return j.Valid
+	case dbr.NullBool:
+		return j.Valid
+	case dbr.NullTime:
+		return j.Valid
+	default:
+		return true
+	}
 }
