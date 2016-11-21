@@ -254,3 +254,71 @@ func TestValidateOfRequiredValidator(t *testing.T) {
 		}
 	}
 }
+
+func TestConvertToConcreteValue(t *testing.T) {
+	// Output expected is always Kind of non Ptr
+	type Case struct {
+		Message string
+		Input   reflect.Value
+	}
+	var (
+		stringValue = "string"
+		intValue    = 1
+		floatValue  = 1.1
+		boolValue   = true
+		structValue = time.Now()
+	)
+
+	cases := []Case{
+		{
+			Message: "kind of string",
+			Input:   reflect.ValueOf(stringValue),
+		},
+		{
+			Message: "kind of int",
+			Input:   reflect.ValueOf(intValue),
+		},
+		{
+			Message: "kind of float",
+			Input:   reflect.ValueOf(floatValue),
+		},
+		{
+			Message: "kind of bool",
+			Input:   reflect.ValueOf(boolValue),
+		},
+		{
+			Message: "kind of struct",
+			Input:   reflect.ValueOf(structValue),
+		},
+		{
+			Message: "kind of pointer of string",
+			Input:   reflect.ValueOf(&stringValue),
+		},
+		{
+			Message: "kind of pointer of int",
+			Input:   reflect.ValueOf(&intValue),
+		},
+		{
+			Message: "kind of pointer of float",
+			Input:   reflect.ValueOf(&floatValue),
+		},
+		{
+			Message: "kind of pointer of bool",
+			Input:   reflect.ValueOf(&boolValue),
+		},
+		{
+			Message: "kind of pointer of struct",
+			Input:   reflect.ValueOf(&structValue),
+		},
+	}
+
+	for _, c := range cases {
+		v, ok := validator.ConvertToConcreteValue(c.Input)
+		if !ok {
+			t.Errorf("test with %s: fail to convert to concrete value %v", c.Message, c.Input)
+		}
+		if v.Kind() == reflect.Ptr {
+			t.Errorf("test with  %s: expected non Ptr but not", c.Message)
+		}
+	}
+}
