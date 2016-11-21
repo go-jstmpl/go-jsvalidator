@@ -112,9 +112,8 @@ func getFieldByName(s reflect.Value, key string) (v reflect.Value, ok bool) {
 	return v, true
 }
 
-// isValid reports whether i is valid.
-// The argument i will always convert to dbr.Null* type or primitive type
-// by type switch in Validate of RequiredValidator.
+// isValid returns whether i is valid.
+// The type of i should be dbr.Null* or primitive.
 func isValid(i interface{}) (ok bool) {
 	switch t := i.(type) {
 	case dbr.NullString:
