@@ -104,29 +104,29 @@ func convertToConcreteValue(input reflect.Value) (value reflect.Value, ok bool) 
 
 // getFieldByName returns the struct field with the given name.
 // The ok return value reports whether field with key was found in value.
-func getFieldByName(v reflect.Value, key string) (f reflect.Value, ok bool) {
-	field := v.FieldByName(key)
-	if (field == reflect.Value{}) {
+func getFieldByName(s reflect.Value, key string) (v reflect.Value, ok bool) {
+	v = s.FieldByName(key)
+	if (v == reflect.Value{}) {
 		return reflect.Value{}, false
 	}
-	return field, true
+	return v, true
 }
 
 // isValid reports whether i is valid.
 // The argument i will always convert to dbr.Null* type or primitive type
 // by type switch in Validate of RequiredValidator.
 func isValid(i interface{}) (ok bool) {
-	switch j := i.(type) {
+	switch t := i.(type) {
 	case dbr.NullString:
-		return j.Valid
+		return t.Valid
 	case dbr.NullInt64:
-		return j.Valid
+		return t.Valid
 	case dbr.NullFloat64:
-		return j.Valid
+		return t.Valid
 	case dbr.NullBool:
-		return j.Valid
+		return t.Valid
 	case dbr.NullTime:
-		return j.Valid
+		return t.Valid
 	default:
 		return true
 	}
