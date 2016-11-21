@@ -322,3 +322,43 @@ func TestConvertToConcreteValue(t *testing.T) {
 		}
 	}
 }
+
+func TestGetFieldByName(t *testing.T) {
+	type Sample struct {
+		Hoge string
+		Foo  string
+		Bar  string
+	}
+
+	v, ok := validator.GetFieldByName(
+		reflect.ValueOf(
+			Sample{
+				Hoge: "hoge",
+				Foo:  "foo",
+				Bar:  "bar",
+			},
+		),
+		"Foo",
+	)
+	if !ok {
+		t.Fatal("test with existing field key: expected true but not")
+	}
+	i := v.Interface()
+	if i.(string) != "foo" {
+		t.Errorf("test with existing field: expected `foo` but not")
+	}
+
+	_, ok = validator.GetFieldByName(
+		reflect.ValueOf(
+			Sample{
+				Hoge: "hoge",
+				Foo:  "foo",
+				Bar:  "bar",
+			},
+		),
+		"Piyo",
+	)
+	if ok {
+		t.Errorf("test with not existing field: expected false but not")
+	}
+}
