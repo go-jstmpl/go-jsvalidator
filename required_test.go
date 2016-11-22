@@ -514,6 +514,38 @@ func TestIsPresentArray(t *testing.T) {
 	}
 }
 
+func IsPresentStruct(t *testing.T) {
+	type Case struct {
+		Description       string
+		Input             reflect.Value
+		ExpectedIsPresent bool
+	}
+	type emptyStruct struct{}
+	type nonEmptyStruct struct {
+		field string
+	}
+
+	cases := []Case{
+		{
+			Description:       "empty struct",
+			Input:             reflect.ValueOf(emptyStruct{}),
+			ExpectedIsPresent: false,
+		},
+		{
+			Description:       "non empty struct",
+			Input:             reflect.ValueOf(nonEmptyStruct{field: "value"}),
+			ExpectedIsPresent: true,
+		},
+	}
+
+	for _, c := range cases {
+		ok := validator.IsPresentStruct(c.Input)
+		if ok != c.ExpectedIsPresent {
+			t.Errorf("test with %s: expected %t but not", c.Description, c.ExpectedIsPresent)
+		}
+	}
+}
+
 func TestIsValid(t *testing.T) {
 	type Case struct {
 		Description     string
