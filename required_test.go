@@ -441,6 +441,79 @@ func TestIsPresentString(t *testing.T) {
 	}
 }
 
+func TestIsPresentArray(t *testing.T) {
+	type Case struct {
+		Description       string
+		Input             reflect.Value
+		ExpectedIsPresent bool
+	}
+
+	cases := []Case{
+		{
+			Description:       "empty array of int",
+			Input:             reflect.ValueOf([]int{}),
+			ExpectedIsPresent: false,
+		},
+		{
+			Description:       "empty array of string",
+			Input:             reflect.ValueOf([]string{}),
+			ExpectedIsPresent: false,
+		},
+		{
+			Description:       "empty array of float64",
+			Input:             reflect.ValueOf([]float64{}),
+			ExpectedIsPresent: false,
+		},
+		{
+			Description:       "empty array of bool",
+			Input:             reflect.ValueOf([]bool{}),
+			ExpectedIsPresent: false,
+		},
+		{
+			Description:       "empty array of struct",
+			Input:             reflect.ValueOf([]time.Time{}),
+			ExpectedIsPresent: false,
+		},
+		{
+			Description:       "array of int with one element",
+			Input:             reflect.ValueOf([]int{1}),
+			ExpectedIsPresent: true,
+		},
+		{
+			Description:       "array of string with one element",
+			Input:             reflect.ValueOf([]string{"value"}),
+			ExpectedIsPresent: true,
+		},
+		{
+			Description:       "array of float64 with one element",
+			Input:             reflect.ValueOf([]float64{1.1}),
+			ExpectedIsPresent: true,
+		},
+		{
+			Description:       "array of bool with one element",
+			Input:             reflect.ValueOf([]bool{true}),
+			ExpectedIsPresent: true,
+		},
+		{
+			Description:       "array of struct with one element",
+			Input:             reflect.ValueOf([]time.Time{time.Now()}),
+			ExpectedIsPresent: true,
+		},
+		{
+			Description:       "array of int with many element",
+			Input:             reflect.ValueOf([]int{1, 2, 3, 4, 5}),
+			ExpectedIsPresent: true,
+		},
+	}
+
+	for _, c := range cases {
+		ok := validator.IsPresentArray(c.Input)
+		if ok != c.ExpectedIsPresent {
+			t.Errorf("test with %s: expected %t but not", c.Description, c.ExpectedIsPresent)
+		}
+	}
+}
+
 func TestIsValid(t *testing.T) {
 	type Case struct {
 		Description     string
