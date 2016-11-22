@@ -4,11 +4,14 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"regexp"
 
 	"github.com/gocraft/dbr"
 )
 
 var (
+	rSpace = regexp.MustCompile("^[[:space:]]*$")
+
 	RequiredDefinitionEmptyError       = errors.New("the required value should have at least one element")
 	RequiredDefinitionDuplicationError = errors.New("the required value should not be duplicated")
 )
@@ -112,12 +115,33 @@ func getFieldByName(s reflect.Value, key string) (value reflect.Value, ok bool) 
 	return value, true
 }
 
+func isPresentString(s string) bool {
+	return !rSpace.MatchString(s)
+}
+
+func isPresentArray(v reflect.Value) bool {
+	if v.Len() == 0 {
+		return false
+	}
+	return true
+}
+
+func isPresentStruct(v reflect.Value) bool {
+	if v.NumField() == 0 {
+		return false
+	}
+	return true
+}
+
 // isValid returns whether i is valid.
 // The type of i should be dbr.Null* or primitive.
 func isValid(i interface{}) (ok bool) {
 	switch t := i.(type) {
 	case dbr.NullString:
-		return t.Valid
+		if !t.Valid {
+			return false
+		}
+		return isPresentString(t.String)
 	case dbr.NullInt64:
 		return t.Valid
 	case dbr.NullFloat64:
@@ -126,7 +150,17 @@ func isValid(i interface{}) (ok bool) {
 		return t.Valid
 	case dbr.NullTime:
 		return t.Valid
+	case string:
+		return isPresentString(t)
 	default:
-		return true
+		v := reflect.ValueOf(t)
+		switch v.Kind() {
+		case reflect.Struct:
+			return isPresentStruct(v)
+		case reflect.Array, reflect.Slice:
+			return isPresentArray(v)
+		default:
+			return true
+		}
 	}
 }

@@ -66,175 +66,129 @@ func TestNewRequiredValidator(t *testing.T) {
 }
 
 func TestValidateOfRequiredValidator(t *testing.T) {
-	type Types struct {
-		NullableStringValue dbr.NullString
-		NullableIntValue    dbr.NullInt64
-		NullableFloatValue  dbr.NullFloat64
-		NullableBoolValue   dbr.NullBool
-		NullableTimeValue   dbr.NullTime
-		StringValue         string
-		IntValue            int
-		FloatValue          float64
-		BoolValue           bool
-		TimeValue           time.Time
+	type Sample struct {
+		ID      int
+		Name    string
+		Message dbr.NullString
+		Items   []string
 	}
 
 	type Input struct {
-		Types      Types
+		Sample     Sample
 		Definition validator.RequiredValidatorDefinition
 	}
 
 	type Case struct {
-		Message  string
-		Input    Input
-		Expected error
+		Description string
+		Input       Input
+		Expected    error
 	}
 
 	cases := []Case{
 		{
-			Message: "complete struct against required",
+			Description: "complete struct against required",
 			Input: Input{
-				Types: Types{
-					NullableStringValue: dbr.NewNullString("value"),
-					NullableIntValue:    dbr.NewNullInt64(1),
-					NullableFloatValue:  dbr.NewNullFloat64(1.1),
-					NullableBoolValue:   dbr.NewNullBool(true),
-					NullableTimeValue:   dbr.NewNullTime("2009-11-10 23:00:00"),
-					StringValue:         "value",
-					IntValue:            1,
-					FloatValue:          1.1,
-					BoolValue:           true,
-					TimeValue:           time.Date(2009, 11, 10, 23, 00, 0, 0, time.UTC),
+				Sample: Sample{
+					ID:      1,
+					Name:    "Hoge",
+					Message: dbr.NewNullString("Foo bar."),
+					Items:   []string{"A", "B", "C"},
 				},
 				Definition: validator.RequiredValidatorDefinition{
 					Required: []string{
-						"NullableStringValue",
-						"NullableIntValue",
-						"NullableFloatValue",
-						"NullableBoolValue",
-						"NullableTimeValue",
-						"StringValue",
-						"IntValue",
-						"FloatValue",
-						"BoolValue",
-						"TimeValue",
+						"ID",
+						"Name",
+						"Message",
+						"Items",
 					},
 				},
 			},
 			Expected: nil,
 		},
 		{
-			Message: "NullableStringValue is missing",
+			Description: "Name is empty string",
 			Input: Input{
-				Types: Types{
-					NullableStringValue: dbr.NewNullString(nil),
+				Sample: Sample{
+					ID:      1,
+					Name:    "",
+					Message: dbr.NewNullString("Foo bar."),
+					Items:   []string{"A", "B", "C"},
 				},
 				Definition: validator.RequiredValidatorDefinition{
-					Required: []string{"NullableStringValue"},
+					Required: []string{
+						"Name",
+					},
 				},
 			},
 			Expected: &validator.RequiredValidationError{
-				Input: Types{
-					NullableStringValue: dbr.NewNullString(nil),
+				Input: Sample{
+					ID:      1,
+					Name:    "",
+					Message: dbr.NewNullString("Foo bar."),
+					Items:   []string{"A", "B", "C"},
 				},
 				Definition: validator.RequiredValidatorDefinition{
-					Required: []string{"NullableStringValue"},
+					Required: []string{
+						"Name",
+					},
 				},
 			},
 		},
 		{
-			Message: "NullableIntValue is missing",
+			Description: "Message is nil",
 			Input: Input{
-				Types: Types{
-					NullableIntValue: dbr.NewNullInt64(nil),
+				Sample: Sample{
+					ID:      1,
+					Name:    "Hoge",
+					Message: dbr.NewNullString(nil),
+					Items:   []string{"A", "B", "C"},
 				},
 				Definition: validator.RequiredValidatorDefinition{
-					Required: []string{"NullableIntValue"},
+					Required: []string{
+						"Message",
+					},
 				},
 			},
 			Expected: &validator.RequiredValidationError{
-				Input: Types{
-					NullableIntValue: dbr.NewNullInt64(nil),
+				Input: Sample{
+					ID:      1,
+					Name:    "Hoge",
+					Message: dbr.NewNullString(nil),
+					Items:   []string{"A", "B", "C"},
 				},
 				Definition: validator.RequiredValidatorDefinition{
-					Required: []string{"NullableIntValue"},
+					Required: []string{
+						"Message",
+					},
 				},
 			},
 		},
 		{
-			Message: "NullableFloatValue is missing",
+			Description: "Items is empty",
 			Input: Input{
-				Types: Types{
-					NullableFloatValue: dbr.NewNullFloat64(nil),
+				Sample: Sample{
+					ID:      1,
+					Name:    "Hoge",
+					Message: dbr.NewNullString("Foo bar."),
+					Items:   []string{},
 				},
 				Definition: validator.RequiredValidatorDefinition{
-					Required: []string{"NullableFloatValue"},
+					Required: []string{
+						"Items",
+					},
 				},
 			},
 			Expected: &validator.RequiredValidationError{
-				Input: Types{
-					NullableFloatValue: dbr.NewNullFloat64(nil),
+				Input: Sample{
+					ID:      1,
+					Name:    "Hoge",
+					Message: dbr.NewNullString("Foo bar."),
+					Items:   []string{},
 				},
 				Definition: validator.RequiredValidatorDefinition{
-					Required: []string{"NullableFloatValue"},
-				},
-			},
-		},
-		{
-			Message: "NullableBoolValue is missing",
-			Input: Input{
-				Types: Types{
-					NullableBoolValue: dbr.NewNullBool(nil),
-				},
-				Definition: validator.RequiredValidatorDefinition{
-					Required: []string{"NullableBoolValue"},
-				},
-			},
-			Expected: &validator.RequiredValidationError{
-				Input: Types{
-					NullableBoolValue: dbr.NewNullBool(nil),
-				},
-				Definition: validator.RequiredValidatorDefinition{
-					Required: []string{"NullableBoolValue"},
-				},
-			},
-		},
-		{
-			Message: "NullableTimeValue is missing",
-			Input: Input{
-				Types: Types{
-					NullableTimeValue: dbr.NewNullTime(nil),
-				},
-				Definition: validator.RequiredValidatorDefinition{
-					Required: []string{"NullableTimeValue"},
-				},
-			},
-			Expected: &validator.RequiredValidationError{
-				Input: Types{
-					NullableTimeValue: dbr.NewNullTime(nil),
-				},
-				Definition: validator.RequiredValidatorDefinition{
-					Required: []string{"NullableTimeValue"},
-				},
-			},
-		},
-
-		{
-			Message: "NullableTimeValue is missing",
-			Input: Input{
-				Types: Types{
-					NullableTimeValue: dbr.NewNullTime(nil),
-				},
-				Definition: validator.RequiredValidatorDefinition{
-					Required: []string{"NullableTimeValue"},
-				},
-			},
-			Expected: &validator.RequiredValidationError{
-				Input: Types{
-					NullableTimeValue: dbr.NewNullTime(nil),
-				},
-				Definition: validator.RequiredValidatorDefinition{
-					Required: []string{"NullableTimeValue"},
+					Required: []string{
+						"Items",
+					},
 				},
 			},
 		},
@@ -244,13 +198,13 @@ func TestValidateOfRequiredValidator(t *testing.T) {
 		definition := c.Input.Definition
 		va, err := validator.NewRequiredValidator(definition)
 		if err != nil {
-			t.Errorf("test with %s: fail to create new required validator: %s", c.Message, err)
+			t.Errorf("test with %s: fail to create new required validator: %s", c.Description, err)
 			continue
 		}
 
-		err = va.Validate(c.Input.Types)
+		err = va.Validate(c.Input.Sample)
 		if !reflect.DeepEqual(err, c.Expected) {
-			t.Errorf("test with %s: expected %+v, but actual %+v", c.Message, c.Expected, err)
+			t.Errorf("test with %s: expected %+v, but actual %+v", c.Description, c.Expected, err)
 		}
 	}
 }
@@ -360,6 +314,189 @@ func TestGetFieldByName(t *testing.T) {
 	)
 	if ok {
 		t.Errorf("test with not existing field: expected false but not")
+	}
+}
+
+func TestIsPresentString(t *testing.T) {
+	type Case struct {
+		Description       string
+		Input             string
+		ExpectedIsPresent bool
+	}
+
+	cases := []Case{
+		{
+			Description:       "presented value",
+			Input:             "value",
+			ExpectedIsPresent: true,
+		},
+		{
+			Description:       "empty",
+			Input:             "",
+			ExpectedIsPresent: false,
+		},
+		{
+			Description:       "single space",
+			Input:             " ",
+			ExpectedIsPresent: false,
+		},
+		{
+			Description:       "double space",
+			Input:             "  ",
+			ExpectedIsPresent: false,
+		},
+		{
+			Description:       "many space",
+			Input:             "                         ",
+			ExpectedIsPresent: false,
+		},
+		{
+			Description:       "horizontal tab",
+			Input:             "\t",
+			ExpectedIsPresent: false,
+		},
+		{
+			Description:       "newline",
+			Input:             "\n",
+			ExpectedIsPresent: false,
+		},
+		{
+			Description:       "vertical tab character",
+			Input:             "\v",
+			ExpectedIsPresent: false,
+		},
+		{
+			Description:       "form feed",
+			Input:             "\f",
+			ExpectedIsPresent: false,
+		},
+		{
+			Description:       "carriage return",
+			Input:             "\r",
+			ExpectedIsPresent: false,
+		},
+		{
+			Description:       "whitespace",
+			Input:             "\t\n\v\f\r ",
+			ExpectedIsPresent: false,
+		},
+		{
+			Description:       "whitespace with value",
+			Input:             "\t\n\v\f\r value",
+			ExpectedIsPresent: true,
+		},
+	}
+
+	for _, c := range cases {
+		ok := validator.IsPresentString(c.Input)
+		if ok != c.ExpectedIsPresent {
+			t.Errorf("test with %s: expected %t but not", c.Description, c.ExpectedIsPresent)
+		}
+	}
+}
+
+func TestIsPresentArray(t *testing.T) {
+	type Case struct {
+		Description       string
+		Input             reflect.Value
+		ExpectedIsPresent bool
+	}
+
+	cases := []Case{
+		{
+			Description:       "empty array of int",
+			Input:             reflect.ValueOf([]int{}),
+			ExpectedIsPresent: false,
+		},
+		{
+			Description:       "empty array of string",
+			Input:             reflect.ValueOf([]string{}),
+			ExpectedIsPresent: false,
+		},
+		{
+			Description:       "empty array of float64",
+			Input:             reflect.ValueOf([]float64{}),
+			ExpectedIsPresent: false,
+		},
+		{
+			Description:       "empty array of bool",
+			Input:             reflect.ValueOf([]bool{}),
+			ExpectedIsPresent: false,
+		},
+		{
+			Description:       "empty array of struct",
+			Input:             reflect.ValueOf([]time.Time{}),
+			ExpectedIsPresent: false,
+		},
+		{
+			Description:       "array of int with one element",
+			Input:             reflect.ValueOf([]int{1}),
+			ExpectedIsPresent: true,
+		},
+		{
+			Description:       "array of string with one element",
+			Input:             reflect.ValueOf([]string{"value"}),
+			ExpectedIsPresent: true,
+		},
+		{
+			Description:       "array of float64 with one element",
+			Input:             reflect.ValueOf([]float64{1.1}),
+			ExpectedIsPresent: true,
+		},
+		{
+			Description:       "array of bool with one element",
+			Input:             reflect.ValueOf([]bool{true}),
+			ExpectedIsPresent: true,
+		},
+		{
+			Description:       "array of struct with one element",
+			Input:             reflect.ValueOf([]time.Time{time.Now()}),
+			ExpectedIsPresent: true,
+		},
+		{
+			Description:       "array of int with many element",
+			Input:             reflect.ValueOf([]int{1, 2, 3, 4, 5}),
+			ExpectedIsPresent: true,
+		},
+	}
+
+	for _, c := range cases {
+		ok := validator.IsPresentArray(c.Input)
+		if ok != c.ExpectedIsPresent {
+			t.Errorf("test with %s: expected %t but not", c.Description, c.ExpectedIsPresent)
+		}
+	}
+}
+
+func IsPresentStruct(t *testing.T) {
+	type Case struct {
+		Description       string
+		Input             reflect.Value
+		ExpectedIsPresent bool
+	}
+	type emptyStruct struct{}
+	type nonEmptyStruct struct {
+		field string
+	}
+
+	cases := []Case{
+		{
+			Description:       "empty struct",
+			Input:             reflect.ValueOf(emptyStruct{}),
+			ExpectedIsPresent: false,
+		},
+		{
+			Description:       "non empty struct",
+			Input:             reflect.ValueOf(nonEmptyStruct{field: "value"}),
+			ExpectedIsPresent: true,
+		},
+	}
+
+	for _, c := range cases {
+		ok := validator.IsPresentStruct(c.Input)
+		if ok != c.ExpectedIsPresent {
+			t.Errorf("test with %s: expected %t but not", c.Description, c.ExpectedIsPresent)
+		}
 	}
 }
 
