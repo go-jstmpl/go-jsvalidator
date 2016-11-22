@@ -66,175 +66,129 @@ func TestNewRequiredValidator(t *testing.T) {
 }
 
 func TestValidateOfRequiredValidator(t *testing.T) {
-	type Types struct {
-		NullableStringValue dbr.NullString
-		NullableIntValue    dbr.NullInt64
-		NullableFloatValue  dbr.NullFloat64
-		NullableBoolValue   dbr.NullBool
-		NullableTimeValue   dbr.NullTime
-		StringValue         string
-		IntValue            int
-		FloatValue          float64
-		BoolValue           bool
-		TimeValue           time.Time
+	type Sample struct {
+		ID      int
+		Name    string
+		Message dbr.NullString
+		Items   []string
 	}
 
 	type Input struct {
-		Types      Types
+		Sample     Sample
 		Definition validator.RequiredValidatorDefinition
 	}
 
 	type Case struct {
-		Message  string
-		Input    Input
-		Expected error
+		Description string
+		Input       Input
+		Expected    error
 	}
 
 	cases := []Case{
 		{
-			Message: "complete struct against required",
+			Description: "complete struct against required",
 			Input: Input{
-				Types: Types{
-					NullableStringValue: dbr.NewNullString("value"),
-					NullableIntValue:    dbr.NewNullInt64(1),
-					NullableFloatValue:  dbr.NewNullFloat64(1.1),
-					NullableBoolValue:   dbr.NewNullBool(true),
-					NullableTimeValue:   dbr.NewNullTime("2009-11-10 23:00:00"),
-					StringValue:         "value",
-					IntValue:            1,
-					FloatValue:          1.1,
-					BoolValue:           true,
-					TimeValue:           time.Date(2009, 11, 10, 23, 00, 0, 0, time.UTC),
+				Sample: Sample{
+					ID:      1,
+					Name:    "Hoge",
+					Message: dbr.NewNullString("Foo bar."),
+					Items:   []string{"A", "B", "C"},
 				},
 				Definition: validator.RequiredValidatorDefinition{
 					Required: []string{
-						"NullableStringValue",
-						"NullableIntValue",
-						"NullableFloatValue",
-						"NullableBoolValue",
-						"NullableTimeValue",
-						"StringValue",
-						"IntValue",
-						"FloatValue",
-						"BoolValue",
-						"TimeValue",
+						"ID",
+						"Name",
+						"Message",
+						"Items",
 					},
 				},
 			},
 			Expected: nil,
 		},
 		{
-			Message: "NullableStringValue is missing",
+			Description: "Name is empty string",
 			Input: Input{
-				Types: Types{
-					NullableStringValue: dbr.NewNullString(nil),
+				Sample: Sample{
+					ID:      1,
+					Name:    "",
+					Message: dbr.NewNullString("Foo bar."),
+					Items:   []string{"A", "B", "C"},
 				},
 				Definition: validator.RequiredValidatorDefinition{
-					Required: []string{"NullableStringValue"},
+					Required: []string{
+						"Name",
+					},
 				},
 			},
 			Expected: &validator.RequiredValidationError{
-				Input: Types{
-					NullableStringValue: dbr.NewNullString(nil),
+				Input: Sample{
+					ID:      1,
+					Name:    "",
+					Message: dbr.NewNullString("Foo bar."),
+					Items:   []string{"A", "B", "C"},
 				},
 				Definition: validator.RequiredValidatorDefinition{
-					Required: []string{"NullableStringValue"},
+					Required: []string{
+						"Name",
+					},
 				},
 			},
 		},
 		{
-			Message: "NullableIntValue is missing",
+			Description: "Message is nil",
 			Input: Input{
-				Types: Types{
-					NullableIntValue: dbr.NewNullInt64(nil),
+				Sample: Sample{
+					ID:      1,
+					Name:    "Hoge",
+					Message: dbr.NewNullString(nil),
+					Items:   []string{"A", "B", "C"},
 				},
 				Definition: validator.RequiredValidatorDefinition{
-					Required: []string{"NullableIntValue"},
+					Required: []string{
+						"Message",
+					},
 				},
 			},
 			Expected: &validator.RequiredValidationError{
-				Input: Types{
-					NullableIntValue: dbr.NewNullInt64(nil),
+				Input: Sample{
+					ID:      1,
+					Name:    "Hoge",
+					Message: dbr.NewNullString(nil),
+					Items:   []string{"A", "B", "C"},
 				},
 				Definition: validator.RequiredValidatorDefinition{
-					Required: []string{"NullableIntValue"},
+					Required: []string{
+						"Message",
+					},
 				},
 			},
 		},
 		{
-			Message: "NullableFloatValue is missing",
+			Description: "Items is empty",
 			Input: Input{
-				Types: Types{
-					NullableFloatValue: dbr.NewNullFloat64(nil),
+				Sample: Sample{
+					ID:      1,
+					Name:    "Hoge",
+					Message: dbr.NewNullString("Foo bar."),
+					Items:   []string{},
 				},
 				Definition: validator.RequiredValidatorDefinition{
-					Required: []string{"NullableFloatValue"},
+					Required: []string{
+						"Items",
+					},
 				},
 			},
 			Expected: &validator.RequiredValidationError{
-				Input: Types{
-					NullableFloatValue: dbr.NewNullFloat64(nil),
+				Input: Sample{
+					ID:      1,
+					Name:    "Hoge",
+					Message: dbr.NewNullString("Foo bar."),
+					Items:   []string{},
 				},
 				Definition: validator.RequiredValidatorDefinition{
-					Required: []string{"NullableFloatValue"},
-				},
-			},
-		},
-		{
-			Message: "NullableBoolValue is missing",
-			Input: Input{
-				Types: Types{
-					NullableBoolValue: dbr.NewNullBool(nil),
-				},
-				Definition: validator.RequiredValidatorDefinition{
-					Required: []string{"NullableBoolValue"},
-				},
-			},
-			Expected: &validator.RequiredValidationError{
-				Input: Types{
-					NullableBoolValue: dbr.NewNullBool(nil),
-				},
-				Definition: validator.RequiredValidatorDefinition{
-					Required: []string{"NullableBoolValue"},
-				},
-			},
-		},
-		{
-			Message: "NullableTimeValue is missing",
-			Input: Input{
-				Types: Types{
-					NullableTimeValue: dbr.NewNullTime(nil),
-				},
-				Definition: validator.RequiredValidatorDefinition{
-					Required: []string{"NullableTimeValue"},
-				},
-			},
-			Expected: &validator.RequiredValidationError{
-				Input: Types{
-					NullableTimeValue: dbr.NewNullTime(nil),
-				},
-				Definition: validator.RequiredValidatorDefinition{
-					Required: []string{"NullableTimeValue"},
-				},
-			},
-		},
-
-		{
-			Message: "NullableTimeValue is missing",
-			Input: Input{
-				Types: Types{
-					NullableTimeValue: dbr.NewNullTime(nil),
-				},
-				Definition: validator.RequiredValidatorDefinition{
-					Required: []string{"NullableTimeValue"},
-				},
-			},
-			Expected: &validator.RequiredValidationError{
-				Input: Types{
-					NullableTimeValue: dbr.NewNullTime(nil),
-				},
-				Definition: validator.RequiredValidatorDefinition{
-					Required: []string{"NullableTimeValue"},
+					Required: []string{
+						"Items",
+					},
 				},
 			},
 		},
@@ -244,13 +198,13 @@ func TestValidateOfRequiredValidator(t *testing.T) {
 		definition := c.Input.Definition
 		va, err := validator.NewRequiredValidator(definition)
 		if err != nil {
-			t.Errorf("test with %s: fail to create new required validator: %s", c.Message, err)
+			t.Errorf("test with %s: fail to create new required validator: %s", c.Description, err)
 			continue
 		}
 
-		err = va.Validate(c.Input.Types)
+		err = va.Validate(c.Input.Sample)
 		if !reflect.DeepEqual(err, c.Expected) {
-			t.Errorf("test with %s: expected %+v, but actual %+v", c.Message, c.Expected, err)
+			t.Errorf("test with %s: expected %+v, but actual %+v", c.Description, c.Expected, err)
 		}
 	}
 }
