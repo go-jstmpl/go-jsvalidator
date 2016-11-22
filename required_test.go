@@ -363,6 +363,84 @@ func TestGetFieldByName(t *testing.T) {
 	}
 }
 
+func TestIsPresentString(t *testing.T) {
+	type Case struct {
+		Description       string
+		Input             string
+		ExpectedIsPresent bool
+	}
+
+	cases := []Case{
+		{
+			Description:       "presented value",
+			Input:             "value",
+			ExpectedIsPresent: true,
+		},
+		{
+			Description:       "empty",
+			Input:             "",
+			ExpectedIsPresent: false,
+		},
+		{
+			Description:       "single space",
+			Input:             " ",
+			ExpectedIsPresent: false,
+		},
+		{
+			Description:       "double space",
+			Input:             "  ",
+			ExpectedIsPresent: false,
+		},
+		{
+			Description:       "many space",
+			Input:             "                         ",
+			ExpectedIsPresent: false,
+		},
+		{
+			Description:       "horizontal tab",
+			Input:             "\t",
+			ExpectedIsPresent: false,
+		},
+		{
+			Description:       "newline",
+			Input:             "\n",
+			ExpectedIsPresent: false,
+		},
+		{
+			Description:       "vertical tab character",
+			Input:             "\v",
+			ExpectedIsPresent: false,
+		},
+		{
+			Description:       "form feed",
+			Input:             "\f",
+			ExpectedIsPresent: false,
+		},
+		{
+			Description:       "carriage return",
+			Input:             "\r",
+			ExpectedIsPresent: false,
+		},
+		{
+			Description:       "whitespace",
+			Input:             "\t\n\v\f\r ",
+			ExpectedIsPresent: false,
+		},
+		{
+			Description:       "whitespace with value",
+			Input:             "\t\n\v\f\r value",
+			ExpectedIsPresent: true,
+		},
+	}
+
+	for _, c := range cases {
+		ok := validator.IsPresentString(c.Input)
+		if ok != c.ExpectedIsPresent {
+			t.Errorf("test with %s: expected %t but not", c.Description, c.ExpectedIsPresent)
+		}
+	}
+}
+
 func TestIsValid(t *testing.T) {
 	type Case struct {
 		Description     string
