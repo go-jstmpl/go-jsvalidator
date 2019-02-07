@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"time"
 )
 
 var (
@@ -34,7 +35,7 @@ func (f FormatValidationError) Error() string {
 
 func NewFormatValidator(definition FormatValidatorDefinition) (FormatValidator, error) {
 	switch definition.Format {
-	case "date-time", "email", "hostname", "uri", "password-0Aa":
+	case "date-time", "email", "hostname", "uri", "password-0Aa", "time-zone-name":
 		return FormatValidator{definition}, nil
 	}
 	return FormatValidator{}, FormatDefinitionInvalidFormatError
@@ -68,6 +69,12 @@ func (f FormatValidator) Validate(input string) error {
 		break
 	case "password-0Aa":
 		ok := isPassword0Aa(input)
+		if ok {
+			return nil
+		}
+		break
+	case "time-zone-name":
+		ok := isTimeZoneName(input)
 		if ok {
 			return nil
 		}
@@ -147,4 +154,11 @@ func isPassword0Aa(pw string) bool {
 		}
 	}
 	return large && small && number
+}
+
+func isTimeZoneName(name string) bool {
+	if _, err := time.LoadLocation(name); err != nil {
+		return false
+	}
+	return true
 }

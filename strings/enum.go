@@ -24,7 +24,7 @@ type EnumValidationError struct {
 }
 
 func (err EnumValidationError) Error() string {
-	return fmt.Sprintf("input value %d doesn't exist in %v", err.Input, err.Definition.Enum)
+	return fmt.Sprintf("input value %s doesn't exist in %v", err.Input, err.Definition.Enum)
 }
 
 func NewEnumValidator(def EnumValidatorDefinition) (EnumValidator, error) {

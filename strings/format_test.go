@@ -40,6 +40,11 @@ func TestNewFormatValidator(t *testing.T) {
 			Error:      nil,
 		},
 		{
+			Message:    "time-zone-name format",
+			Definition: strings.FormatValidatorDefinition{Format: "time-zone-name"},
+			Error:      nil,
+		},
+		{
 			Message:    "empty string",
 			Definition: strings.FormatValidatorDefinition{Format: ""},
 			Error:      strings.FormatDefinitionInvalidFormatError,
@@ -448,6 +453,35 @@ func TestFormatValidator(t *testing.T) {
 			Input: "PASSWORD123",
 			Expected: &strings.FormatValidationError{
 				Input:      "PASSWORD123",
+				Definition: definition,
+			},
+		},
+	}
+
+	for _, c := range cases {
+		err := va.Validate(c.Input)
+		if !reflect.DeepEqual(err, c.Expected) {
+			t.Errorf("expected %v, but actual %v", c.Expected, err)
+		}
+	}
+
+	definition = strings.FormatValidatorDefinition{
+		Format: "time-zone-name",
+	}
+	va, err = strings.NewFormatValidator(definition)
+	if err != nil {
+		t.Error(err.Error())
+	}
+
+	cases = []FormatValidationTestCase{
+		{
+			Input:    "Asia/Tokyo",
+			Expected: nil,
+		},
+		{
+			Input: "Asia/NeoTokyo",
+			Expected: &strings.FormatValidationError{
+				Input:      "Asia/NeoTokyo",
 				Definition: definition,
 			},
 		},
